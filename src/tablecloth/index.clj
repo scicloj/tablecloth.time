@@ -17,7 +17,7 @@
   [index-column dataset]
   (with-meta dataset {:index (make-index dataset index-column)}))
 
-(defn index-by [index-column dataset]
+(defn index-by2 [index-column dataset]
   {:index (make-index dataset index-column)
    :dataset dataset})
 
