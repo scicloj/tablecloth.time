@@ -21,5 +21,7 @@
       (vary-meta dataset assoc :index index)
       (with-meta dataset {:index index}))))
 
+(defn get-index-meta [dataset]
+  (-> dataset meta :index))
 
 
