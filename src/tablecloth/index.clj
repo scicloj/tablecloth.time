@@ -14,8 +14,12 @@
 
 (defn index-by
   "Returns a dataset with an index attached as metadata."
-  [index-column dataset]
-  (with-meta dataset {:index (make-index dataset index-column)}))
+  [dataset index-column]
+  (let [has-meta? (not= (meta dataset) nil)
+        index (make-index dataset index-column)]
+    (if has-meta?
+      (vary-meta dataset assoc :index index)
+      (with-meta dataset {:index index}))))
 
 (defn index-by2 [index-column dataset]
   {:index (make-index dataset index-column)
