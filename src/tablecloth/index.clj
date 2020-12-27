@@ -21,8 +21,5 @@
       (vary-meta dataset assoc :index index)
       (with-meta dataset {:index index}))))
 
-(defn index-by2 [index-column dataset]
-  {:index (make-index dataset index-column)
-   :dataset dataset})
 
 
