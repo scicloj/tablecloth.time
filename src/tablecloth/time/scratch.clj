@@ -1,6 +1,7 @@
 (ns tablecloth.time.scratch
+  (:import java.time.LocalDate)
   (:require [tablecloth.api :as tablecloth]
-            [tablecloth.time.index :refer [index-by slice]]
+            [tablecloth.time.index :refer [index-by slice make-index]]
             [notespace.api :as notespace]
             [notespace.kinds :as kind]
             [clojure.pprint :refer [pprint]]))
@@ -24,8 +25,9 @@
     (index-by :Month)
     (slice "1949-01-01" "1949-07-01"))
 
-;; Resample?
-(-> data
-    (tablecloth/add-or-replace-column :Year (fn [ds] (map #(.getYear %) (:Month ds))))
-    (index-by :Year))
+
+
+
+
+
 
