@@ -7,4 +7,5 @@
                  [scicloj/tablecloth "5.00-beta-21"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
-  :repl-options {:init-ns tablecloth.time})
+  ;; :repl-options {:init-ns tablecloth.time}
+  )
