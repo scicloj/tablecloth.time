@@ -15,12 +15,14 @@
         :parser-fn {"Month" [:packed-local-date
                              (fn [date-str]
                                (java.time.LocalDate/parse
-                                (str date-str "-01")))]}})))
+                                (str date-str "-01")))]}})
+      (tablecloth/rename-columns {:Month :date
+                                  :#Passengers :passengers})))
 
 (meta data)
 
-(meta (index-by data :Month))
+(meta (index-by data :date))
 
 (-> data
-    (index-by :Month)
+    (index-by :date)
     (slice "1949-01-01" "1949-07-01"))
