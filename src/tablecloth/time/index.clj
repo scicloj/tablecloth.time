@@ -1,6 +1,7 @@
 (ns tablecloth.time.index
   (:import java.util.TreeMap)
-  (:require [tablecloth.api :as tablecloth]))
+  (:require [tablecloth.api :as tablecloth]
+            [tick.alpha.api :as t]))
 
 (defn make-index
   "Returns an index for `dataset` based on the specified `index-column-key`."
@@ -23,8 +24,11 @@
 
 (defn slice [dataset from to]
   (let [index (get-index-meta dataset)
-        from-key (java.time.LocalDate/parse from)
-        to-key (java.time.LocalDate/parse to)
-        row-numbers (-> index (.subMap from-key to-key) (.values))]
+        row-numbers (-> index (.subMap from to) (.values))]
     (tablecloth/select-rows dataset row-numbers)))
+
+(defn slice-year [dataset from to]
+  (let [from-year (t/date (str from "-01-01"))
+        to-year (t/date (str to "-01-01"))]
+    (slice dataset from-year to-year)))
 
