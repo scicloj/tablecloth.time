@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [scicloj/tablecloth "5.00-beta-21"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
+                 [tick "0.4.27-alpha"]
                  [aerial.hanami "0.12.4"]]
   ;; :repl-options {:init-ns tablecloth.time}
   )
