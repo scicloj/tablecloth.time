@@ -10,15 +10,23 @@
 
 ["## Dates and Times in Clojure
 
-Manually build a datetime using the `tick` library."]
+Clojure is hosted on the Java JVM, so it's time support is based on Java's `java.time` library.
+This is an example of a Java time class:"]
+
+(java.time.LocalDate/now)
+
+["Clojure has libraries that wrap the Java time classes to make working with time more fluent. We'll focus on a library called `tick` that provides a useful set of functions for manipulating
+java.time classes.
+
+Here's how you create a time object using `tick`:"]
 
 (t/new-time 23 59 59 999999)
 
-["Or, parse from a string."]
+["Here's how you parse a date from a string:"]
 
 (t/parse "2010-10-10")
 
-["Tick doesn't seem to handle all string formats. In that case, we can use java."]
+["Tick doesn't yet handle all string formats. In that case, we can use Java's classes:"]
 
 (java.time.LocalDate/parse
  "Tue, 3 Jun 2008 11:05:30 GMT"
@@ -39,10 +47,9 @@ date = np.array('2015-07-04', dtype=np.datetime64)
 #=> array(datetime.date(2015, 7, 4), dtype='datetime64[D]')
 ```
 
-As discussed in Ch.2, we less frequently interact directly with arrays in Clojure, instead operating on datasets. However, we can use dtype-next's containers to build typed collections of datetime data."]
+As discussed in Chapter 2, we less frequently interact directly with arrays in Clojure, instead operating on datasets. However, we can use dtype-next's containers to build typed collections of datetime data."]
 
 (dtype/make-container :local-date [(tech.v3.datatype.datetime/local-date)])
-(dtype/make-container :java-array :local-date 5)
 
 ["Python also makes it possible to work with a numpy array that is typed with vectorized computations like this:
 ```
@@ -52,12 +59,9 @@ np.array('2015-07-04', dtype=np.datetime64) + np.arange(12)
        '2015-07-12', '2015-07-13', '2015-07-14', '2015-07-15'], dtype='datetime64[D]')
 ```
 
-In Clojure, this is not supported right now, but we do have the ability to do something similar.
+In Clojure, this is not supported right now, but we do have the ability to add time at a specific
+interval.
 "]
 
 (dtype-dt/plus-temporal-amount (dtype-dt/local-date) (range 5) :days)
-
-
-
-
-
+(dtype-dt/plus-temporal-amount (dtype-dt/local-date) (range 5) :months)
