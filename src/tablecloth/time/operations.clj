@@ -11,7 +11,7 @@
   (let [index (get-index-meta dataset)
         row-numbers (if (not index)
                       (throw (Exception. "Dataset has no index specified."))
-                      (-> index (.subMap from to) (.values)))]
+                      (-> index (.subMap from true to true) (.values)))]
     (tablecloth/select-rows dataset row-numbers)))
 
 (defn slice-by-date [dataset from to]
@@ -25,7 +25,6 @@
    (let [from-year (t/date (str from "-01-01"))
          to-year (t/date (str to "-01-01"))]
      (get-slice dataset from-year to-year))))
-
 
 ;; LocalDate date = LocalDate.now();
 ;; DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy MM dd");
