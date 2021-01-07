@@ -11,12 +11,14 @@
                       (-> index (.subMap from true to true) (.values)))]
     (tablecloth/select-rows dataset row-numbers)))
 
+(defn slice-by-year [dataset from to]
+  (let [from-year (t/year from)
+        to-year (t/year to)]
+    (get-slice dataset from-year to-year)))
+
 (defn slice-by-date [dataset from to]
   (let [from-date (t/date from)
         to-date (t/date to)]
     (get-slice dataset from-date to-date)))
 
-(defn slice-by-year [dataset from to]
-  (let [from-year (t/year from)
-        to-year (t/year to)]
-     (get-slice dataset from-year to-year)))
+
