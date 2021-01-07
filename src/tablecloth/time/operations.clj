@@ -4,9 +4,6 @@
             [tech.v3.datatype.errors :as errors]
             [tick.alpha.api :as t]))
 
-;; (slice "2010-01-01" "2015-01-01")
-;; (slice "2015" "2017")
-
 (defn get-slice [dataset from to]
   (let [index (get-index-meta dataset)
         row-numbers (if (not index)
