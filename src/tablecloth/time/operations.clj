@@ -19,16 +19,7 @@
         to-date (t/date to)]
     (get-slice dataset from-date to-date)))
 
-(defn slice-by-year
-  ([dataset from] (slice-by-year from ))
-  ([dataset from to]
-   (let [from-year (t/date (str from "-01-01"))
-         to-year (t/date (str to "-01-01"))]
-     (get-slice dataset from-year to-year))))
-
-;; LocalDate date = LocalDate.now();
-;; DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy MM dd");
-;; String text = date.format(formatter);
-;; LocalDate parsedDate = LocalDate.parse(text, formatter);
-
-
+(defn slice-by-year [dataset from to]
+  (let [from-year (t/year from)
+        to-year (t/year to)]
+     (get-slice dataset from-year to-year)))
