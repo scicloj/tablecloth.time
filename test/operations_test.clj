@@ -31,3 +31,10 @@
                      (index-by :A)
                      (ops/slice-by-year "1979" "1980")))))
 
+(deftest slice-by-datetime
+  (is (ds-equal? (dataset {:A [(t/date-time "1970-01-01T09:00") (t/date-time "1970-01-01T10:00")]
+                           :B [9 10]})
+                 (-> (dataset {:A (plus-temporal-amount (t/date-time "1970-01-01T00:00") (range 11) :hours)
+                               :B (range 11)})
+                     (index-by :A)
+                     (ops/slice-by-datetime "1970-01-01T09:00" "1979-01-01T10:00")))))

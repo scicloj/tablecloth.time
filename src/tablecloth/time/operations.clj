@@ -21,4 +21,7 @@
         to-date (t/date to)]
     (get-slice dataset from-date to-date)))
 
-
+(defn slice-by-datetime [dataset from to]
+  (let [from-datetime (t/date-time from)
+        to-datetime (t/date-time to)]
+    (get-slice dataset from-datetime to-datetime)))
