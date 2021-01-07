@@ -6,6 +6,8 @@
             [tick.alpha.api :as t]
             [clojure.test :refer [deftest is]]))
 
+;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
+
 ;; Temporary until = fixed for datasets in tech.ml
 (defn ds-equal? [dsa dsb]
   (let [colnames-equal (= (column-names dsa)
