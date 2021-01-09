@@ -21,10 +21,4 @@
 (defn get-index-meta [dataset]
   (-> dataset meta :index))
 
-(defn slice [dataset from to]
-  (let [index (get-index-meta dataset)
-        from-key (java.time.LocalDate/parse from)
-        to-key (java.time.LocalDate/parse to)
-        row-numbers (-> index (.subMap from-key to-key) (.values))]
-    (tablecloth/select-rows dataset row-numbers)))
 
