@@ -1,13 +1,16 @@
 (ns tablecloth.time.operations
+  (:import java.util.TreeMap)
   (:require [tablecloth.time.index :refer [get-index-meta]]
             [tablecloth.api :as tablecloth]
             [tech.v3.datatype.errors :as errors]
             [tick.alpha.api :as t]))
 
+(set! *warn-on-reflection* true)
+
 ;; This method treats the from/to keys naively. When we attempt
 ;; to unify the API into a single slice method this may go away.
 (defn get-slice [dataset from to]
-  (let [index (get-index-meta dataset)
+  (let [^TreeMap index (get-index-meta dataset)
         row-numbers (if (not index)
                       (throw (Exception. "Dataset has no index specified."))
                       (-> index (.subMap from true to true) (.values)))]
@@ -15,7 +18,7 @@
 
 ;; TODO Write single `slice` method to handle all time units
 
-(defn slice-by-year [dataset from to]
+(defn slice-by-year [dataset ^String from  ^String to]
   (let [from-year (t/year from)
         to-year (t/year to)]
     (get-slice dataset from-year to-year)))
