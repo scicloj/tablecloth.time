@@ -23,4 +23,9 @@
 (defn get-index-meta [dataset]
   (-> dataset meta :index))
 
+;; Better to name this get-index-key-type?
+(defn get-index-type [dataset]
+  (let [^TreeMap index (-> dataset get-index-meta)]
+    (-> index .firstKey class)))
+
 

@@ -1,6 +1,6 @@
 (ns tablecloth.time.operations
   (:import java.util.TreeMap)
-  (:require [tablecloth.time.index :refer [get-index-meta]]
+  (:require [tablecloth.time.index :refer [get-index-meta get-index-type]]
             [tablecloth.api :as tablecloth]
             [tech.v3.datatype.errors :as errors]
             [tick.alpha.api :as t]))
@@ -18,17 +18,28 @@
 
 ;; TODO Write single `slice` method to handle all time units
 
-(defn slice-by-year [dataset ^String from  ^String to]
-  (let [from-year (t/year from)
-        to-year (t/year to)]
-    (get-slice dataset from-year to-year)))
+(defmulti parse-datetime-str
+  (fn [datetime-datatype _] datetime-datatype))
 
-(defn slice-by-date [dataset from to]
-  (let [from-date (t/date from)
-        to-date (t/date to)]
-    (get-slice dataset from-date to-date)))
+(defmethod parse-datetime-str
+  java.time.LocalDate
+  [_ date-str]
+  (java.time.LocalDate/parse date-str))
 
-(defn slice-by-datetime [dataset from to]
-  (let [from-datetime (t/date-time from)
-        to-datetime (t/date-time to)]
-    (get-slice dataset from-datetime to-datetime)))
+(defmethod parse-datetime-str
+  java.time.YearMonth
+  [_ date-str]
+  (java.time.YearMonth/parse date-str))
+
+(defmethod parse-datetime-str
+  java.time.Year
+  [_ date-str]
+  (java.time.Year/parse date-str))
+
+(defn slice [dataset from to]
+  (let [time-unit (get-index-type dataset)
+        from-key (parse-datetime-str time-unit from)
+        to-key (parse-datetime-str time-unit to)]
+    (get-slice dataset from-key to-key)))
+
+
