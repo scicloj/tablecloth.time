@@ -16,10 +16,18 @@
                       (-> index (.subMap from true to true) (.values)))]
     (tablecloth/select-rows dataset row-numbers)))
 
-;; TODO Write single `slice` method to handle all time units
-
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
+
+(defmethod parse-datetime-str
+  java.time.Instant
+  [_ date-str]
+  (java.time.Instant/parse date-str))
+
+(defmethod parse-datetime-str
+  java.time.ZonedDateTime
+  [_ date-str]
+  (java.time.ZonedDateTime/parse date-str))
 
 (defmethod parse-datetime-str
   java.time.LocalDate
