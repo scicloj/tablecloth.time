@@ -26,6 +26,11 @@
   (java.time.LocalDate/parse date-str))
 
 (defmethod parse-datetime-str
+  java.time.LocalDateTime
+  [_ date-str]
+  (java.time.LocalDateTime/parse date-str))
+
+(defmethod parse-datetime-str
   java.time.YearMonth
   [_ date-str]
   (java.time.YearMonth/parse date-str))
