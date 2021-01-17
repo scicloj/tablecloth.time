@@ -18,6 +18,16 @@
     (and colnames-equal cols-equal)))
 
 (deftest slice
+  ;; zoned-date-time
+  (is (ds-equal? (dataset {:A [#time/zoned-date-time "1970-01-01T09:00Z[UTC]"
+                               #time/zoned-date-time "1970-01-01T10:00Z[UTC]"]
+                           :B [9 10]})
+                 (-> (dataset {:A (plus-temporal-amount
+                                   #time/zoned-date-time "1970-01-01T00:00Z[UTC]"
+                                   (range 11) :hours)
+                               :B (range 11)})
+                     (index-by :A)
+                     (ops/slice "1970-01-01T09:00Z[UTC]" "1979-01-01T10:00Z[UTC]"))))
   ;; local-date-time
   (is (ds-equal? (dataset {:A [(t/date-time "1970-01-01T09:00") (t/date-time "1970-01-01T10:00")]
                            :B [9 10]})
