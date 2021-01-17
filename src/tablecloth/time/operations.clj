@@ -1,20 +1,11 @@
 (ns tablecloth.time.operations
   (:import java.util.TreeMap)
-  (:require [tablecloth.time.index :refer [get-index-meta get-index-type]]
+  (:require [tablecloth.time.index :refer [get-index-type slice-index]]
             [tablecloth.api :as tablecloth]
             [tech.v3.datatype.errors :as errors]
             [tick.alpha.api :as t]))
 
 (set! *warn-on-reflection* true)
-
-;; This method treats the from/to keys naively. When we attempt
-;; to unify the API into a single slice method this may go away.
-(defn get-slice [dataset from to]
-  (let [^TreeMap index (get-index-meta dataset)
-        row-numbers (if (not index)
-                      (throw (Exception. "Dataset has no index specified."))
-                      (-> index (.subMap from true to true) (.values)))]
-    (tablecloth/select-rows dataset row-numbers)))
 
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
@@ -48,6 +39,6 @@
   (let [time-unit (get-index-type dataset)
         from-key (parse-datetime-str time-unit from)
         to-key (parse-datetime-str time-unit to)]
-    (get-slice dataset from-key to-key)))
+    (slice-index dataset from-key to-key)))
 
 

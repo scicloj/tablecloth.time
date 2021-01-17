@@ -14,6 +14,13 @@
                      (into {}))]
     (TreeMap. ^java.util.Map idx-map)))
 
+(defn slice-index [dataset from to]
+  (let [^TreeMap index (get-index-meta dataset)
+        row-numbers (if (not index)
+                      (throw (Exception. "Dataset has no index specified."))
+                      (-> index (.subMap from true to true) (.values)))]
+    (tablecloth/select-rows dataset row-numbers)))
+
 (defn index-by
   "Returns a dataset with an index attached as metadata."
   [dataset index-column]
