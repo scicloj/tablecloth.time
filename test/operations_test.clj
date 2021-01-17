@@ -3,7 +3,6 @@
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.operations :as ops]
             [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
-            [tick.alpha.api :as t]
             [clojure.test :refer [deftest is]]))
 
 ;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
@@ -29,23 +28,25 @@
                      (index-by :A)
                      (ops/slice "1970-01-01T09:00Z[UTC]" "1979-01-01T10:00Z[UTC]"))))
   ;; local-date-time
-  (is (ds-equal? (dataset {:A [(t/date-time "1970-01-01T09:00") (t/date-time "1970-01-01T10:00")]
+  (is (ds-equal? (dataset {:A [#time/date-time "1970-01-01T09:00"
+                               #time/date-time "1970-01-01T10:00"]
                            :B [9 10]})
                  (-> (dataset {:A (plus-temporal-amount (t/date-time "1970-01-01T00:00") (range 11) :hours)
                                :B (range 11)})
                      (index-by :A)
                      (ops/slice "1970-01-01T09:00" "1979-01-01T10:00"))))
   ;; year
-  (is (ds-equal? (dataset {:A [(t/year "1979") (t/year "1980")]
+  (is (ds-equal? (dataset {:A [#time/year "1979" #time/year "1980"]
                            :B [9 10]})
-                 (-> (dataset {:A (plus-temporal-amount (t/year 1970) (range 11) :years)
+                 (-> (dataset {:A (plus-temporal-amount #time/year "1970" (range 11) :years)
                                :B (range 11)})
                      (index-by :A)
                      (ops/slice "1979" "1980"))))
   ;; local-date
-  (is (ds-equal? (dataset {:A [(t/date "1970-01-09") (t/date "1970-01-10")]
+  (is (ds-equal? (dataset {:A [#time/date "1970-01-09" #time/date "1970-01-10"]
                            :B [8 9]})
-                 (-> (dataset {:A (plus-temporal-amount (t/date "1970-01-01") (range 10) :days)
+                 (-> (dataset {:A (plus-temporal-amount #time/date "1970-01-01" (range 10) :days)
                                :B (range 10)})
                      (index-by :A)
                      (ops/slice "1970-01-09" "1970-01-10")))))
+
