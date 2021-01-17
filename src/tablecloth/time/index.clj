@@ -4,6 +4,14 @@
 
 (set! *warn-on-reflection* true)
 
+(defn get-index-meta [dataset]
+  (-> dataset meta :index))
+
+;; Better to name this get-index-key-type?
+(defn get-index-type [dataset]
+  (let [^TreeMap index (-> dataset get-index-meta)]
+    (-> index .firstKey class)))
+
 (defn make-index
   "Returns an index for `dataset` based on the specified `index-column-key`."
   [dataset index-column-key]
@@ -27,12 +35,5 @@
   (let [index (make-index dataset index-column)]
     (vary-meta dataset assoc :index index)))
 
-(defn get-index-meta [dataset]
-  (-> dataset meta :index))
-
-;; Better to name this get-index-key-type?
-(defn get-index-type [dataset]
-  (let [^TreeMap index (-> dataset get-index-meta)]
-    (-> index .firstKey class)))
 
 
