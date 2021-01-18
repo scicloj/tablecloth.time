@@ -16,17 +16,16 @@
                     (partition 2 (interleave (columns dsa) (columns dsb))))]
     (and colnames-equal cols-equal)))
 
+
 (deftest slice
-  ;; zoned-date-time
-  (is (ds-equal? (dataset {:A [#time/zoned-date-time "1970-01-01T09:00Z[UTC]"
-                               #time/zoned-date-time "1970-01-01T10:00Z[UTC]"]
+  ;; instant
+  (is (ds-equal? (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
+                               #time/instant "1970-01-01T10:00:00.000Z"]
                            :B [9 10]})
-                 (-> (dataset {:A (plus-temporal-amount
-                                   #time/zoned-date-time "1970-01-01T00:00Z[UTC]"
-                                   (range 11) :hours)
+                 (-> (dataset {:A (plus-temporal-amount #time/instant "1970-01-01T00:00:00.000Z" (range 11) :hours)
                                :B (range 11)})
                      (index-by :A)
-                     (ops/slice "1970-01-01T09:00Z[UTC]" "1979-01-01T10:00Z[UTC]"))))
+                     (ops/slice "1970-01-01T09:00:00.000Z" "1970-01-01T10:00:00.000Z"))))
   ;; local-date-time
   (is (ds-equal? (dataset {:A [#time/date-time "1970-01-01T09:00"
                                #time/date-time "1970-01-01T10:00"]
@@ -42,6 +41,13 @@
                                :B (range 11)})
                      (index-by :A)
                      (ops/slice "1979" "1980"))))
+  ;; year-month
+  (is (ds-equal? (dataset {:A [#time/year-month "1979-01" #time/year-month "1980-01"]
+                           :B [9 10]})
+                 (-> (dataset {:A (plus-temporal-amount #time/year-month "1970-01" (range 11) :years)
+                               :B (range 11)})
+                     (index-by :A)
+                     (ops/slice "1979-01" "1980-01"))))
   ;; local-date
   (is (ds-equal? (dataset {:A [#time/date "1970-01-09" #time/date "1970-01-10"]
                            :B [8 9]})
