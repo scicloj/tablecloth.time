@@ -79,7 +79,9 @@
                  (instance? java.time.temporal.Temporal to) to
                  :else (parse-datetime-str time-unit to))]
     (cond
-      (not= time-unit (class from-key)) (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
-      (not= time-unit (class to-key)) (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
+      (not= time-unit (class from-key))
+      (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
+      (not= time-unit (class to-key))
+      (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
       :else (slice-index dataset from-key to-key))))
 
