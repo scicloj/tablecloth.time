@@ -42,10 +42,36 @@
   [_ date-str]
   (java.time.Year/parse date-str))
 
-(defn slice [dataset from to]
+(defn slice
+  "Returns a subset of dataset's row as specified by from and to, inclusively.
+  From and to are either strings or datetime type literals (e.g. #time/local-date \"1970-01-01\").
+  The dataset must have been indexed, and the time unit of the index must match the unit of time
+  by which you are attempting to slice.
+
+  Example data:
+
+  |   :A | :B |
+  |------|----|
+  | 1970 |  0 |
+  | 1971 |  1 |
+  | 1972 |  2 |
+  | 1973 |  3 |
+
+  Example:
+
+  (-> data
+      (index-by :A)
+      (slice \"1972\" \"1973\"))
+
+  ;; => _unnamed [2 2]:
+
+  |   :A | :B |
+  |------|----|
+  | 1972 |  2 |
+  | 1973 |  3 |
+  "
+  [dataset from to]
   (let [time-unit (get-index-type dataset)
         from-key (parse-datetime-str time-unit from)
         to-key (parse-datetime-str time-unit to)]
     (slice-index dataset from-key to-key)))
-
-
