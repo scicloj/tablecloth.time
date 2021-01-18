@@ -12,33 +12,27 @@
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
 
-(defmethod parse-datetime-str
-  java.time.Instant
+(defmethod parse-datetime-str java.time.Instant
   [_ date-str]
   (java.time.Instant/parse date-str))
 
-(defmethod parse-datetime-str
-  java.time.ZonedDateTime
+(defmethod parse-datetime-str java.time.ZonedDateTime
   [_ date-str]
   (java.time.ZonedDateTime/parse date-str))
 
-(defmethod parse-datetime-str
-  java.time.LocalDate
+(defmethod parse-datetime-str java.time.LocalDate
   [_ date-str]
   (java.time.LocalDate/parse date-str))
 
-(defmethod parse-datetime-str
-  java.time.LocalDateTime
+(defmethod parse-datetime-str java.time.LocalDateTime
   [_ date-str]
   (java.time.LocalDateTime/parse date-str))
 
-(defmethod parse-datetime-str
-  java.time.YearMonth
+(defmethod parse-datetime-str java.time.YearMonth
   [_ date-str]
   (java.time.YearMonth/parse date-str))
 
-(defmethod parse-datetime-str
-  java.time.Year
+(defmethod parse-datetime-str java.time.Year
   [_ date-str]
   (java.time.Year/parse date-str))
 
