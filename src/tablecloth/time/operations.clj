@@ -7,6 +7,8 @@
 
 (set! *warn-on-reflection* true)
 
+;; TODO Would it be better to do this with a map instead of a mutlimethod?
+
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
 
