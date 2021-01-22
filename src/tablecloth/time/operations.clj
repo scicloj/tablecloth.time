@@ -1,5 +1,5 @@
 (ns tablecloth.time.operations
-  (:import java.util.TreeMap)
+  (:import java.time.format.DateTimeParseException)
   (:require [tablecloth.time.index :refer [get-index-type slice-index]]
             [tablecloth.api :as tablecloth]
             [tech.v3.datatype.errors :as errors]
@@ -65,13 +65,22 @@
   | 1973 |  3 |
   "
   [dataset from to]
-  (let [time-unit (get-index-type dataset)
+  (let [build-err-msg (fn [^java.lang.Exception err arg-symbol time-unit]
+                        (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
+                          (str (format msg-str arg-symbol time-unit) (.getMessage err))))
+        time-unit (get-index-type dataset)
         from-key (cond
                    (instance? java.time.temporal.Temporal from) from
-                   :else (parse-datetime-str time-unit from))
+                   :else (try
+                           (parse-datetime-str time-unit from)
+                           (catch DateTimeParseException err
+                             (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
         to-key (cond
                  (instance? java.time.temporal.Temporal to) to
-                 :else (parse-datetime-str time-unit to))]
+                 :else (try
+                         (parse-datetime-str time-unit to)
+                         (catch DateTimeParseException err
+                           (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))]
     (cond
       (not= time-unit (class from-key))
       (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
