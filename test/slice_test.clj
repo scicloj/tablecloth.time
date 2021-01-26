@@ -1,7 +1,7 @@
 (ns tablecloth.time.operations-test
   (:require [tablecloth.api :refer [dataset columns column-names]]
             [tablecloth.time.index :refer [index-by]]
-            [tablecloth.time.operations :as ops]
+            [tablecloth.time.api :refer [slice]]
             [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
             [clojure.test :refer [deftest is are]]))
 
@@ -23,7 +23,7 @@
                       (-> (dataset {:A (plus-temporal-amount #time/instant "1970-01-01T00:00:00.000Z" (range 11) :hours)
                                     :B (range 11)})
                           (index-by :A)
-                          (ops/slice (:to arg-map) (:from arg-map))))
+                          (slice (:to arg-map) (:from arg-map))))
     _ {:to "1970-01-01T09:00:00.000Z" :from "1970-01-01T10:00:00.000Z"}
     _ {:to #time/instant "1970-01-01T09:00:00.000Z" :from #time/instant "1970-01-01T10:00:00.000Z"}))
 
@@ -34,7 +34,7 @@
                       (-> (dataset {:A (plus-temporal-amount #time/date-time "1900-01-01T00:00" (range 11) :hours)
                                     :B (range 11)})
                           (index-by :A)
-                          (ops/slice (:to arg-map) (:from arg-map))))
+                          (slice (:to arg-map) (:from arg-map))))
     _ {:to "1970-01-01T09:00" :from "1970-01-01T10:00:00"}
     _ {:to #time/date-time "1970-01-01T09:00" :from #time/date-time "1970-01-01T10:00"}))
 
@@ -44,7 +44,7 @@
                       (-> (dataset {:A (plus-temporal-amount #time/year "1970" (range 11) :years)
                                     :B (range 11)})
                           (index-by :A)
-                          (ops/slice (:to arg-map) (:from arg-map))))
+                          (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979" :from "1980"}
     _ {:to #time/year "1979" :from #time/year "1980"}))
 
@@ -54,7 +54,7 @@
                       (-> (dataset {:A (plus-temporal-amount #time/year-month "1970-01" (range 11) :years)
                                     :B (range 11)})
                           (index-by :A)
-                          (ops/slice (:to arg-map) (:from arg-map))))
+                          (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979-01" :from "1980-01"}
     _ {:to #time/year-month "1979-01" :from #time/year-month "1980-01"}))
 
@@ -64,7 +64,7 @@
                       (-> (dataset {:A (plus-temporal-amount #time/date "1970-01-01" (range 11) :years)
                                     :B (range 11)})
                           (index-by :A)
-                          (ops/slice (:to arg-map) (:from arg-map))))
+                          (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979-01-01" :from "1980-01-01"}
     _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
 
