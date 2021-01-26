@@ -1,4 +1,4 @@
-(ns tablecloth.time.operations
+(ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
   (:require [tablecloth.time.index :refer [get-index-type slice-index]]
             [tablecloth.api :as tablecloth]
