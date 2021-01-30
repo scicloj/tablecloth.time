@@ -105,11 +105,14 @@ indexed-ds
 ^kind/vega
 (hanami-common/xform
  hanami-templates/line-chart
- :DATA (take 400 (prep-data-for-plotting ds-2005-to-2015 :date [:symbol]))
+ :DATA (prep-data-for-plotting ds-2005-to-2015 :date [:symbol])
  :X :date
  :XTYPE :temporal
  :Y :price
  :YTYPE :quantitative)
+
+
+
 
 
 
