@@ -23,6 +23,11 @@
     (TreeMap. ^java.util.Map idx-map)))
 
 (defn slice-index
+  "Returns a subset of dataset's rows (or row indexes) as specified by from and to, inclusively.
+
+  Options are:
+
+  - result-type - return results as dataset (`:as-dataset`, default) or a row of indexes (`:as-indexes`). "
   ([dataset from to] (slice-index dataset from to nil))
   ([dataset from to {:keys [result-type]
                      :or {result-type :as-dataset}
