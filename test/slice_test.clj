@@ -68,3 +68,22 @@
     _ {:to "1979-01-01" :from "1980-01-01"}
     _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
 
+
+(deftest slice-result-types
+  (let [ds (dataset {:A [#time/date "1970-01-01"
+                         #time/date "1970-01-02"
+                         #time/date "1970-01-03"]
+                     :B [4 5 6]})]
+    (is (instance? java.util.AbstractMap$2
+                   (-> ds
+                       (index-by :A)
+                       (slice "1970-01-02" "1970-01-03" {:result-type :as-indexes}))))
+    (is (instance? tech.v3.dataset.impl.dataset.Dataset
+                   (-> ds
+                       (index-by :A)
+                       (slice "1970-01-02" "1970-01-03" {:result-type :as-dataset}))))
+    ;; default behavior
+    (is (instance? tech.v3.dataset.impl.dataset.Dataset
+                   (-> ds
+                       (index-by :A)
+                       (slice "1970-01-02" "1970-01-03"))))))
