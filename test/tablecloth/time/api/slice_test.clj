@@ -1,4 +1,4 @@
-(ns tablecloth.time.operations-test
+(ns tablecloth.time.api.slice-test
   (:require [tablecloth.api :refer [dataset columns column-names]]
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.api :refer [slice]]
