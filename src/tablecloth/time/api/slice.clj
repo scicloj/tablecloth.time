@@ -37,10 +37,14 @@
   (java.time.Year/parse date-str))
 
 (defn slice
-  "Returns a subset of dataset's rows as specified by from and to, inclusively.
-  From and to are either strings or datetime type literals (e.g. #time/local-date \"1970-01-01\").
+  "Returns a subset of dataset's rows (or row indexes) as specified by from and to, inclusively.
+  `from` and `to` are either strings or datetime type literals (e.g. #time/local-date \"1970-01-01\").
   The dataset must have been indexed, and the time unit of the index must match the unit of time
   by which you are attempting to slice.
+
+  Options are:
+
+  - result-type - return results as dataset (`:as-dataset`, default) or a row of indexes (`:as-indexes`).
 
   Example data:
 
