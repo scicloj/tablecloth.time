@@ -84,10 +84,10 @@
                           (parse-datetime-str time-unit to)
                           (catch DateTimeParseException err
                             (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))]
-     (do  (cond
-            (not= time-unit (class from-key))
-            (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
-            (not= time-unit (class to-key))
-            (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
-            :else (slice-index dataset from-key to-key options))))))
+     (cond
+       (not= time-unit (class from-key))
+       (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
+       (not= time-unit (class to-key))
+       (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
+       :else (slice-index dataset from-key to-key options)))))
 
