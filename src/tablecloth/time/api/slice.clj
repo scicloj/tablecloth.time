@@ -71,7 +71,6 @@
   ([dataset from to] (slice dataset from to nil))
   ([dataset from to {:keys [result-type]
                      :or {result-type :as-dataset} :as options}]
-   (println [result-type options])
    (let [build-err-msg (fn [^java.lang.Exception err arg-symbol time-unit]
                          (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
