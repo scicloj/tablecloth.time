@@ -95,55 +95,64 @@ indexed-ds
       (dataset/column-cast date-col-key :string)
       (tablecloth/rows :as-maps)))
 
-
-(def ds-2006
+(def ds-2005-2016
   (-> raw-ds
       (tablecloth/select-rows #(= "MSFT" (:symbol %)))
       (idx/index-by :date)
-      (time/slice "2005-01-01" "2015-01-01")))
+      (time/slice "2005-01-01" "2016-12-01")))
 
-(tablecloth/shape ds-2006)
+(tablecloth/shape ds-2005-2016)
 
-(tablecloth/head ds-2006)
+(tablecloth/head ds-2005-2016)
 
 ^kind/vega
 (hanami-common/xform
  hanami-templates/line-chart
- :DATA (prep-data-for-plotting ds-2006 :date [:symbol])
+ :DATA (prep-data-for-plotting ds-2005-2016 :date [:symbol])
  :X :date
  :XTYPE :temporal
  :Y :price
  :YTYPE :quantitative)
 
-(-> ds-2006
-    (tablecloth/group-by #(-> % :date t/year-month))
+(-> ds-2005-2016
+    (tablecloth/group-by #(-> % :date t/year))
     (vary-meta assoc :print-line-policy :repl))
 
+(-> ds-2005-2016
+    (tablecloth/group-by #(-> % :date t/year))
+    (tablecloth/aggregate (fn [group-ds]
+                            {:symbol (-> group-ds :symbol first)
+                             :price (dtype-fn/mean (:price group-ds))}))
+    (tablecloth/rename-columns {:$group-name :year
+                                :summary-symbol :symbol
+                                :summary-price :price}))
 
-(def ds-2006-yearly
-  (-> ds-2006
-      (tablecloth/group-by #(-> % :date t/year-month))
-      (tablecloth/aggregate (fn [ds]
-                              {:symbol (reduce identity (:symbol ds))
-                               :price (reduce + (:price ds))}))
-      (tablecloth/rename-columns {:$group-name :year-month
+(def ds-2005-2016-yearly
+  (-> ds-2005-2016
+      (tablecloth/group-by #(-> % :date t/year))
+      (tablecloth/aggregate (fn [group-ds]
+                              {:symbol (-> group-ds :symbol first)
+                               :price (dtype-fn/mean (:price group-ds))}))
+      (tablecloth/rename-columns {:$group-name :year
                                   :summary-symbol :symbol
                                   :summary-price :price})))
 
 ^kind/dataset
-ds-2006-yearly
+ds-2005-2016-yearly
+
+(-> ds-2005-2016-yearly
+    (tablecloth/drop-columns [:symbol])
+    (dataset/column-cast :year :string)
+    (tablecloth/rows :as-maps))
 
 ^kind/vega
 (hanami-common/xform
  hanami-templates/line-chart
- :DATA (-> ds-2006-yearly
-           (idx/index-by :year-month)
-           (time/slice "2006-01" "2006-12")
+ :DATA (-> ds-2005-2016-yearly
            (tablecloth/drop-columns [:symbol])
-           (dataset/column-cast :year-month :string)
+           (dataset/column-cast :year :string)
            (tablecloth/rows :as-maps))
- :X :year-month
+ :X :year
  :XTYPE :temporal
  :Y :price
  :YTYPE :quantitative)
-
