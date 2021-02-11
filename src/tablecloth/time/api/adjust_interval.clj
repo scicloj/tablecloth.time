@@ -1,10 +1,14 @@
 (ns tablecloth.time.api.adjust-interval
+  (:import org.threeten.extra.YearQuarter)
   (:require [tech.v3.datatype :refer [emap]]
             [tablecloth.api :as tablecloth]
             [tick.alpha.api :as tick]))
 
+
 (def map-time-unit->time-converter
-  {:year-month tick/year-month})
+  {:quarter (fn [datetime] (YearQuarter/from datetime))
+   :year-month tick/year-month
+   :year tick/year})
 
 (defn adjust-interval
   "Change the time index frequency."
@@ -12,8 +16,11 @@
   (let [time-converter (target-unit map-time-unit->time-converter)
         index-column  (index-col-key dataset)
         adjusted-column-data (emap time-converter target-unit (index-col-key dataset))]
+    (println {:time-converter time-converter
+              :index-column index-column
+              :adjusted-column-data (take 10 adjusted-column-data)})
     (-> dataset
-        (tablecloth/add-or-replace-column :year-month adjusted-column-data)
+        (tablecloth/add-or-replace-column target-unit adjusted-column-data)
         (tablecloth/group-by (into [target-unit] keys)))))
 
 (comment
@@ -40,18 +47,33 @@
       (tablecloth/add-or-replace-column :year-month (fn [ds] (map tick/year-month (:date ds))))
       (tablecloth/group-by [:year-month :symbol]))
 
-
   ;; what if the index column is less granular? will that ever happen? I don't think that makes sense. Can't image a use-case.
 
-  (->> (tech.v3.dataset.readers/mapseq-reader ds-msft)
-       (tech.v3.datatype.argops/arggroup-by #(-> % :date tick.alpha.api/year-month)))
+  ;; works
+  (-> raw-ds
+      (adjust-interval :date [:symbol] :year-month)
+      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
 
-  (-> ds-msft
-      (tech.v3.dataset/select-columns [:symbol :date])
-      (tech.v3.dataset/group-by->indexes identity)
+  ;; works
+  (-> raw-ds
+      (adjust-interval :date [:symbol] :year)
+      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
 
-      )
+  (-> raw-ds
+      (adjust-interval :date [:symbol] :quarter)
+      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
+
+  ;; ???
+  (-> raw-ds
+      (adjust-interval :date [:symbol] :quarter-start))
 
 
+  ;; LocalDate.now().get(IsoFields.QUARTER_OF_YEAR)
+  (.get #time/date "2020-10-10" java.time.temporal.IsoFields/QUARTER_OF_YEAR)
+
+  (-> (.get #time/date "2020-10-10" java.time.temporal.ChronoUnit/Quarter)
+      (type))
+
+  (YearQuarter/from #time/date "2020-10-10")
 
 )
