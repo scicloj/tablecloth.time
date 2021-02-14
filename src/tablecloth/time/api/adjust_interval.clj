@@ -23,8 +23,6 @@
 ;; BA 	Business year end
 ;; BH 	Business hours
 
-java.time.temporal.TemporalUnit/
-
 (def map-time-unit->time-converter
   {:day tick/date
    :week (fn [datetime] (-> datetime YearWeek/from))
@@ -51,7 +49,7 @@ java.time.temporal.TemporalUnit/
          (tablecloth/group-by (into [target-unit] keys))
          (cond-> ungroup? tablecloth/ungroup
                  (not ungroup?) identity)))))
-tech.v3.datatype.datetime/datetime->milliseconds
+
 (comment
   (def raw-ds
     (-> "https://raw.githubusercontent.com/techascent/tech.ml.dataset/master/test/data/stocks.csv"
@@ -81,7 +79,7 @@ tech.v3.datatype.datetime/datetime->milliseconds
       (adjust-interval :date [:symbol] :quarter)
       (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
 
-  ;; week 
+  ;; week
   (-> raw-ds
       (adjust-interval :date [:symbol] :week)
       (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
@@ -100,11 +98,14 @@ tech.v3.datatype.datetime/datetime->milliseconds
   (-> raw-ds
       (adjust-interval :date [:symbol] :quarter-start))
 
-  ;; adjust to smaller interval - ??
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :instant))
-
   ;; ungroup option - works
   (-> raw-ds
       (adjust-interval :date [:symbol] :quarter {:ungroup? true}))
+
+  ;; let's say our finished functions, if they need to know about the index:
+  ;; 1. know if they need an index
+  ;; 2. create the index
+  ;; 2. if not, can complain to the user.
+
   )
+
