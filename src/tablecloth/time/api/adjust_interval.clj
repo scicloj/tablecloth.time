@@ -73,12 +73,6 @@
   (-> raw-ds :instant last)
   ;; => #time/instant "1970-01-02T00:00:02.999Z"
 
-
-  (tick/date #time/instant "1970-01-02T08:00:02.999Z")
-  (.truncateTo #time/instant "1970-01-02T08:00:02.999Z" java.time.temporal.ChronoUnit/DAYS)
-
-  (.with #time/instant "1970-01-02T00:00:02.999Z" java.time.temporal.TemporalAdjusters/)
-
   ;; day
   (-> raw-ds
       (adjust-interval :instant [:symbol] :day)
