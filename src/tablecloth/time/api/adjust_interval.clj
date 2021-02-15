@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.adjust-interval
   (:import [org.threeten.extra YearQuarter YearWeek]
-           [java.time YearMonth])
+           [java.time LocalDate Year YearMonth])
   (:require [tech.v3.datatype :refer [emap]]
             [tech.v3.datatype.datetime :as dtdt]
             [tablecloth.api :as tablecloth]
@@ -9,11 +9,11 @@
 ;; D 	Calendar day ✅
 ;; W 	Weekly ✅
 ;; M 	Month end ✅
-;; Q 	Quarter end
+;; Q 	Quarter end ✅
 ;; A 	Year end
 ;; H 	Hours
 ;; T 	Minutes
-;; S 	Seconds
+;; S 	Seconds ✅
 ;; L 	Milliseonds
 ;; U 	Microseconds
 ;; N 	nanoseconds
@@ -25,15 +25,19 @@
 
 (def map-time-unit->time-converter
   {:day tick/date
-   :week (fn [datetime] (-> datetime YearWeek/from))
-   :week-end (fn [datetime] (-> datetime
-                              (YearWeek/from)
-                              (.atDay java.time.DayOfWeek/SUNDAY)))
-   :month-end (fn [datetime] (-> datetime
-                                 (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
-   :quarter (fn [datetime] (YearQuarter/from datetime))
-   :year-month tick/year-month
-   :year tick/year})
+   :week (fn [datetime] (-> datetime
+                            (YearWeek/from)
+                            (.atDay java.time.DayOfWeek/SUNDAY)))
+   :month (fn [datetime] (-> datetime
+                             (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
+   :quarter (fn [datetime]
+              (.atEndOfQuarter (YearQuarter/from datetime)))
+   :year (fn [datetime]
+               (-> datetime tick/date (.with (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
+   :seconds (fn [datetime]
+              (-> datetime
+                  (dtdt/plus-temporal-amount 1 :seconds)
+                  (.truncatedTo java.time.temporal.ChronoUnit/SECONDS)))})
 
 (defn adjust-interval
   "Change the time index frequency."
@@ -51,56 +55,41 @@
                  (not ungroup?) identity)))))
 
 (comment
-  (def raw-ds
-    (-> "https://raw.githubusercontent.com/techascent/tech.ml.dataset/master/test/data/stocks.csv"
-        (tablecloth/dataset {:key-fn keyword})))
+  ;; (def raw-ds
+  ;;   (-> "https://raw.githubusercontent.com/techascent/tech.ml.dataset/master/test/data/stocks.csv"
+  ;;       (tablecloth/dataset {:key-fn keyword})))
 
-  raw-ds
-
-  (def ds-msft
-    (-> raw-ds
-        (tablecloth/select-rows #(= "MSFT" (:symbol %)))))
+  (defn time-series [start-inst n tf]
+    (dtdt/plus-temporal-amount start-inst (range n) tf))
 
 
-  (tablecloth/head ds-msft)
+  (def raw-ds (tablecloth/dataset {:instant (time-series
+                                              #time/instant "1970-01-01T23:59:58.000Z"
+                                              5000
+                                              :milliseconds)
+                                   :symbol "MSFT"
+                                   :price (take 5000 (repeatedly #(rand 200)))}))
 
-  ;; day - hmmm ends up sorted by day across years...
+  (-> raw-ds :instant last)
+  ;; => #time/instant "1970-01-02T00:00:02.999Z"
+
+
+  (tick/date #time/instant "1970-01-02T08:00:02.999Z")
+  (.truncateTo #time/instant "1970-01-02T08:00:02.999Z" java.time.temporal.ChronoUnit/DAYS)
+
+  (.with #time/instant "1970-01-02T00:00:02.999Z" java.time.temporal.TemporalAdjusters/)
+
+  ;; day
   (-> raw-ds
-      (adjust-interval :date [:symbol] :day)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
+      (adjust-interval :instant [:symbol] :day)
+      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
+      )
 
-  ;; year - works
+  ;; seconds
   (-> raw-ds
-      (adjust-interval :date [:symbol] :year)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
-
-  ;; quarter - works
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :quarter)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
-
-  ;; week
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :week)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
-
-  ;; week-end - works?
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :week-end)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
-
-  ;; month-end
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :month-end)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))}))
-
-  ;; quarter start - ???
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :quarter-start))
-
-  ;; ungroup option - works
-  (-> raw-ds
-      (adjust-interval :date [:symbol] :quarter {:ungroup? true}))
+      (adjust-interval :instant [:symbol] :seconds)
+      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
+      (tech.v3.dataset/sort-by-column :seconds))
 
   ;; let's say our finished functions, if they need to know about the index:
   ;; 1. know if they need an index
