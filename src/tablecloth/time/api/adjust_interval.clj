@@ -4,6 +4,7 @@
   (:require [tech.v3.datatype :refer [emap]]
             [tech.v3.datatype.datetime :as dtdt]
             [tablecloth.api :as tablecloth]
+            [tablecloth.time.api :refer [truncate-to]]
             [tick.alpha.api :as tick]))
 
 ;; D 	Calendar day ✅
@@ -23,21 +24,15 @@
 ;; BA 	Business year end
 ;; BH 	Business hours
 
-(def map-time-unit->time-converter
-  {:day tick/date
-   :week (fn [datetime] (-> datetime
-                            (YearWeek/from)
-                            (.atDay java.time.DayOfWeek/SUNDAY)))
-   :month (fn [datetime] (-> datetime
-                             (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
-   :quarter (fn [datetime]
-              (.atEndOfQuarter (YearQuarter/from datetime)))
-   :year (fn [datetime]
-               (-> datetime tick/date (.with (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
-   :seconds (fn [datetime]
-              (-> datetime
-                  (dtdt/plus-temporal-amount 1 :seconds)
-                  (.truncatedTo java.time.temporal.ChronoUnit/SECONDS)))})
+;; (def map-time-unit->time-converter
+;;   {:day tick/date
+;;    :month (fn [datetime] (-> datetime
+;;                              (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
+;;    :quarter (fn [datetime]
+;;               (.atEndOfQuarter (YearQuarter/from datetime)))
+;;    :year (fn [datetime]
+;;                (-> datetime tick/date (.with (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
+;;   })
 
 (defn adjust-interval
   "Change the time index frequency."
@@ -45,9 +40,9 @@
    (adjust-interval dataset index-col-key keys target-unit nil))
   ([dataset index-col-key keys target-unit {:keys [ungroup?]
                                             :or {ungroup? false}}]
-   (let [time-converter (target-unit map-time-unit->time-converter)
+   (let [time-converter #(truncate-to % target-unit)
          index-column  (index-col-key dataset)
-         adjusted-column-data (emap time-converter target-unit (index-col-key dataset))]
+         adjusted-column-data (emap time-converter target-unit index-column)]
      (-> dataset
          (tablecloth/add-or-replace-column target-unit adjusted-column-data)
          (tablecloth/group-by (into [target-unit] keys))
@@ -81,14 +76,8 @@
 
   ;; seconds
   (-> raw-ds
-      (adjust-interval :instant [:symbol] :seconds)
+      (adjust-interval :instant [:symbol] :days)
       (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
-      (tech.v3.dataset/sort-by-column :seconds))
-
-  ;; let's say our finished functions, if they need to know about the index:
-  ;; 1. know if they need an index
-  ;; 2. create the index
-  ;; 2. if not, can complain to the user.
-
-  )
-
+      )
+  
+)
