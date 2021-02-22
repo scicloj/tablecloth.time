@@ -16,6 +16,14 @@
                     (partition 2 (interleave (columns dsa) (columns dsb))))]
     (and colnames-equal cols-equal)))
 
+(deftest slice-by-int
+  (is (= (dataset {:A [2 3]
+                   :B [5 6]})
+         (-> (dataset {:A [1 2 3]
+                       :B [4 5 6]})
+             (index-by :A)
+             (slice 2 3)))))
+
 (deftest slice-by-instant
   (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
                                     #time/instant "1970-01-01T10:00:00.000Z"]
