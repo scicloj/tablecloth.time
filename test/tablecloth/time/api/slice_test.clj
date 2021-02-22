@@ -2,15 +2,16 @@
   (:require [tablecloth.api :refer [dataset columns column-names]]
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.api :refer [slice]]
-            [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
+            [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
             [clojure.test :refer [deftest is are]]))
 
 ;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
 
-(deftest slice-by-int
+(deftest slice-by-long-temporal-field
   (is (= (dataset {:A [2 3]
                    :B [5 6]})
-         (-> (dataset {:A [1 2 3]
+         (-> (dataset {:A (long-temporal-field :day-of-year
+                                               (plus-temporal-amount #time/date "1970-01-01" (range 3) :days))
                        :B [4 5 6]})
              (index-by :A)
              (slice 2 3)))))
