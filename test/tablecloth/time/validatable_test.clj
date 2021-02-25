@@ -1,7 +1,7 @@
-(ns tablecloth.validatable-test
+(ns tablecloth.time.validatable-test
   (:require [clojure.test :refer [deftest is]]
             [tablecloth.api :as tablecloth]
-            [tablecloth.validatable :as validatable]))
+            [tablecloth.time.validatable :as validatable]))
 
 (deftest validatable-test
   (let [ds (tablecloth/dataset {:x [1 2 3]
