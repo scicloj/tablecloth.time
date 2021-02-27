@@ -76,13 +76,15 @@
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
          time-unit (get-index-type dataset)
          from-key (cond
-                    (instance? java.time.temporal.Temporal from) from
+                    (or (int? from)
+                        (instance? java.time.temporal.Temporal from)) from
                     :else (try
                             (parse-datetime-str time-unit from)
                             (catch DateTimeParseException err
                               (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
          to-key (cond
-                  (instance? java.time.temporal.Temporal to) to
+                  (or (int? from)
+                      (instance? java.time.temporal.Temporal to)) to
                   :else (try
                           (parse-datetime-str time-unit to)
                           (catch DateTimeParseException err
@@ -93,4 +95,3 @@
        (not= time-unit (class to-key))
        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
        :else (slice-index dataset from-key to-key options)))))
-
