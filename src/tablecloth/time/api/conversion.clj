@@ -89,39 +89,36 @@
       (milliseconds->anytime :local-date-time)
       (.toLocalDate)))
 
-;;    :week (fn [datetime] (-> datetime
-;;                             (YearWeek/from)
-;;                             (.atDay java.time.DayOfWeek/SUNDAY)))
-(defmethod truncate-to :week
+;; TODO: End of week is not the same in all locales
+(defmethod truncate-to :weeks
   [datetime _]
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :local-date-time)
-      ))
+      YearWeek/from
+      (.atDay java.time.DayOfWeek/SUNDAY)))
+
+(defmethod truncate-to :months
+  [datetime _]
+  ;; TODO
+  )
+
+(defmethod truncate-to :quarters
+  [datetime _]
+  ;; TODO
+  )
+
+(defmethod truncate-to :years
+  [datetime _]
+  ;; TODO
+  )
+
+
 
 (comment
-  (dt/e
   (anytime->milliseconds #time/year "2015")
   (anytime->milliseconds (dtdt/instant))
 
+  (truncate-to (tick/instant) :weeks)
 
-  (truncate-to (tick/year) :minutes)
-
-  (-> #time/date "2020-10-08"
-      (anytime->milliseconds)
-      (milliseconds->anytime :local-date)
-      YearWeek/from
-      (.atDay java.time.DayOfWeek/SUNDAY)
-      )
-
-  (java.time.temporal.WeekFields/of (dtdt/locale))
-
-  ;; week
-  (-> #time/instant "2021-02-15T07:27:38.676Z"
-      anytime->milliseconds
-      (quot dtdt/milliseconds-in-week)
-      (* dtdt/milliseconds-in-week)
-      (+ dtdt/milliseconds-in-week)
-      (milliseconds->anytime :instant)
-      )
 )
