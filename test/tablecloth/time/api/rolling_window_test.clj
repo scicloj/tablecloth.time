@@ -11,6 +11,7 @@
                                     [:values (map #(* 10 %) (take count (range)))]])
                (tidx/index-by :idx))
         rw (rolling-window ds len)]
+    
     (sweet/fact "compare dataset sizes"
       (tablecloth/row-count rw) => count)))
 

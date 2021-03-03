@@ -2,6 +2,8 @@
   (:require [tablecloth.api :as tablecloth]
             [tablecloth.time.index :as tidx]
             [tablecloth.time.api :refer [slice]]))
+(import java.util.Map)
+(import java.util.LinkedHashMap)
 
 ;; A rolling-window is of size len
 ;; A dataset is constructed to hold the rows of a rolling-window
@@ -38,11 +40,24 @@
         (slice left right {:result-type :as-indexes})
         (vec))))
 
+
 ;; for symmetry
 (defn- rw-slices
   "slices for a dataset"
   [ds indices]
   (map (rw-slice ds) indices))
+
+
+;; utility
+(defn- ->ordered-map
+  "creates an ordered map {k, v} from ordered inputs [k] [v])"
+  [k v]
+  (let [om (LinkedHashMap.)
+        kv (mapv vector k v)]
+    (doseq [[ke ve] kv]
+      (.put ^Map om ke ve))
+    om))
+
 
 (defn instructions
   "maps row location to row indices of it's rolling-window.
@@ -51,13 +66,11 @@
   (let [indices (rw-indices ds len)
         slices (rw-slices ds indices)
         labels (map #(hash-map :loc (second %)) indices)]
-    (zipmap labels slices)))
+    (->ordered-map labels slices)))
+
 
 ;; support alternate approaches to build grouped datasets for rolling-window
 (defn rolling-window
   "entry for a rolling-window dataset"
   [ds len]
   (tablecloth/group-by ds (instructions ds len)))
-
-
-
