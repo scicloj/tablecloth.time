@@ -74,7 +74,7 @@
     om))
 
 
-(defn instructions
+(defn- instructions
   "maps row location to row indices of it's rolling-window.
    it will be used as a group-by input to create a grouped dataset"
   [ds column-name len]
@@ -86,7 +86,7 @@
 
 ;; support alternate approaches to build grouped datasets for rolling-window
 (defn rolling-window
-  "entry for a rolling-window dataset"
+  "rolling-window dataset"
   [ds column-name len]
   (tablecloth/group-by ds (instructions ds column-name len)))
 
