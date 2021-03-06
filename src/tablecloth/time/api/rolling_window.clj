@@ -1,35 +1,50 @@
 (ns tablecloth.time.api.rolling-window
   (:require [tablecloth.api :as tablecloth]
-            [tablecloth.time.index :as tidx]
             [tablecloth.time.api :refer [slice]]))
 (import java.util.Map)
 (import java.util.LinkedHashMap)
 
-;; A rolling-window is of size len
-;; A dataset is constructed to hold the rows of a rolling-window
+;; A rolling-window is defined by the window length, which maps to the preceding set of rows
+;; The rolling-window dataset is constructed to hold the rows of a rolling-window
+;; So, the rolling-window dataset is essentially a dataset of datasets - a grouped dataset
 
-;; For each row of the dataset, a rolling-window is defined
-;; So, rolling-window dataset is essentially a dataset of datasets - a grouped dataset
+;; notation
+;; loc is row location in a column
+;; len is the number of rows in the dataset. same as row-count
+;; index-name is column name in the dataset that is used as the index
+;; left & right are the corresponding edges of a window
 
-;; Analytic functions operating on a grouped dataset are available for rolling-window
+;; notes
+;; We allow dataset to be indexed on any column
+;; Conceptually, index of a column is {column value, :loc (s?)}
+;; A rolling window is defined as a subset of the rows, and is mapped by the index value
 
-;; inputs #1: an indexed dataset, eolling window size
-;; TODO: inputs #2: index, dataset row count, rolling window size
 
 (defn- rw-index
-  "rolling-window left/right indices for a row
-    case 1: where we need the last n obs before loc (inclusive)"
+  "left/right loc(s) of a rolling window for a given loc
+   #1: simple case where we want a set of consecutive rows
+   TODO #2: allow for lag"
   [len]
   (fn [loc]
     [(max 0 (+ (- loc len) 1)) loc]))
 
 
+(defn- rw-index-values
+  "column values at rolling window left/right loc(s)"
+  [ds column-name]
+  (fn [loc]
+    (let [[left right] loc
+          column (tablecloth/column ds column-name)]
+      [(nth column left) (nth column right)])))
+
+
 (defn- rw-indices
   "rolling-window left/right indices for a dataset"
-  [ds len]
+  [ds column-name len]
   (let [count (tablecloth/row-count ds)
         indices (take count (range))]
-    (map (rw-index len) indices)))
+    (->>(map (rw-index len) indices)
+        (map (rw-index-values ds column-name)))))
 
 
 (defn- rw-slice
@@ -41,7 +56,7 @@
         (vec))))
 
 
-;; for symmetry
+;; for symmetry. slice (row) and slices (dataset)
 (defn- rw-slices
   "slices for a dataset"
   [ds indices]
@@ -62,8 +77,8 @@
 (defn instructions
   "maps row location to row indices of it's rolling-window.
    it will be used as a group-by input to create a grouped dataset"
-  [ds len]
-  (let [indices (rw-indices ds len)
+  [ds column-name len]
+  (let [indices (rw-indices ds column-name len)
         slices (rw-slices ds indices)
         labels (map #(hash-map :loc (second %)) indices)]
     (->ordered-map labels slices)))
@@ -72,5 +87,7 @@
 ;; support alternate approaches to build grouped datasets for rolling-window
 (defn rolling-window
   "entry for a rolling-window dataset"
-  [ds len]
-  (tablecloth/group-by ds (instructions ds len)))
+  [ds column-name len]
+  (tablecloth/group-by ds (instructions ds column-name len)))
+
+
