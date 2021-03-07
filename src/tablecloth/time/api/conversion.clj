@@ -110,10 +110,13 @@
   ;; TODO
   )
 
+
 (defmethod truncate-to :years
   [datetime _]
-  ;; TODO
-  )
+  (-> datetime
+      anytime->milliseconds
+      (milliseconds->anytime :local-date)
+      Year/from))
 
 
 
