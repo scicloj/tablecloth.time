@@ -36,17 +36,26 @@
        ;; default
        (dtdt/datetime->milliseconds datetime)))))
 
-(defn milliseconds->anytime [millis datetime-type]
+
+;; TODO Add information about time unit types to docstring
+(defn milliseconds->anytime
+  "Convert milliseconds to any time unit as specified by `datetime-type`."
+  [millis datetime-type]
   (case datetime-type
     :year
     (milliseconds-since-epoch->year millis)
+    ;; default - for cases not specified explicilty above
+    ;;           tech.datatype.datetime offers support
     (dtdt/milliseconds->datetime datetime-type millis)))
 
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
 (add-object-datatype! :year java.time.Year true)
 (add-object-datatype! :year-month java.time.YearMonth true)
 
-(defn ->instant [datetime]
+
+(defn ->instant
+  "Convert any datetime to an instant."
+  [datetime]
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :instant)))
