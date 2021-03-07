@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.conversion
   (:import [java.time Year YearMonth]
-           [org.threeten.extra YearWeek])
+           [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
             [tech.v3.datatype.casting :refer [add-object-datatype!]]
@@ -107,9 +107,11 @@
 
 (defmethod truncate-to :quarters
   [datetime _]
-  ;; TODO
-  )
-
+  (-> datetime
+      anytime->milliseconds
+      (milliseconds->anytime :local-date)
+      YearQuarter/from
+      .atEndOfQuarter))
 
 (defmethod truncate-to :years
   [datetime _]
