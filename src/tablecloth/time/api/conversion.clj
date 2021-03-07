@@ -67,35 +67,35 @@
       (milliseconds->anytime :instant)))
 
 
-(defmulti covert-to
+(defmulti convert-to
   "Convert `datetime` to the target time unit as epcified by `unit`"
   (fn [_ unit] unit))
 
-(defmethod covert-to :milliseconds
+(defmethod convert-to :milliseconds
   [datetime _]
   (-> datetime
       ->instant
       (.truncatedTo java.time.temporal.ChronoUnit/MILLIS)))
 
-(defmethod covert-to :seconds
+(defmethod convert-to :seconds
   [datetime _]
   (-> datetime
       ->instant
       (.truncatedTo java.time.temporal.ChronoUnit/SECONDS)))
 
-(defmethod covert-to :minutes
+(defmethod convert-to :minutes
   [datetime _]
   (-> datetime
       ->instant
       (.truncatedTo java.time.temporal.ChronoUnit/MINUTES)))
 
-(defmethod covert-to :hours
+(defmethod convert-to :hours
   [datetime _]
   (-> datetime
       ->instant
       (.truncatedTo java.time.temporal.ChronoUnit/HOURS)))
 
-(defmethod covert-to :days
+(defmethod convert-to :days
   [datetime _]
   (-> datetime
       anytime->milliseconds
@@ -103,7 +103,7 @@
       (.toLocalDate)))
 
 ;; TODO: End of week is not the same in all locales
-(defmethod covert-to :weeks
+(defmethod convert-to :weeks
   [datetime _]
   (-> datetime
       anytime->milliseconds
@@ -111,14 +111,14 @@
       YearWeek/from
       (.atDay java.time.DayOfWeek/SUNDAY)))
 
-(defmethod covert-to :months
+(defmethod convert-to :months
   [datetime _]
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :local-date)
       (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
 
-(defmethod covert-to :quarters
+(defmethod convert-to :quarters
   [datetime _]
   (-> datetime
       anytime->milliseconds
@@ -126,7 +126,7 @@
       YearQuarter/from
       .atEndOfQuarter))
 
-(defmethod covert-to :years
+(defmethod convert-to :years
   [datetime _]
   (-> datetime
       anytime->milliseconds
