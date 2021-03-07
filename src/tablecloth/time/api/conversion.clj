@@ -8,11 +8,14 @@
 
 (set! *warn-on-reflection* true)
 
+
 (defn year->local-date [^Year year]
   (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
 
+
 (defn year->milliseconds-since-epoch [^Year year]
   (-> year year->local-date dtdt/local-date->milliseconds-since-epoch))
+
 
 (defn milliseconds-since-epoch->year
   ([millis]
@@ -20,6 +23,7 @@
   ([millis timezone]
    (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
        (.getYear))))
+
 
 (defn anytime->milliseconds
   "Converts any time unit type to milliseconds."
@@ -48,6 +52,7 @@
     ;;           tech.datatype.datetime offers support
     (dtdt/milliseconds->datetime datetime-type millis)))
 
+
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
 (add-object-datatype! :year java.time.Year true)
 (add-object-datatype! :year-month java.time.YearMonth true)
@@ -59,6 +64,7 @@
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :instant)))
+
 
 (defmulti covert-to (fn [_ unit] unit))
 
