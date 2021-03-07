@@ -4,7 +4,7 @@
   (:require [tech.v3.datatype :refer [emap]]
             [tech.v3.datatype.datetime :as dtdt]
             [tablecloth.api :as tablecloth]
-            [tablecloth.time.api.adjust-interval :refer [convert-to]]
+            [tablecloth.time.api.conversion :refer [convert-to]]
             [tick.alpha.api :as tick]))
 
 ;; D 	Calendar day ✅
@@ -40,7 +40,7 @@
    (adjust-interval dataset index-col-key keys target-unit nil))
   ([dataset index-col-key keys target-unit {:keys [ungroup?]
                                             :or {ungroup? false}}]
-   (let [time-converter #(truncate-to % target-unit)
+   (let [time-converter #(convert-to % target-unit)
          index-column  (index-col-key dataset)
          adjusted-column-data (emap time-converter target-unit index-column)]
      (-> dataset
@@ -70,7 +70,7 @@
 
   ;; day
   (-> raw-ds
-      (adjust-interval :instant [:symbol] :day)
+      (adjust-interval :instant [:symbol] :seconds)
       (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
       )
 
