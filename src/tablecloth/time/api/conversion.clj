@@ -4,14 +4,9 @@
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
             [tech.v3.datatype.casting :refer [add-object-datatype!]]
-            [tick.alpha.api :as tick]))
+            ))
 
 (set! *warn-on-reflection* true)
-
-(defn- parse-anytime [str-or-datetime]
-  (if (string? str-or-datetime)
-    (tick/parse str-or-datetime)
-    str-or-datetime))
 
 (defn year->local-date [^Year year]
   (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
@@ -119,13 +114,3 @@
       anytime->milliseconds
       (milliseconds->anytime :local-date)
       Year/from))
-
-
-
-(comment
-  (anytime->milliseconds #time/year "2015")
-  (anytime->milliseconds (dtdt/instant))
-
-  (truncate-to (tick/instant) :weeks)
-
-)
