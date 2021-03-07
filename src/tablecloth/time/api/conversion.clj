@@ -66,7 +66,9 @@
       (milliseconds->anytime :instant)))
 
 
-(defmulti covert-to (fn [_ unit] unit))
+(defmulti covert-to
+  "Convert `datetime` to the target time unit as epcified by `unit`"
+  (fn [_ unit] unit))
 
 (defmethod covert-to :milliseconds
   [datetime _]
