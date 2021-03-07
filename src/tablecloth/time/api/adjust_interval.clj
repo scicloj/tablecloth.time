@@ -4,7 +4,7 @@
   (:require [tech.v3.datatype :refer [emap]]
             [tech.v3.datatype.datetime :as dtdt]
             [tablecloth.api :as tablecloth]
-            [tablecloth.time.api :refer [truncate-to]]
+            [tablecloth.time.api.adjust-interval :refer [convert-to]]
             [tick.alpha.api :as tick]))
 
 ;; D 	Calendar day ✅

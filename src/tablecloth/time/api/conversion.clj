@@ -4,6 +4,7 @@
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
             [tech.v3.datatype.casting :refer [add-object-datatype!]]
+            [tick.alpha.api :as tick]
             ))
 
 (set! *warn-on-reflection* true)
