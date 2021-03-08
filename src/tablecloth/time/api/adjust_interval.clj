@@ -8,23 +8,6 @@
             [tablecloth.time.api.conversion :refer [convert-to]]
             [tick.alpha.api :as tick]))
 
-;; D 	Calendar day ✅
-;; W 	Weekly ✅
-;; M 	Month end ✅
-;; Q 	Quarter end ✅
-;; A 	Year end
-;; H 	Hours
-;; T 	Minutes
-;; S 	Seconds ✅
-;; L 	Milliseonds
-;; U 	Microseconds
-;; N 	nanoseconds
-;; B 	Business day
-;; BM 	Business month end
-;; BQ 	Business quarter end
-;; BA 	Business year end
-;; BH 	Business hours
-
 ;; (def map-time-unit->time-converter
 ;;   {:day tick/date
 ;;    :month (fn [datetime] (-> datetime

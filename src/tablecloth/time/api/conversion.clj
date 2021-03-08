@@ -9,6 +9,14 @@
 
 (set! *warn-on-reflection* true)
 
+;; TODO add more support for conversion targets
+;; - nanoseconds
+;; - microseconds
+;; - business day
+;; - business month end
+;; - busness quarter end
+;; - business year end
+;; - business hours
 
 (defn year->local-date [^Year year]
   (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
