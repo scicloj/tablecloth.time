@@ -8,15 +8,6 @@
             [tablecloth.time.api.conversion :refer [convert-to]]
             [tick.alpha.api :as tick]))
 
-;; (def map-time-unit->time-converter
-;;   {:day tick/date
-;;    :month (fn [datetime] (-> datetime
-;;                              (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
-;;    :quarter (fn [datetime]
-;;               (.atEndOfQuarter (YearQuarter/from datetime)))
-;;    :year (fn [datetime]
-;;                (-> datetime tick/date (.with (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
-;;   })
 
 (defn adjust-interval
   "Change the time index frequency."
@@ -54,16 +45,18 @@
   (-> raw-ds :instant last)
   ;; => #time/instant "1970-01-02T00:00:02.999Z"
 
-  ;; day
-  (-> raw-ds
-      (adjust-interval :instant [:symbol] :seconds)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
-      )
-
-  ;; seconds
   (-> raw-ds
       (adjust-interval :instant [:symbol] :days)
       (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
       )
-  
-)
+
+  (-> raw-ds
+      :instant
+      (tablecloth/select-rows (range 5))
+      (tech.v3.datatype/->reader)
+      (->> (tech.v3.datatype.argops/arggroup-by identity {:unordered? false}))
+      type
+      )
+
+  (tablecloth/select-rows )
+  )
