@@ -74,6 +74,22 @@
       (milliseconds->anytime :instant)))
 
 
+(defn ->local-date-time
+  "Convert any datetime to a local datetime."
+  [datetime]
+  (-> datetime
+      anytime->milliseconds
+      (milliseconds->anytime :local-date-time)))
+
+
+(defn ->local-date
+  "Convert any datetime to a local date."
+  [datetime]
+  (-> datetime
+      anytime->milliseconds
+      (milliseconds->anytime :local-date)))
+
+
 (defmulti convert-to
   "Convert any time unit to another."
   (fn [_ unit] unit))
@@ -104,39 +120,32 @@
 
 (defmethod convert-to :days
   [datetime _]
-  (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date-time)
-      (.toLocalDate)))
+  (-> datetime ->local-date))
 
 ;; TODO: End of week is not the same in all locales
 (defmethod convert-to :weeks
   [datetime _]
   (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date-time)
+      ->local-date-time
       YearWeek/from
       (.atDay java.time.DayOfWeek/SUNDAY)))
 
 (defmethod convert-to :months
   [datetime _]
   (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date)
+      ->local-date
       (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
 
 (defmethod convert-to :quarters
   [datetime _]
   (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date)
+      ->local-date
       YearQuarter/from
       .atEndOfQuarter))
 
 (defmethod convert-to :years
   [datetime _]
   (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date)
+      ->local-date
       Year/from))
 
