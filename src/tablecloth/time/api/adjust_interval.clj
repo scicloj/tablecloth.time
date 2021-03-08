@@ -8,6 +8,8 @@
             [tablecloth.time.api.conversion :refer [convert-to]]
             [tick.alpha.api :as tick]))
 
+;; TODO Consider alternate syntax based on individual time converters, no multimethod
+;; (adjust-interval [dataset index-col keys converter new-index-col-key])
 
 (defn adjust-interval
   "Change the time index frequency."
