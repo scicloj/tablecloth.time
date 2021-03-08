@@ -3,6 +3,7 @@
            [java.time LocalDate Year YearMonth])
   (:require [tech.v3.datatype :refer [emap]]
             [tech.v3.datatype.datetime :as dtdt]
+            [tech.v3.dataset :as tech-dataset]
             [tablecloth.api :as tablecloth]
             [tablecloth.time.api.conversion :refer [convert-to]]
             [tick.alpha.api :as tick]))
@@ -46,6 +47,8 @@
      (-> dataset
          (tablecloth/add-or-replace-column target-unit adjusted-column-data)
          (tablecloth/group-by (into [target-unit] keys))
+         ;; can remove when tech.dataset changes arggroup to return an ordered LinkedHashMap
+         (tech-dataset/sort-by #(get-in % [:name target-unit]))
          (cond-> ungroup? tablecloth/ungroup
                  (not ungroup?) identity)))))
 
