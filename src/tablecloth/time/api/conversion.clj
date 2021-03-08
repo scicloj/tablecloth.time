@@ -76,7 +76,7 @@
 
 
 (defmulti convert-to
-  "Convert `datetime` to the target time unit as epcified by `unit`"
+  "Convert any time unit to another."
   (fn [_ unit] unit))
 
 (defmethod convert-to :milliseconds
