@@ -7,5 +7,8 @@
                  [scicloj/tablecloth "5.00-beta-28"]
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
-                 [aerial.hanami "0.12.4"]
-                 [midje/midje "1.9.10"]])
+                 [aerial.hanami "0.12.4"]]
+  :profiles {:dev {:cloverage {:runner :midje}
+                   :dependencies [[midje "1.9.10"]]
+                   :plugins [[lein-midje "3.2.1"]
+                             [lein-cloverage "1.1.2"]]}})
