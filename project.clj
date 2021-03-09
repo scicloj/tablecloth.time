@@ -7,4 +7,9 @@
                  [scicloj/tablecloth "5.00-beta-28"]
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
-                 [aerial.hanami "0.12.4"]])
+                 [aerial.hanami "0.12.4"]]
+  :plugins [[lein-cljfmt "0.7.0"]
+            [jonase/eastwood "0.3.14"]]
+  :aliases {"lint" ["do"
+                    ["cljfmt" "check"]
+                    ["eastwood" "{:source-paths [\"src\"]}"]]})
