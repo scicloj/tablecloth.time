@@ -7,9 +7,9 @@
   (let [ds (tablecloth/dataset {:x [1 2 3]
                                 :y [4 5 6]})
         ds-with-validatable (validatable/add-validatable ds
-                                             [:x]
-                                             :id1
-                                             9999)]
+                                                         [:x]
+                                                         :id1
+                                                         9999)]
     (is (-> ds-with-validatable
             (tablecloth/select-rows [0 2])
             (validatable/valid? :id1)
