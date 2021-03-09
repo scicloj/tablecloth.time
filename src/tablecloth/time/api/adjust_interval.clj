@@ -10,6 +10,9 @@
 
 ;; TODO Consider alternate syntax based on individual time converters, no multimethod
 ;; (adjust-interval [dataset index-col keys converter new-index-col-key])
+;; A benefit of this would be ethat we do not need to decide the meaning of the keys
+;; that we are using as the 'target-units'. Currently, they awkwardly overlap the
+;; keys provided by tech.datetime and tick.
 
 (defn adjust-interval
   "Change the time index frequency."
