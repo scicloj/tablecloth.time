@@ -7,4 +7,5 @@
                  [scicloj/tablecloth "5.00-beta-28"]
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
-                 [aerial.hanami "0.12.4"]])
+                 [aerial.hanami "0.12.4"]
+                 [midje/midje "1.9.10"]])
