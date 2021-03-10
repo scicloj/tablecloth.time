@@ -9,14 +9,14 @@
                  [tick "0.4.27-alpha"]
                  [org.threeten/threeten-extra "1.5.0"]]
 
-  :profiles {:dev
-             {:dependencies [[scicloj/notespace "3-beta3"]
-                             [aerial.hanami "0.12.4"]
-                             [midje/midje "1.9.10"
-                               :exclusions [org.clojure/clojure]]]
-                   :plugins [[lein-cljfmt "0.7.0"]
-                             [jonase/eastwood "0.3.14"]
-                             [lein-midje "3.2.1"]]
-                   :aliases {"lint" ["do"
-                                     ["cljfmt" "check"]
-                                     ["eastwood" "{:source-paths [\"src\"]}"]]}}}))
+  :profiles
+  {:dev {:dependencies [[scicloj/notespace "3-beta3"]
+                        [aerial.hanami "0.12.4"]
+                        [midje/midje "1.9.10"
+                          :exclusions [org.clojure/clojure]]]
+         :plugins [[lein-cljfmt "0.7.0"]
+                   [jonase/eastwood "0.3.14"]
+                   [lein-midje "3.2.1"]]
+         :aliases {"lint" ["do"
+                           ["cljfmt" "check"]
+                           ["eastwood" "{:source-paths [\"src\"]}"]]}}})
