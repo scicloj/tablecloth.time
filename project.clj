@@ -8,9 +8,10 @@
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
-  :profiles {:dev {:plugins [[lein-cljfmt "0.7.0"]
+  :profiles {:dev {:dependencies [[midje/midje "1.9.10" :exclusions [org.clojure/clojure]]]
+                   :plugins [[lein-cljfmt "0.7.0"]
                              [jonase/eastwood "0.3.14"]
-                             [midje/midje "1.9.10"]]
+                             [lein-midje "3.2.1"]]
                    :aliases {"lint" ["do"
                                      ["cljfmt" "check"]
                                      ["eastwood" "{:source-paths [\"src\"]}"]]}}})
