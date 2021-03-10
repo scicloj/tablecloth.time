@@ -9,7 +9,8 @@
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
   :profiles {:dev {:plugins [[lein-cljfmt "0.7.0"]
-                             [jonase/eastwood "0.3.14"]]
+                             [jonase/eastwood "0.3.14"]
+                             [midje/midje "1.9.10"]]
                    :aliases {"lint" ["do"
                                      ["cljfmt" "check"]
                                      ["eastwood" "{:source-paths [\"src\"]}"]]}}})
