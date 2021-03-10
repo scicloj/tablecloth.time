@@ -14,5 +14,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: lein deps
-    - name: Run tests
+    - name: Run clojure tests
       run: lein test
+    - name: Run midje tests
+      run: lein midje
