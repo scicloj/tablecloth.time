@@ -2,19 +2,19 @@
   (:require [tablecloth.api :refer [dataset columns column-names]]
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.api :refer [slice]]
-            [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
+            [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
             [clojure.test :refer [deftest is are]]))
 
 ;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
 
-;; Temporary until = fixed for datasets in tech.ml
-(defn ds-equal? [dsa dsb]
-  (let [colnames-equal (= (column-names dsa)
-                          (column-names dsb))
-        cols-equal (every?
-                    #(= (first %) (second %))
-                    (partition 2 (interleave (columns dsa) (columns dsb))))]
-    (and colnames-equal cols-equal)))
+(deftest slice-by-long-temporal-field
+  (is (= (dataset {:A [2 3]
+                   :B [5 6]})
+         (-> (dataset {:A (long-temporal-field :day-of-year
+                                               (plus-temporal-amount #time/date "1970-01-01" (range 3) :days))
+                       :B [4 5 6]})
+             (index-by :A)
+             (slice 2 3)))))
 
 (deftest slice-by-instant
   (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
@@ -31,7 +31,7 @@
   (are [_ arg-map] (= (dataset {:A [#time/date-time "1970-01-01T09:00"
                                     #time/date-time "1970-01-01T10:00"]
                                 :B [9 10]})
-                      (-> (dataset {:A (plus-temporal-amount #time/date-time "1900-01-01T00:00" (range 11) :hours)
+                      (-> (dataset {:A (plus-temporal-amount #time/date-time "1970-01-01T00:00" (range 11) :hours)
                                     :B (range 11)})
                           (index-by :A)
                           (slice (:to arg-map) (:from arg-map))))
@@ -40,9 +40,11 @@
 
 (deftest slice-by-year
   (are [_ arg-map] (= (dataset {:A [#time/year "1979" #time/year "1980"]
-                                :B [9 10]})
-                      (-> (dataset {:A (plus-temporal-amount #time/year "1970" (range 11) :years)
-                                    :B (range 11)})
+                                :B [4 5]})
+                      (-> (dataset {:A [#time/year "1975" #time/year "1976"
+                                        #time/year "1977" #time/year "1978"
+                                        #time/year "1979" #time/year "1980"]
+                                    :B (range 6)})
                           (index-by :A)
                           (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979" :from "1980"}
@@ -59,7 +61,7 @@
     _ {:to #time/year-month "1979-01" :from #time/year-month "1980-01"}))
 
 (deftest slice-by-local-date
-  (are [_ arg-map] (= (dataset {:A [#time/date "1970-01-09" #time/date "1970-01-10"]
+  (are [_ arg-map] (= (dataset {:A [#time/date "1979-01-01" #time/date "1980-01-01"]
                                 :B [9 10]})
                       (-> (dataset {:A (plus-temporal-amount #time/date "1970-01-01" (range 11) :years)
                                     :B (range 11)})
@@ -67,7 +69,6 @@
                           (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979-01-01" :from "1980-01-01"}
     _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
-
 
 (deftest slice-result-types
   (let [ds (dataset {:A [#time/date "1970-01-01"
