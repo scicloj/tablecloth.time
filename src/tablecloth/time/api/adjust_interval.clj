@@ -16,18 +16,13 @@
 
 (defn adjust-interval
   "Change the time index frequency."
-  ([dataset index-col-key keys target-unit]
-   (adjust-interval dataset index-col-key keys target-unit nil))
-  ([dataset index-col-key keys target-unit {:keys [ungroup?]
-                                            :or {ungroup? false}}]
+  [dataset index-col-key keys target-unit]
    (let [time-converter #(convert-to % target-unit)
          index-column  (index-col-key dataset)
          adjusted-column-data (emap time-converter target-unit index-column)]
      (-> dataset
          (tablecloth/add-or-replace-column target-unit adjusted-column-data)
-         (tablecloth/group-by (into [target-unit] keys))
-         (cond-> ungroup? tablecloth/ungroup
-                 (not ungroup?) identity)))))
+         (tablecloth/group-by (into [target-unit] keys)))))
 
 (comment
   ;; (def raw-ds
@@ -37,7 +32,6 @@
   (defn time-series [start-inst n tf]
     (dtdt/plus-temporal-amount start-inst (range n) tf))
 
-
   (def raw-ds (tablecloth/dataset {:instant (time-series
                                               #time/instant "1970-01-01T23:59:58.000Z"
                                               5000
@@ -45,13 +39,19 @@
                                    :symbol "MSFT"
                                    :price (take 5000 (repeatedly #(rand 200)))}))
 
+  (-> raw-ds )
+
   (-> raw-ds :instant last)
   ;; => #time/instant "1970-01-02T00:00:02.999Z"
 
   (-> raw-ds
-      (adjust-interval :instant [:symbol] :days)
-      (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
+      (adjust-interval :instant [:symbol] :minutes)
+      (tablecloth/ungroup)
+      ;; (tablecloth/aggregate {:price #(tech.v3.datatype.functional/mean (:price %))})
       )
+
+  (-> ds (adjust-interval :instant [:symbol] ->minutes))
+  (-> ds (adjust-interval :instant [:symbol] ->every-fifteen-minutes))
 
   (-> raw-ds
       :instant
@@ -61,5 +61,4 @@
       type
       )
 
-  (tablecloth/select-rows )
   )
