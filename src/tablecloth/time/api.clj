@@ -7,6 +7,4 @@
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
-(exporter/export-symbols tablecloth.time.api.conversion
-                         truncate-to)
 
