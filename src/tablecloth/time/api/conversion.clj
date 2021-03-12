@@ -90,62 +90,46 @@
       (milliseconds->anytime :local-date)))
 
 
-(defmulti convert-to
-  "Convert any time unit to another."
-  (fn [_ unit] unit))
+(defn ->seconds
+  [datetime]
+  (let [^java.time.Instant inst (->instant datetime)]
+    (.truncatedTo inst java.time.temporal.ChronoUnit/SECONDS)))
 
-(defmethod convert-to :milliseconds
-  [datetime _]
-  (-> datetime
-      ->instant
-      (.truncatedTo java.time.temporal.ChronoUnit/MILLIS)))
 
-(defmethod convert-to :seconds
-  [datetime _]
-  (-> datetime
-      ->instant
-      (.truncatedTo java.time.temporal.ChronoUnit/SECONDS)))
+(defn ->minutes
+  [datetime]
+  (let [^java.time.Instant inst (->instant datetime)]
+    (.truncatedTo inst java.time.temporal.ChronoUnit/MINUTES)))
 
-(defmethod convert-to :minutes
-  [datetime _]
-  (-> datetime
-      ->instant
-      (.truncatedTo java.time.temporal.ChronoUnit/MINUTES)))
 
-(defmethod convert-to :hours
-  [datetime _]
-  (-> datetime
-      ->instant
-      (.truncatedTo java.time.temporal.ChronoUnit/HOURS)))
+(defn ->hours
+  [datetime]
+  (let [^java.time.Instant inst (->instant datetime)]
+    (.truncatedTo inst java.time.temporal.ChronoUnit/HOURS)))
 
-(defmethod convert-to :days
-  [datetime _]
+(defn ->days
+  [datetime]
   (-> datetime ->local-date))
 
-;; TODO: End of week is not the same in all locales
-(defmethod convert-to :weeks
-  [datetime _]
+;; (defn ->weeks
+;;   [datetime]
+;;   ->local-date-time
+;;   YearWeek/from
+;;   (.atDay java.time.DayOfWeek/SUNDAY))
+
+(defn ->months
+  [datetime]
+  (let [^java.time.LocalDate local-date (->local-date datetime)]
+    (.with local-date (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
+
+(defn ->quarters
+  [datetime]
   (-> datetime
       ->local-date-time
-      YearWeek/from
-      (.atDay java.time.DayOfWeek/SUNDAY)))
-
-(defmethod convert-to :months
-  [datetime _]
-  (-> datetime
-      ->local-date
-      (.with (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
-
-(defmethod convert-to :quarters
-  [datetime _]
-  (-> datetime
-      ->local-date
       YearQuarter/from
       .atEndOfQuarter))
 
-(defmethod convert-to :years
-  [datetime _]
-  (-> datetime
-      ->local-date
-      Year/from))
+(defn ->years
+  [datetime]
+  (-> datetime ->local-date Year/from))
 
