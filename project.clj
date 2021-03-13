@@ -8,10 +8,15 @@
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
-  :profiles {:dev {:dependencies [[midje/midje "1.9.10" :exclusions [org.clojure/clojure]]]
-                   :plugins [[lein-cljfmt "0.7.0"]
-                             [jonase/eastwood "0.3.14"]
-                             [lein-midje "3.2.1"]]
-                   :aliases {"lint" ["do"
-                                     ["cljfmt" "check"]
-                                     ["eastwood" "{:source-paths [\"src\"]}"]]}}})
+  :profiles
+  {:dev {:dependencies [[scicloj/notespace "3-beta3"]
+                        [aerial.hanami "0.12.4"]
+                        [clj-kondo "2021.03.03"]
+                        [midje/midje "1.9.10"
+                          :exclusions [org.clojure/clojure]]]
+         :plugins [[lein-cljfmt "0.7.0"]
+                   [lein-midje "3.2.1"]]
+         :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
+                   "lint" ["do"
+                           ["cljfmt" "check"]
+                           ["run" "-m" "clj-kondo.main" "--lint" "src"]]}}})
