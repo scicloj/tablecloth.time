@@ -20,7 +20,7 @@
                                   (* 2 60)
                                   :seconds)
         result (-> test-dataset (adjust-interval :idx
-                                                 [:symbol]
+                                                 [:key-a, :key-b]
                                                  converters/->minutes
                                                  :minutes))]
 
@@ -28,7 +28,7 @@
       (is (-> result (tablecloth/grouped?))))
 
     (testing "it passes through columns specified as `keys`"
-      (is (some #{:symbol} (tablecloth/column-names result))))
+      (is (some #{:key-a :key-b} (tablecloth/column-names result))))
 
     (testing "it creates a new time column specified by `new-column-name`"
       (is (some #{:minutes} (tablecloth/column-names result))))))
