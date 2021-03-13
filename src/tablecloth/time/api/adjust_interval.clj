@@ -13,9 +13,6 @@
 
 ;; keys provided by tech.datetime and tick.
 
-tech.v3.datatype.casting/datatype->class-map
-tech.v3.datatype.casting/class->datatype-map
-
 (defn adjust-interval
   "Change the time index frequency."
   [dataset index-column-name keys time-converter new-column-name]
