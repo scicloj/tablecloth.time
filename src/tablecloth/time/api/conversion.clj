@@ -128,3 +128,37 @@
   [datetime]
   (-> datetime ->local-date Year/from))
 
+
+;; (defmacro milliseconds-in [chrono-unit]
+;;   (let [chron-unit-string (clojure.string/join "" (drop-last (name chrono-unit)))
+;;         milliseconds-in-* (str "dtdt/milliseconds-in-" chron-unit-string)]
+;;     (symbol milliseconds-in-*)))
+
+(defn milliseconds-in [chrono-unit]
+  (case chrono-unit
+    :seconds
+    dtdt/milliseconds-in-second
+    :minutes
+    dtdt/milliseconds-in-minute
+    :hours
+    dtdt/milliseconds-in-hour))
+
+(defn ->every
+  [x-seconds chrono-unit-kw datetime]
+  (let [ms-in (milliseconds-in chrono-unit-kw)
+        ms (-> datetime anytime->milliseconds)
+        divisor (* x-seconds ms-in)
+        remainder (mod ms divisor)
+        new-ms (- ms remainder)]
+    (milliseconds->anytime new-ms :instant)))
+
+
+(comment
+  (milliseconds-in :seconds)
+
+
+  (->every 5 :seconds "1970-01-01T00:00:07Z")
+
+  )
+
+
