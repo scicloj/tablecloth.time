@@ -4,9 +4,8 @@
 (import java.util.Map)
 (import java.util.LinkedHashMap)
 
-;; A rolling-window is defined by the window length, which maps to the preceding set of rows
-;; The rolling-window dataset is constructed to hold the rows of a rolling-window
-;; So, the rolling-window dataset is essentially a dataset of datasets - a grouped dataset
+;; A rolling-window for a row is defined by it's length, and maps to a set of rows preceding it
+;; We use a grouped dataset, which is a dataset of datasets, to hold the rows of a rolling-window
 
 ;; notation
 ;; loc is row location in a column
@@ -15,9 +14,9 @@
 ;; left & right are the corresponding edges of a window
 
 ;; notes
-;; We allow dataset to be indexed on any column
-;; Conceptually, index of a column is {column value, :loc (s?)}
-;; A rolling window is defined as a subset of the rows, and is mapped by the index value
+;; The implementation is simple. We leverage tablecloth/group-by functionality
+;; that takes in a map of row-indices to group by, and creates the grouped dataset
+;; The instructions function builds the map of rolling-window indices
 
 
 (defn- rw-index
@@ -43,7 +42,7 @@
   [ds column-name len]
   (let [count (tablecloth/row-count ds)
         indices (take count (range))]
-    (->>(map (rw-index len) indices)
+    (->> (map (rw-index len) indices)
         (map (rw-index-values ds column-name)))))
 
 
@@ -76,7 +75,7 @@
 
 (defn- instructions
   "maps row location to row indices of it's rolling-window.
-   it will be used as a group-by input to create a grouped dataset"
+   it is used as an input to group-by to create a grouped dataset"
   [ds column-name len]
   (let [indices (rw-indices ds column-name len)
         slices (rw-slices ds indices)
