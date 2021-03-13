@@ -12,11 +12,12 @@
   :profiles
   {:dev {:dependencies [[scicloj/notespace "3-beta3"]
                         [aerial.hanami "0.12.4"]
+                        [clj-kondo "2021.03.03"]
                         [midje/midje "1.9.10"
                           :exclusions [org.clojure/clojure]]]
          :plugins [[lein-cljfmt "0.7.0"]
-                   [jonase/eastwood "0.3.14"]
                    [lein-midje "3.2.1"]]
-         :aliases {"lint" ["do"
+         :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
+                   "lint" ["do"
                            ["cljfmt" "check"]
-                           ["eastwood" "{:source-paths [\"src\"]}"]]}}})
+                           ["run" "-m" "clj-kondo.main" "--lint" "src"]]}}})
