@@ -1,9 +1,9 @@
 (ns tablecloth.time.api.adjust-interval-test
-  (:use midje.sweet)
   (:require [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
             [tablecloth.api :as tablecloth]
             [tablecloth.time.api.conversion :as converters]
-            [tablecloth.time.api :refer [adjust-interval]]))
+            [tablecloth.time.api :refer [adjust-interval]]
+            [midje.sweet :refer [fact]]))
 
 (defn time-series [start-inst n tf]
   (plus-temporal-amount start-inst (range n) tf))
