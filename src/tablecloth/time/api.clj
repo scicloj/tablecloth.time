@@ -7,4 +7,5 @@
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
-
+(exporter/export-symbols tablecloth.time.api.adjust-interval
+                         adjust-interval)
