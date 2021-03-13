@@ -19,12 +19,12 @@ tech.v3.datatype.casting/class->datatype-map
 (defn adjust-interval
   "Change the time index frequency."
   [dataset index-column-name keys time-converter new-column-name]
-   (let [index-column (index-column-name dataset)
-         target-datatype (-> index-column first time-converter elemwise-datatype)
-         adjusted-column-data (emap time-converter target-datatype index-column)]
-     (-> dataset
-         (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
-         (tablecloth/group-by (into [new-column-name] keys)))))
+  (let [index-column (index-column-name dataset)
+        target-datatype (-> index-column first time-converter elemwise-datatype)
+        adjusted-column-data (emap time-converter target-datatype index-column)]
+    (-> dataset
+        (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
+        (tablecloth/group-by (into [new-column-name] keys)))))
 
 (comment
   ;; (def raw-ds
@@ -43,8 +43,5 @@ tech.v3.datatype.casting/class->datatype-map
                    (* 2 60)
                    :seconds)
       (adjust-interval :idx [:symbol] convert/->minutes :minutes)
-      (tablecloth/ungroup))
-
-
-  )
+      (tablecloth/ungroup)))
 ;; => nil

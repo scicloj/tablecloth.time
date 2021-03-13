@@ -20,10 +20,8 @@
 (defn year->local-date [^Year year]
   (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
 
-
 (defn year->milliseconds-since-epoch [^Year year]
   (-> year year->local-date dtdt/local-date->milliseconds-since-epoch))
-
 
 (defn milliseconds-since-epoch->year
   ([millis]
@@ -31,7 +29,6 @@
   ([millis timezone]
    (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
        (.getYear))))
-
 
 (defn anytime->milliseconds
   "Converts any time unit type to milliseconds."
@@ -50,6 +47,8 @@
 
 
 ;; TODO Add information about time unit types to docstring
+
+
 (defn milliseconds->anytime
   "Convert milliseconds to any time unit as specified by `datetime-type`."
   [millis datetime-type]
@@ -62,9 +61,10 @@
 
 
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
+
+
 (add-object-datatype! :year java.time.Year true)
 (add-object-datatype! :year-month java.time.YearMonth true)
-
 
 (defn ->instant
   "Convert any datetime to an instant."
@@ -73,14 +73,12 @@
       anytime->milliseconds
       (milliseconds->anytime :instant)))
 
-
 (defn ->local-date-time
   "Convert any datetime to a local datetime."
   [datetime]
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :local-date-time)))
-
 
 (defn ->local-date
   "Convert any datetime to a local date."
@@ -89,18 +87,15 @@
       anytime->milliseconds
       (milliseconds->anytime :local-date)))
 
-
 (defn ->seconds
   [datetime]
   (let [^java.time.Instant inst (->instant datetime)]
     (.truncatedTo inst java.time.temporal.ChronoUnit/SECONDS)))
 
-
 (defn ->minutes
   [datetime]
   (let [^java.time.Instant inst (->instant datetime)]
     (.truncatedTo inst java.time.temporal.ChronoUnit/MINUTES)))
-
 
 (defn ->hours
   [datetime]
