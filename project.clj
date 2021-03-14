@@ -19,4 +19,4 @@
          :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
                    "lint" ["do"
                            ["cljfmt" "check"]
-                           ["run" "-m" "clj-kondo.main" "--lint" "src"]]}}})
+                           ["run" "-m" "clj-kondo.main" "--lint" "src:test"]]}}})
