@@ -8,7 +8,11 @@
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
-  :profiles {:dev {:cloverage {:runner :midje}
-                   :dependencies [[midje "1.9.10"]]
-                   :plugins [[lein-midje "3.2.1"]
-                             [lein-cloverage "1.1.2"]]}})
+  :profiles {:dev {:dependencies [[midje/midje "1.9.10" :exclusions [org.clojure/clojure]]]
+                   :plugins [[lein-cljfmt "0.7.0"]
+                             [jonase/eastwood "0.3.14"]
+                             [lein-midje "3.2.1"]]
+                   :aliases {"lint" ["do"
+                                     ["cljfmt" "check"]
+                                     ["eastwood" "{:source-paths [\"src\"]}"]]}}})
+
