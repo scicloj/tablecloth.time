@@ -45,10 +45,6 @@
        ;; default
        (dtdt/datetime->milliseconds datetime)))))
 
-
-;; TODO Add information about time unit types to docstring
-
-
 (defn milliseconds->anytime
   "Convert milliseconds to any time unit as specified by `datetime-type`."
   [millis datetime-type]
@@ -59,10 +55,7 @@
     ;;           tech.datatype.datetime offers support
     (dtdt/milliseconds->datetime datetime-type millis)))
 
-
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
-
-
 (add-object-datatype! :year java.time.Year true)
 (add-object-datatype! :year-month java.time.YearMonth true)
 
@@ -86,6 +79,36 @@
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime :local-date)))
+
+(defn milliseconds-in [chrono-unit]
+  (case chrono-unit
+    :seconds
+    dtdt/milliseconds-in-second
+    :minutes
+    dtdt/milliseconds-in-minute
+    :hours
+    dtdt/milliseconds-in-hour))
+
+(defn round-down-to-nearest
+  ([interval chrono-unit]
+   (partial round-down-to-nearest interval chrono-unit))
+  ([interval chrono-unit datetime]
+   (let [millis  (anytime->milliseconds datetime)
+         divisor (* interval (milliseconds-in chrono-unit))]
+     (milliseconds->anytime (- millis (mod millis divisor))))))
+
+;; (defn ->every
+;;   ([interval chrono-unit]
+;;    (partial ->every interval chrono-unit))
+;;   ([interval chrono-unit-kw datetime]
+;;    (let [ms-in-chrono-unit (milliseconds-in chrono-unit-kw)
+;;          datetime-in-ms (-> datetime anytime->milliseconds)
+;;          divisor (* interval ms-in)
+;;          remainder (mod ms divisor)
+;;          new-ms (- ms remainder)]
+;;      ()
+;;      (milliseconds->anytime new-ms :instant))))
+
 
 (defn ->seconds
   [datetime]
@@ -129,35 +152,26 @@
   (-> datetime ->local-date Year/from))
 
 
-;; (defmacro milliseconds-in [chrono-unit]
-;;   (let [chron-unit-string (clojure.string/join "" (drop-last (name chrono-unit)))
-;;         milliseconds-in-* (str "dtdt/milliseconds-in-" chron-unit-string)]
-;;     (symbol milliseconds-in-*)))
-
-(defn milliseconds-in [chrono-unit]
-  (case chrono-unit
-    :seconds
-    dtdt/milliseconds-in-second
-    :minutes
-    dtdt/milliseconds-in-minute
-    :hours
-    dtdt/milliseconds-in-hour))
-
-(defn ->every
-  [x-seconds chrono-unit-kw datetime]
-  (let [ms-in (milliseconds-in chrono-unit-kw)
-        ms (-> datetime anytime->milliseconds)
-        divisor (* x-seconds ms-in)
-        remainder (mod ms divisor)
-        new-ms (- ms remainder)]
-    (milliseconds->anytime new-ms :instant)))
-
-
 (comment
   (milliseconds-in :seconds)
 
 
-  (->every 5 :seconds "1970-01-01T00:00:07Z")
+  (->every 5 :seconds)
+
+  (def ->my-second (->every 1 :seconds))
+
+
+  (->seconds #time/date "1970-01-01")
+;; => #time/instant "1970-01-01T00:00:00Z"
+  (->my-second #time/date "1970-01-01")
+;; => #time/instant "1970-01-01T00:00:00Z"
+
+  (defn compute-with-time-measurement [f]
+    (let [start-time (dtdt/instant)
+          result (f)
+          end-time (dtdt/instant)]
+      {:result result
+      :duration (dtdt/between start-time end-time :milliseconds)}))
 
   )
 
