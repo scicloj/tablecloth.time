@@ -13,10 +13,9 @@
                                     [:values (map #(* 10 %) (take count (range)))]])
                (index-by :idx))
         rw (rolling-window ds :idx len)]
-    
+
     (testing "compare dataset sizes"
       (is (= (tablecloth/row-count rw) count)))))
-
 
 (deftest rolling-window-time-index-properties "rolling window dataset validations of time based indices"
   (let [len 3

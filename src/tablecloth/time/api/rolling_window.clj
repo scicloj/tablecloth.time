@@ -27,7 +27,6 @@
   (fn [loc]
     [(max 0 (+ (- loc len) 1)) loc]))
 
-
 (defn- rw-index-values
   "column values at rolling window left/right loc(s)"
   [ds column-name]
@@ -36,15 +35,13 @@
           column (tablecloth/column ds column-name)]
       [(nth column left) (nth column right)])))
 
-
 (defn- rw-indices
   "rolling-window left/right indices for a dataset"
   [ds column-name len]
   (let [count (tablecloth/row-count ds)
         indices (take count (range))]
     (->> (map (rw-index len) indices)
-        (map (rw-index-values ds column-name)))))
-
+         (map (rw-index-values ds column-name)))))
 
 (defn- rw-slice
   "slice (set of row indices from dataset) for a rolling-window"
@@ -56,6 +53,8 @@
 
 
 ;; for symmetry. slice (row) and slices (dataset)
+
+
 (defn- rw-slices
   "slices for a dataset"
   [ds indices]
@@ -63,6 +62,8 @@
 
 
 ;; utility
+
+
 (defn- ->ordered-map
   "creates an ordered map {k, v} from ordered inputs [k] [v])"
   [k v]
@@ -71,7 +72,6 @@
     (doseq [[ke ve] kv]
       (.put ^Map om ke ve))
     om))
-
 
 (defn- rw-map
   "maps row location to row indices of it's rolling-window.
@@ -84,6 +84,8 @@
 
 
 ;; support alternate approaches to build grouped datasets for rolling-window
+
+
 (defn rolling-window
   "rolling-window dataset"
   [ds column-name len]
