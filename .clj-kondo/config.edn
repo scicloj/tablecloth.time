@@ -1,3 +1,4 @@
 {:linters
- {:unresolved-var {:level :off} ;; set b/c seems to be triggered by fns exported with tech.datatype.export-symbols/export-symbols fn.
+ {:unresolved-var {:level :info} ;; set b/c seems to be triggered by fns exported with tech.datatype.export-symbols/export-symbols fn.
+  :unresolved-symbol {:level :info}
   }}
