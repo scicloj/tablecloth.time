@@ -8,7 +8,6 @@
                  [scicloj/tablecloth "5.04"]
                  [tick "0.4.27-alpha"]
                  [org.threeten/threeten-extra "1.5.0"]]
-
   :profiles
   {:dev {:dependencies [[scicloj/notespace "3-beta3"]
                         [aerial.hanami "0.12.4"]
@@ -20,4 +19,4 @@
          :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
                    "lint" ["do"
                            ["cljfmt" "check"]
-                           ["run" "-m" "clj-kondo.main" "--lint" "src"]]}}})
+                           ["run" "-m" "clj-kondo.main" "--lint" "src:test"]]}}})

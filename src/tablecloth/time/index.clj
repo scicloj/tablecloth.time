@@ -1,6 +1,6 @@
 (ns tablecloth.time.index
   (:import java.util.TreeMap)
-  (:require [tablecloth.api :as tablecloth]))
+  (:require [tablecloth.api :refer [select-rows rows]]))
 
 (set! *warn-on-reflection* true)
 
@@ -15,7 +15,7 @@
 (defn make-index
   "Returns an index for `dataset` based on the specified `index-column-key`."
   [dataset index-column-key]
-  (let [row-maps (-> dataset (tablecloth/rows :as-maps))
+  (let [row-maps (-> dataset (rows :as-maps))
         idx-map (->> row-maps
                      (map-indexed (fn [row-number row-map]
                                     [(index-column-key row-map) row-number]))
@@ -30,15 +30,14 @@
   - result-type - return results as dataset (`:as-dataset`, default) or a row of indexes (`:as-indexes`). "
   ([dataset from to] (slice-index dataset from to nil))
   ([dataset from to {:keys [result-type]
-                     :or {result-type :as-dataset}
-                     :as options}]
+                     :or {result-type :as-dataset}}]
    (let [^TreeMap index (get-index-meta dataset)
          row-numbers (if (not index)
                        (throw (Exception. "Dataset has no index specified."))
                        (-> index (.subMap from true to true) (.values)))]
      (condp = result-type
        :as-indexes row-numbers
-       (tablecloth/select-rows dataset row-numbers)))))
+       (select-rows dataset row-numbers)))))
 
 (defn index-by
   "Returns a dataset with an index attached as metadata."
