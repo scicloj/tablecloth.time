@@ -30,8 +30,7 @@
   - result-type - return results as dataset (`:as-dataset`, default) or a row of indexes (`:as-indexes`). "
   ([dataset from to] (slice-index dataset from to nil))
   ([dataset from to {:keys [result-type]
-                     :or {result-type :as-dataset}
-                     :as options}]
+                     :or {result-type :as-dataset}}]
    (let [^TreeMap index (get-index-meta dataset)
          row-numbers (if (not index)
                        (throw (Exception. "Dataset has no index specified."))
