@@ -1,9 +1,6 @@
 (ns tablecloth.time.api.adjust-interval
-  (:import [org.threeten.extra YearQuarter YearWeek]
-           [java.time LocalDate Year YearMonth])
   (:require [tech.v3.datatype :refer [emap elemwise-datatype]]
             [tech.v3.datatype.datetime :as dtdt]
-            [tech.v3.dataset :as tech-dataset]
             [tablecloth.api :as tablecloth]
             [tablecloth.time.api.conversion :as convert]))
 
