@@ -1,9 +1,10 @@
 (ns tablecloth.time.api.slice-test
-  (:require [tablecloth.api :refer [dataset columns column-names]]
+  (:require [tablecloth.api :refer [dataset]]
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.api :refer [slice]]
             [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
-            [clojure.test :refer [deftest is are]]))
+            [clojure.test :refer [deftest is are]]
+            [time-literals.data-readers]))
 
 ;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
 
