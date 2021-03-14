@@ -2,8 +2,7 @@
   (:require [tablecloth.api :as tablecloth]
             [tablecloth.time.index :refer [index-by]]
             [tablecloth.time.api.rolling-window :refer [rolling-window]]
-            [clojure.test :refer [deftest testing is]]
-            [midje.sweet :as sweet]))
+            [clojure.test :refer [deftest testing is]]))
 
 ;; TODO: add tests to validate specific row level behaviors
 

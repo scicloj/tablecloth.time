@@ -1,8 +1,8 @@
 (ns tablecloth.time.api.rolling-window
+  (:import [java.util Map LinkedHashMap])
   (:require [tablecloth.api :as tablecloth]
             [tablecloth.time.api :refer [slice]]))
-(import java.util.Map)
-(import java.util.LinkedHashMap)
+
 
 ;; A rolling-window for a row is defined by it's length, and maps to a set of rows preceding it
 ;; We use a grouped dataset, which is a dataset of datasets, to hold the rows of a rolling-window
@@ -73,7 +73,7 @@
     om))
 
 
-(defn- instructions
+(defn- rw-map
   "maps row location to row indices of it's rolling-window.
    it is used as an input to group-by to create a grouped dataset"
   [ds column-name len]
@@ -87,6 +87,6 @@
 (defn rolling-window
   "rolling-window dataset"
   [ds column-name len]
-  (tablecloth/group-by ds (instructions ds column-name len)))
+  (tablecloth/group-by ds (rw-map ds column-name len)))
 
 

@@ -4,7 +4,7 @@
   :license {:name "The MIT Licence"
             :url "https://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.10.2"]
-                 [scicloj/tablecloth "5.00-beta-28"]
+                 [scicloj/tablecloth "5.04"]
                  [tick "0.4.27-alpha"]
                  [scicloj/notespace "3-alpha3-SNAPSHOT"]
                  [aerial.hanami "0.12.4"]]
