@@ -82,33 +82,37 @@
 
 (defn milliseconds-in [chrono-unit]
   (case chrono-unit
+    :milliseconds
+    1
     :seconds
     dtdt/milliseconds-in-second
     :minutes
     dtdt/milliseconds-in-minute
     :hours
-    dtdt/milliseconds-in-hour))
+    dtdt/milliseconds-in-hour
+    :days
+    dtdt/milliseconds-in-day
+    :weeks
+    dtdt/milliseconds-in-week
+    ;;default
+    (throw (Exception. (str "Can't determine milliseconds in: " chrono-unit)))))
 
 (defn round-down-to-nearest
   ([interval chrono-unit]
    (partial round-down-to-nearest interval chrono-unit))
   ([interval chrono-unit datetime]
    (let [millis  (anytime->milliseconds datetime)
-         divisor (* interval (milliseconds-in chrono-unit))]
-     (milliseconds->anytime (- millis (mod millis divisor))))))
+         divisor (* interval (milliseconds-in chrono-unit))
+         rounded-millis (- millis (mod millis divisor))
+         datetime-type (dt/elemwise-datatype datetime)]
+     (milliseconds->anytime rounded-millis datetime-type))))
 
-;; (defn ->every
-;;   ([interval chrono-unit]
-;;    (partial ->every interval chrono-unit))
-;;   ([interval chrono-unit-kw datetime]
-;;    (let [ms-in-chrono-unit (milliseconds-in chrono-unit-kw)
-;;          datetime-in-ms (-> datetime anytime->milliseconds)
-;;          divisor (* interval ms-in)
-;;          remainder (mod ms divisor)
-;;          new-ms (- ms remainder)]
-;;      ()
-;;      (milliseconds->anytime new-ms :instant))))
-
+;; alias for round-down-to-nearest
+(defn ->every
+  ([interval chrono-unit]
+   (partial round-down-to-nearest interval chrono-unit))
+  ([interval chrono-unit datetime]
+   (round-down-to-nearest interval chrono-unit datetime)))
 
 (defn ->seconds
   [datetime]

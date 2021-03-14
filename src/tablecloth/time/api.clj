@@ -7,3 +7,6 @@
 
 (exporter/export-symbols tablecloth.time.api.adjust-interval
                          adjust-interval)
+
+(exporter/export-symbols tablecloth.time.api.conversion
+                         round-down-to-nearest)
