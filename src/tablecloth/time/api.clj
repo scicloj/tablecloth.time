@@ -17,4 +17,5 @@
                          ->days
                          ->weeks-end
                          ->months-end
+                         ->quarters-end
                          ->years-end)

@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [testing deftest is function?]]
             [tablecloth.time.api :refer [down-to-nearest ->seconds
                                          ->minutes ->hours ->days ->weeks-end
-                                         ->months-end ->years-end]]))
+                                         ->months-end ->quarters-end ->years-end]]))
 
 (deftest test-down-to-nearest
   (testing "returns partial fn if datetime not provided"
@@ -43,6 +43,10 @@
 (deftest test->months-end
   (is (= #time/date "1970-01-31"
          (->months-end #time/date "1970-01-01"))))
+
+(deftest test->quarters-end
+  (is (= #time/date "1970-03-31"
+         (->quarters-end #time/date "1970-01-01"))))
 
 (deftest test->years-end
   (is (= #time/date "1970-12-31"
