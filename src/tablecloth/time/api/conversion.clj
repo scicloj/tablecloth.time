@@ -1,5 +1,5 @@
 (ns tablecloth.time.api.conversion
-  (:import [java.time Year YearMonth]
+  (:import [java.time Year]
            [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
@@ -133,11 +133,12 @@
   [datetime]
   (-> datetime ->local-date))
 
-;; (defn ->weeks
-;;   [datetime]
-;;   ->local-date-time
-;;   YearWeek/from
-;;   (.atDay java.time.DayOfWeek/SUNDAY))
+(defn ->weeks
+  [datetime]
+  (-> datetime
+      ->local-date-time
+      YearWeek/from
+      (.atDay java.time.DayOfWeek/SUNDAY)))
 
 (defn ->months
   [datetime]
@@ -153,30 +154,5 @@
 
 (defn ->years
   [datetime]
-  (-> datetime ->local-date Year/from))
-
-
-(comment
-  (milliseconds-in :seconds)
-
-
-  (->every 5 :seconds)
-
-  (def ->my-second (->every 1 :seconds))
-
-
-  (->seconds #time/date "1970-01-01")
-;; => #time/instant "1970-01-01T00:00:00Z"
-  (->my-second #time/date "1970-01-01")
-;; => #time/instant "1970-01-01T00:00:00Z"
-
-  (defn compute-with-time-measurement [f]
-    (let [start-time (dtdt/instant)
-          result (f)
-          end-time (dtdt/instant)]
-      {:result result
-      :duration (dtdt/between start-time end-time :milliseconds)}))
-
-  )
-
-
+  (let [^java.time.LocalDate localDate (-> datetime ->local-date )]
+    (.with localDate (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
