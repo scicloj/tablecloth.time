@@ -10,6 +10,7 @@
 
 (exporter/export-symbols tablecloth.time.api.conversion
                          down-to-nearest
+                         ->every
                          ->seconds
                          ->minutes
                          ->hours
