@@ -1,8 +1,8 @@
-(ns tablecloth.time.api.conversion-test
+(ns tablecloth.time.api.converters-test
   (:require [clojure.test :refer [testing deftest is function? are]]
-            [tablecloth.time.api.conversion :refer [down-to-nearest ->seconds
-                                                    ->minutes ->hours ->days ->weeks
-                                                    ->months ->years]]))
+            [tablecloth.time.api :refer [down-to-nearest ->seconds
+                                         ->minutes ->hours ->days ->weeks
+                                         ->months ->years]]))
 
 (deftest test-down-to-nearest
   (testing "returns partial fn if datetime not provided"

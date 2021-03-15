@@ -1,7 +1,7 @@
 (ns tablecloth.time.api.adjust-interval-test
   (:require [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
             [tablecloth.api :as tablecloth]
-            [tablecloth.time.api.conversion :as converters]
+            [tablecloth.time.api.converters :as converters]
             [tablecloth.time.api :refer [adjust-interval]]
             [midje.sweet :refer [fact contains]]
             [clojure.test :refer [testing deftest is]]))

@@ -1,4 +1,4 @@
-(ns tablecloth.time.api.conversion
+(ns tablecloth.time.api.converters
   (:import [java.time Year]
            [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
