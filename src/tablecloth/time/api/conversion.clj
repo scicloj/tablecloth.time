@@ -99,7 +99,7 @@
 
 (defn down-to-nearest
   ([interval chrono-unit]
-   (partial round-down-to-nearest interval chrono-unit))
+   (partial down-to-nearest interval chrono-unit))
   ([interval chrono-unit datetime]
    (let [millis  (anytime->milliseconds datetime)
          divisor (* interval (milliseconds-in chrono-unit))
