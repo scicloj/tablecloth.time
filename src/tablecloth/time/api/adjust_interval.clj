@@ -3,7 +3,10 @@
             [tablecloth.api :as tablecloth]))
 
 (defn adjust-interval
-  "Change the time index frequency."
+  "Adjusts the interval of the dataset by adding a new column `new-column-name`
+  whose values are the result of applying `time-converter` to the column specified
+  by `index-column-name`, and then performing a `group-by` operation on that column
+  and any columns specified by `keys`."
   [dataset index-column-name keys time-converter new-column-name]
   (let [index-column (index-column-name dataset)
         target-datatype (-> index-column first time-converter elemwise-datatype)
