@@ -43,17 +43,19 @@
        :year
        (year->milliseconds-since-epoch datetime)
        ;; default
-       (dtdt/datetime->milliseconds datetime)))))
+       (dtdt/datetime->milliseconds timezone datetime)))))
 
 (defn milliseconds->anytime
   "Convert milliseconds to any time unit as specified by `datetime-type`."
-  [millis datetime-type]
-  (case datetime-type
-    :year
-    (milliseconds-since-epoch->year millis)
-    ;; default - for cases not specified explicilty above
-    ;;           tech.datatype.datetime offers support
-    (dtdt/milliseconds->datetime datetime-type millis)))
+  ([millis datetime-type]
+   (milliseconds->anytime millis datetime-type (dtdt/utc-zone-id)))
+  ([millis datetime-type timezone]
+   (case datetime-type
+     :year
+     (milliseconds-since-epoch->year millis timezone)
+     ;; default - for cases not specified explicilty above
+     ;;           tech.datatype.datetime offers support
+     (dtdt/milliseconds->datetime datetime-type timezone millis))))
 
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
 (add-object-datatype! :year java.time.Year true)
