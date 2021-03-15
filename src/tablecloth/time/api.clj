@@ -15,6 +15,6 @@
                          ->minutes
                          ->hours
                          ->days
-                         ->weeks
-                         ->months
-                         ->years)
+                         ->weeks-end
+                         ->months-end
+                         ->years-end)

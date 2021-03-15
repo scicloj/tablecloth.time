@@ -135,26 +135,26 @@
   [datetime]
   (-> datetime ->local-date))
 
-(defn ->weeks
+(defn ->weeks-end
   [datetime]
   (-> datetime
       ->local-date-time
       YearWeek/from
       (.atDay java.time.DayOfWeek/SUNDAY)))
 
-(defn ->months
+(defn ->months-end
   [datetime]
   (let [^java.time.LocalDate local-date (->local-date datetime)]
     (.with local-date (java.time.temporal.TemporalAdjusters/lastDayOfMonth))))
 
-(defn ->quarters
+(defn ->quarters-end
   [datetime]
   (-> datetime
       ->local-date-time
       YearQuarter/from
       .atEndOfQuarter))
 
-(defn ->years
+(defn ->years-end
   [datetime]
   (let [^java.time.LocalDate localDate (-> datetime ->local-date)]
     (.with localDate (java.time.temporal.TemporalAdjusters/lastDayOfYear))))

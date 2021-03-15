@@ -1,8 +1,8 @@
 (ns tablecloth.time.api.converters-test
   (:require [clojure.test :refer [testing deftest is function?]]
             [tablecloth.time.api :refer [down-to-nearest ->seconds
-                                         ->minutes ->hours ->days ->weeks
-                                         ->months ->years]]))
+                                         ->minutes ->hours ->days ->weeks-end
+                                         ->months-end ->years-end]]))
 
 (deftest test-down-to-nearest
   (testing "returns partial fn if datetime not provided"
@@ -36,15 +36,15 @@
   (is (= #time/date "1970-01-01"
          (->days #time/instant "1970-01-01T01:00:00.100Z"))))
 
-(deftest test->weeks
+(deftest test->weeks-end
   (is (= #time/date "1970-01-04"
-         (->weeks #time/instant "1970-01-01T00:00:00.000Z"))))
+         (->weeks-end #time/instant "1970-01-01T00:00:00.000Z"))))
 
-(deftest test->months
+(deftest test->months-end
   (is (= #time/date "1970-01-31"
-         (->months #time/date "1970-01-01"))))
+         (->months-end #time/date "1970-01-01"))))
 
-(deftest test->years
+(deftest test->years-end
   (is (= #time/date "1970-12-31"
-         (->years #time/date "1970-01-01"))))
+         (->years-end #time/date "1970-01-01"))))
 
