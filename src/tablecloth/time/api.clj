@@ -9,4 +9,11 @@
                          adjust-interval)
 
 (exporter/export-symbols tablecloth.time.api.conversion
-                         round-down-to-nearest)
+                         down-to-nearest
+                         ->seconds
+                         ->minutes
+                         ->hours
+                         ->days
+                         ->weeks
+                         ->months
+                         ->years)
