@@ -1,6 +1,5 @@
 (ns tablecloth.time.api.adjust-interval
   (:require [tech.v3.datatype :refer [emap elemwise-datatype]]
-            [tech.v3.datatype.datetime :as dtdt]
             [tablecloth.api :as tablecloth]))
 
 (defn adjust-interval

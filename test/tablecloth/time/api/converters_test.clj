@@ -1,5 +1,5 @@
 (ns tablecloth.time.api.converters-test
-  (:require [clojure.test :refer [testing deftest is function? are]]
+  (:require [clojure.test :refer [testing deftest is function?]]
             [tablecloth.time.api :refer [down-to-nearest ->seconds
                                          ->minutes ->hours ->days ->weeks
                                          ->months ->years]]))
@@ -28,7 +28,7 @@
   (is (= #time/instant "1970-01-01T00:01:00Z"
          (->minutes #time/instant "1970-01-01T00:01:00.000Z"))))
 
-(deftest test->minutes
+(deftest test->hours
   (is (= #time/instant "1970-01-01T01:00:00Z"
          (->hours #time/instant "1970-01-01T01:00:00.100Z"))))
 
