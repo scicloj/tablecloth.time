@@ -97,7 +97,7 @@
     ;;default
     (throw (Exception. (str "Can't determine milliseconds in: " chrono-unit)))))
 
-(defn round-down-to-nearest
+(defn down-to-nearest
   ([interval chrono-unit]
    (partial round-down-to-nearest interval chrono-unit))
   ([interval chrono-unit datetime]
@@ -110,9 +110,9 @@
 ;; alias for round-down-to-nearest
 (defn ->every
   ([interval chrono-unit]
-   (partial round-down-to-nearest interval chrono-unit))
+   (partial down-to-nearest interval chrono-unit))
   ([interval chrono-unit datetime]
-   (round-down-to-nearest interval chrono-unit datetime)))
+   (down-to-nearest interval chrono-unit datetime)))
 
 (defn ->seconds
   [datetime]
