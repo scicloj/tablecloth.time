@@ -18,4 +18,5 @@
                          ->weeks-end
                          ->months-end
                          ->quarters-end
-                         ->years-end)
+                         ->years-end
+                         ->every)
