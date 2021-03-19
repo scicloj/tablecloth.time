@@ -11,4 +11,4 @@ pom.xml.asc
 /.prepl-port
 .hgignore
 .hg/
-.eastwood
+.clj-kondo/.cache
