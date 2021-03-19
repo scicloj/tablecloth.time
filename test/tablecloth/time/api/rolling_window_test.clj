@@ -6,7 +6,8 @@
 
 ;; TODO: add tests to validate specific row level behaviors
 
-(deftest rolling-window-int-index-properties "rolling window dataset validations"
+(deftest rolling-window-int-index-properties
+  "rolling window dataset validations"
   (let [count 10
         len 3
         ds (-> (tablecloth/dataset [[:idx (take count (range))]
@@ -14,10 +15,12 @@
                (index-by :idx))
         rw (rolling-window ds :idx len)]
 
-    (testing "compare dataset sizes"
+    (testing
+     "compare dataset sizes"
       (is (= (tablecloth/row-count rw) count)))))
 
-(deftest rolling-window-time-index-properties "rolling window dataset validations of time based indices"
+(deftest rolling-window-time-index-properties
+  "rolling window dataset validations of time based indices"
   (let [len 3
         ds (-> (tablecloth/dataset {:A [#time/date "1970-01-01"
                                         #time/date "1970-01-02"
@@ -35,5 +38,6 @@
                (index-by :A))
         rw (rolling-window ds :A len)]
 
-    (testing "check dataset size"
+    (testing
+     "check dataset size"
       (is (= (tablecloth/row-count rw) 12)))))
