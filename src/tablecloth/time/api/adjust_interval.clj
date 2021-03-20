@@ -10,7 +10,7 @@
   [dataset index-column-name keys ->new-time-converter new-column-name]
   (let [index-column (index-column-name dataset)
         target-datatype (-> index-column first ->new-time-converter elemwise-datatype)
-        adjusted-column-data (emap time-converter target-datatype index-column)]
+        adjusted-column-data (emap ->new-time-converter target-datatype index-column)]
     (-> dataset
         (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
         (tablecloth/group-by (into [new-column-name] keys)))))
