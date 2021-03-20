@@ -5,11 +5,11 @@
             [tablecloth.time.api :refer [adjust-interval]]
             [clojure.test :refer [testing deftest is]]))
 
-(defn time-series [start-inst n tf]
+(defn time-index [start-inst n tf]
   (plus-temporal-amount start-inst (range n) tf))
 
 (defn get-test-ds [start-time num-rows temporal-unit]
-  (dataset {:idx (time-series start-time num-rows temporal-unit)
+  (dataset {:idx (time-index start-time num-rows temporal-unit)
             :key-a "FOO"
             :key-b "BAR"
             :value (take num-rows (repeatedly #(rand 200)))}))
