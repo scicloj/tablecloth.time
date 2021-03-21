@@ -3,11 +3,12 @@
   :url "http://example.com/FIXME"
   :license {:name "The MIT Licence"
             :url "https://opensource.org/licenses/MIT"}
+
   :dependencies [[org.clojure/clojure "1.10.2"]
                  [scicloj/tablecloth "5.04"]
                  [tick "0.4.27-alpha"]
-                 [scicloj/notespace "3-alpha3-SNAPSHOT"]
-                 [aerial.hanami "0.12.4"]]
+                 [org.threeten/threeten-extra "1.5.0"]]
+
   :profiles
   {:dev {:dependencies [[scicloj/notespace "3-beta3"]
                         [aerial.hanami "0.12.4"]
