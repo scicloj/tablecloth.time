@@ -4,21 +4,17 @@
   :license {:name "The MIT Licence"
             :url "https://opensource.org/licenses/MIT"}
 
-  :dependencies [[org.clojure/clojure "1.10.2"]
-                 [scicloj/tablecloth "5.04"]
-                 [tick "0.4.27-alpha"]
-                 [org.threeten/threeten-extra "1.5.0"]]
+  :plugins [[lein-tools-deps "0.4.5"]]
+  :middleware [lein-tools-deps.plugin/resolve-dependencies-with-deps-edn]
 
-  :profiles
-  {:dev {:dependencies [[scicloj/notespace "3-beta3"]
-                        [aerial.hanami "0.12.4"]
-                        [clj-kondo "2021.03.03"]
-                        [midje/midje "1.9.10"
-                          :exclusions [org.clojure/clojure]]]
-         :plugins [[lein-cljfmt "0.7.0"]
-                   [lein-midje "3.2.1"]]
-         :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
-                   "lint" ["do"
-                           ["cljfmt" "check"]
-                           ["run" "-m" "clj-kondo.main" "--lint" "src:test"]]}}})
+  :lein-tools-deps/config {:config-files [:install :user :project]}
+
+  :profiles {:dev {:lein-tools-deps/config ["deps-dev.edn"]
+                   :plugins [[lein-cljfmt "0.7.0"]
+                             [lein-midje "3.2.1"]]
+                   :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
+                             "lint" ["do"
+                                     ["cljfmt" "check"]
+                                     ["run" "-m" "clj-kondo.main" "--lint" "src:test"]]}}}
+  )
 
