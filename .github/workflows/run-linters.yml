@@ -11,13 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - name: Install clojure tools
-    - uses: DeLaGuardo/setup-clojure@3.2
+      uses: DeLaGuardo/setup-clojure@3.2
       with:
-        cli: 'latest'
-	lein: 'latest'
-    - name: Install dependencies
-    - uses: actions/checkout@v2
-      run: lein deps
-    - name: Run linters
-      run: lein lint
+        cli: "latest"
+	lein: "latest"
