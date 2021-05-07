@@ -1,18 +1,34 @@
-# Sci-Cloj time series exploration
+# tablecloth.time
 
-## Purpose
+> Note: This library is in active development and is not ready for general use.
 
-The sci-cloj group is investigating the available tools in the Clojure scientific computing
-ecosystem for doing time series analysis.
+## Description
 
-We are beginning by doing a bottom-up effort and transliterating the [Python for Data Science
-Handbook](https://jakevdp.github.io/PythonDataScienceHandbook/03.11-working-with-time-series.html)
-to Clojure to see what we are missing.
+This library provides tools for performing time-series analyses. It is built upon
+the foundation of [`scicloj/tablecloth`]() in that:
 
-## Contributing
+* It assumes that in most cases people who use this library will use tablecloth's API
+to manipulate datasets;
+* Its goal is to provide functional tools related specifically to time-series analysis
+that are not covered by tablecloth itself; and
+* Its syntax and vernacular matches that of tablecloth, so that the functional signatures
+of this library should be familiar if you are accustomed to using tablecloth.
 
-To suggest improvements, please create an issue.
-Pull requests are welcome as a form of discussion for enhancing the specification.
+## Development
+
+#### Linting
+
+We use both `cljfmt` and `clj-kondo` to lint our code. To run the linters, do:
+```bash
+> lein lint
+```
+
+#### Tests
+
+To run the tests, do:
+```bash
+> lein test
+```
 
 ## License
 
