@@ -17,7 +17,5 @@ jobs:
     - name: Install clojure tools
       uses: DeLaGuardo/setup-clojure@3.2
       with:
-        # Install just one or all simultaneously
-        cli: 1.10.1.693 # Clojure CLI based on tools.deps
-        lein: 2.9.1     # or use 'latest' to always provision latest version of leiningen
-        boot: 2.8.3     # or use 'latest' to always provision latest version of boot
+        cli: latest
+        lein: latest
