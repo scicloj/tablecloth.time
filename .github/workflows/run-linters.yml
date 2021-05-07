@@ -19,3 +19,6 @@ jobs:
       with:
         cli: latest
         lein: latest
+
+    - name: Leinigen version
+      run: lein -v
