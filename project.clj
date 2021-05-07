@@ -11,7 +11,7 @@
                            :aliases [:dev]}
 
   :profiles {:dev {:aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
-                             "lint" [do
+                             "lint" ["do"
                                      ["cljfmt" "check"]
                                      ["run" "-m" "clj-kondo.main" "--lint" "src:test"]]}
                    :plugins [[lein-midje "3.2.1"]
