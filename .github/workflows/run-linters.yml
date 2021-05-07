@@ -12,6 +12,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@3.2
+      with:
+        cli: latest
+	lein: latest
     - name: Install dependencies
       run: lein deps
     - name: Run linters
