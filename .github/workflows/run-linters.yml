@@ -16,6 +16,3 @@ jobs:
 
     - name: Install clojure tools
       uses: DeLaGuardo/setup-clojure@3.2
-      with:
-        cli: "latest"
-	lein: "latest"
