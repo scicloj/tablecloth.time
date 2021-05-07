@@ -18,3 +18,4 @@ jobs:
       uses: DeLaGuardo/setup-clojure@3.2
       with:
         cli: latest
+	lein: latest
