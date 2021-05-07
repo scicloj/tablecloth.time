@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  run-linters:
 
     runs-on: ubuntu-latest
 
@@ -22,3 +22,9 @@ jobs:
 
     - name: Install dependencies
       run: lein deps
+
+    - name: Leinigen version
+      run: lein -v
+
+    - name: Run linters
+      run: lein lint
