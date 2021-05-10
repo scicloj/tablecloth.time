@@ -1,0 +1,5 @@
+{:deps {scicloj/notespace {:mvn/version "3-beta3"}
+        aerial.hanami     {:mvn/version "0.12.4"}
+        clj-kondo         {:mvn/version "2021.03.03"}
+        midje/midje       {:mvn/version "1.9.10"
+                           :exclusions [org.clojure/clojure]}}}
