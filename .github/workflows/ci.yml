@@ -1,4 +1,4 @@
-name: "Run Linters"
+name: "PR Lint & Test"
 
 on:
   pull_request:
@@ -6,8 +6,7 @@ on:
       - main
 
 jobs:
-  run-linters:
-
+  setup:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,5 +25,16 @@ jobs:
     - name: Leinigen version
       run: lein -v
 
-    - name: Run linters
-      run: lein lint
+  run-lint:
+    needs: setup
+
+    steps:
+      - name: Run Linters
+        run: lein lint
+    
+  run-tests:
+    needs: setup
+
+    steps:
+      - name: Run tests
+        run: lein midje
