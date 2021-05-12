@@ -11,7 +11,7 @@ library. Specifically, that means that:
 to manipulate datasets;
 * It provides functional tools related specifically to time-series analysis
 that are not covered by tablecloth itself; and
-* Its syntax matches tablecloth's, so that the functional signatures
+* Its syntax matches tablecloth's, so that the function signatures
 of this library should be familiar if you are accustomed to tablecloth.
 
 ## Development
