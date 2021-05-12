@@ -1,0 +1,44 @@
+name: Test/Lint Merged
+
+on:
+ pull_request:
+   types: [closed]
+   branches:
+     - main 
+
+jobs:
+  setup:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v2
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.2
+        with:
+          cli: latest
+          lein: latest
+
+      - name: Install dependencies
+        run: lein deps
+
+      - name: Leinigen version
+        run: lein -v
+  
+  run-linters:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Run linters
+        run: lein lint
+
+  run-tests:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Run tests
+        run: lein midje
