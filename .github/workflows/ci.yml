@@ -6,10 +6,19 @@ on:
       - main
 
 jobs:
-  setup:
+  run-linters:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.2
         with:
@@ -22,24 +31,34 @@ jobs:
       - name: Leinigen version
         run: lein -v
 
-  run-lint:
-    needs: setup
-    runs-on: ubuntu-latest
+      - name: Lint!
+        run: lein 
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Run Linters
-        run: lein lint
-    
   run-tests:
-    needs: setup
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run tests
-        run: lein midje
+      - name: Install java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.2
+        with:
+          cli: latest
+          lein: latest
+
+      - name: Install dependencies
+        run: lein deps
+
+      - name: Leinigen version
+        run: lein -v
+
+      - name: Test
+        run: lein test
+
