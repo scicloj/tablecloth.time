@@ -1,4 +1,4 @@
-https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg
+![](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)
 
 ## Description
 
