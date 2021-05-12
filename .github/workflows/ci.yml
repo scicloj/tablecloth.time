@@ -27,6 +27,7 @@ jobs:
 
   run-lint:
     needs: setup
+    runs-on: ubuntu-latest
 
     steps:
       - name: Run Linters
@@ -34,6 +35,7 @@ jobs:
     
   run-tests:
     needs: setup
+    runs-on: ubuntu-latest
 
     steps:
       - name: Run tests
