@@ -15,6 +15,10 @@ that are not covered by tablecloth itself; and
 * Its syntax matches tablecloth's, so that the function signatures
 of this library should be familiar if you are accustomed to tablecloth.
 
+## Usage
+
+TBD
+
 ## Development
 
 This library uses `lein-tools-deps` so we can have a "hybrid" Leinigen/tools.deps
