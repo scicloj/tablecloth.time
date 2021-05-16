@@ -16,11 +16,14 @@ TBD
 
 ## Development
 
-This library uses `lein-tools-deps` so we can have a "hybrid" Leinigen/tools.deps
-setup. That means you can use either `lein` or `clj/clojure`. We chose this hybrid
-setup so that we get the benefits of Leinigen's full suite of build-related tools,
-while also benefitting from the simplicity of tools.deps' approach to dependencies.
-For more context on the differences and trade-offs between the the two, see [this post](https://clojureverse.org/t/is-there-a-sales-pitch-for-switching-to-deps-edn-from-lein-in-2020/5367/5).
+This library uses `lein-tools-deps` so we can have a "hybrid"
+Leinigen/tools.deps setup. That means you can use either `lein` or
+`clj/clojure`. We chose this hybrid setup so that we get the benefits
+of Leinigen's full suite of build-related tools, while also
+benefitting from the simplicity of tools.deps' approach to
+dependencies. For more context on the differences and trade-offs
+between the the two, see [this
+post](https://clojureverse.org/t/is-there-a-sales-pitch-for-switching-to-deps-edn-from-lein-in-2020/5367/5).
 
 #### Linting
 
