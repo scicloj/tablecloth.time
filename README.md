@@ -4,16 +4,11 @@
 
 ## Description
 
-This library provides tools for performing time-series analyses in Clojure. It builds
-on the dataset API provided by the [`tablecloth`](https://github.com/scicloj/tablecloth)
-library. Specifically, that means that:
-
-* It assumes that in most cases people who use this library will use tablecloth's API
-to manipulate datasets;
-* It provides functional tools related specifically to time-series analysis
-that are not covered by tablecloth itself; and
-* Its syntax matches tablecloth's, so that the function signatures
-of this library should be familiar if you are accustomed to tablecloth.
+This library provides a set of functions useful for processing
+time-series data. It is intended to be used with, and mirrors the
+style of, the [`tablecloth`](https://github.com/scicloj/tablecloth)
+library, which provides more fundamental data processing and
+manipulation tools.
 
 ## Usage
 
