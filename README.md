@@ -42,7 +42,14 @@ lein midje
 
 ## Contributing
 
-Development for this project happens in the SciCloj [fundamentals study group](https://scicloj.github.io/pages/web_meetings/#sci-fu_group), a group focused on improving the Cojure datascience ecosystem. We tend to hang out in the [\#sci-fu](https://clojurians.zulipchat.com/#narrow/stream/265544-sci-fu) stream on the Clojurians Zulip, and we meet regularly to coordinate, learn, and solve problems.
+Development for this project happens in the SciCloj [fundamentals
+study
+group](https://scicloj.github.io/pages/web_meetings/#sci-fu_group), a
+group focused on improving the Cojure datascience ecosystem. We tend
+to hang out in the
+[\#sci-fu](https://clojurians.zulipchat.com/#narrow/stream/265544-sci-fu)
+stream on the Clojurians Zulip, and we meet regularly to coordinate,
+learn, and solve problems.
 
 We eagerly invite your participation in this project. The project is currently in an experimental phase and we are approaching its development interactively as a group in a way that is driven by openness and learning. If you are interested, please reach out.
 
