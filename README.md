@@ -4,11 +4,11 @@
 
 ## Description
 
-This library provides a set of functions useful for processing
-time-series data. It is intended to be used with, and mirrors the
-style of, the [`tablecloth`](https://github.com/scicloj/tablecloth)
-library, which provides more fundamental data processing and
-manipulation tools.
+This library offers tools for manipulating and processing time-series
+data. Its API compliments and extends the
+[`tablecloth`](https://github.com/scicloj/tablecloth) library, which
+provides a simplified API for dataset manipulation built on top of
+the highly performant [`tech.ml.dataset`](https://github.com/techascent/tech.ml.dataset).
 
 ## Usage
 
