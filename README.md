@@ -5,10 +5,10 @@
 ## Description
 
 This library offers tools for manipulating and processing time-series
-data. Its API compliments and extends the
-[`tablecloth`](https://github.com/scicloj/tablecloth) library, which
-provides a simplified API for dataset manipulation built on top of
-the highly performant [`tech.ml.dataset`](https://github.com/techascent/tech.ml.dataset).
+data. It compliments and extends the easy-to-use API provided by
+[`tablecloth`](https://github.com/scicloj/tablecloth) for working with
+the highly performant columnar datasets of
+[`tech.ml.dataset`](https://github.com/techascent/tech.ml.dataset).
 
 ## Usage
 
