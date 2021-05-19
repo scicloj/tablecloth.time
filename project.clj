@@ -5,7 +5,7 @@
             :url "https://opensource.org/licenses/MIT"}
 
   :dependencies [[org.clojure/clojure "1.10.2"]
-                 [scicloj/tablecloth "5.04"]
+                 [scicloj/tablecloth "6.00-beta-10"]
                  [tick "0.4.27-alpha"]
                  [org.threeten/threeten-extra "1.5.0"]]
 
