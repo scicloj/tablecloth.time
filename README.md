@@ -16,8 +16,8 @@ TBD
 
 ## Development
 
-We use a Our a "hybrid" Leinigen/tools.deps setup. You can use either
-`lein` or `clj/clojure`. We chose this hybrid setup so that we get the
+We use a "hybrid" Leinigen/tools.deps setup. You can use either `lein`
+or `clj/clojure`. We chose this hybrid setup so that we get the
 benefits of Leinigen's suite of build-related tools, while also
 benefitting from the simplicity of tools.deps' approach to
 dependencies. For more context on the differences and trade-offs
