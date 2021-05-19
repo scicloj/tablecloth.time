@@ -1,6 +1,11 @@
 (ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
-  (:require [tablecloth.time.index :refer [get-index-type slice-index]]))
+  (:require [tablecloth.time.util.indexing-tools :refer [time-columns index-column-object-class
+                                                         index-column-name can-identify-index-column?
+                                                         auto-detect-index-column]]
+            [tablecloth.api :refer [select-rows]]
+            [tech.v3.dataset.column :refer [index-structure]]
+            [tech.v3.dataset.column-index-structure :refer [select-from-index]]))
 
 (set! *warn-on-reflection* true)
 
@@ -66,11 +71,14 @@
   | 1973 |  3 |
   "
   ([dataset from to] (slice dataset from to nil))
-  ([dataset from to options]
+  ([dataset from to {:keys [result-type]
+                     :or {result-type :as-dataset}}]
    (let [build-err-msg (fn [^java.lang.Exception err arg-symbol time-unit]
                          (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
-         time-unit (get-index-type dataset)
+         time-unit (if (can-identify-index-column? dataset)
+                     (index-column-object-class dataset)
+                     (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))) 
          from-key (cond
                     (or (int? from)
                         (instance? java.time.temporal.Temporal from)) from
@@ -90,4 +98,8 @@
        (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
        (not= time-unit (class to-key))
        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
-       :else (slice-index dataset from-key to-key options)))))
+       :else (let [index (-> dataset auto-detect-index-column index-structure)
+                   slice-indexes (select-from-index index :slice {:from from :to to})]
+               (condp = result-type
+                 :as-indexes slice-indexes
+                 (select-rows dataset slice-indexes)))))))
