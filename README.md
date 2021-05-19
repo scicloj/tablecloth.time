@@ -16,10 +16,10 @@ TBD
 
 ## Development
 
-Our development setup is a "hybrid" Leinigen/tools.deps setup. You can
-use either `lein` or `clj/clojure`. We chose this hybrid setup so that
-we get the benefits of Leinigen's suite of build-related tools, while
-also benefitting from the simplicity of tools.deps' approach to
+We use a Our a "hybrid" Leinigen/tools.deps setup. You can use either
+`lein` or `clj/clojure`. We chose this hybrid setup so that we get the
+benefits of Leinigen's suite of build-related tools, while also
+benefitting from the simplicity of tools.deps' approach to
 dependencies. For more context on the differences and trade-offs
 between the the two, see [this
 post](https://clojureverse.org/t/is-there-a-sales-pitch-for-switching-to-deps-edn-from-lein-in-2020/5367/5).
