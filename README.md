@@ -2,7 +2,7 @@
 
 
 [![](https://img.shields.io/clojars/v/scicloj/tablecloth.time)](https://clojars.org/scicloj/tablecloth.time)
-[![](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)]()
+[![build](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml)
 
 
 ## Description
