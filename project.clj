@@ -1,5 +1,5 @@
-(defproject tablecloth.time "0.1.0-SNAPSHOT"
-  :description "Time series manipulation library built on top of tablecloth"
+(defproject tablecloth.time "1.00-alpha1"
+  :description "A time series manipulation library built on top of tablecloth."
   :url "http://example.com/FIXME"
   :license {:name "The MIT Licence"
             :url "https://opensource.org/licenses/MIT"}
