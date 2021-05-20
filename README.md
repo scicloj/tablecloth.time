@@ -1,7 +1,7 @@
 # tablecloth.time
 
 
-[![](https://img.shields.io/clojars/v/scicloj/tablecloth.time)](https://clojars.org/scicloj/tablecloth.time)
+[![](https://img.shields.io/clojars/v/scicloj/tablecloth.time)](https://clojars.org/org.scicloj/tablecloth.time)
 [![build](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml)
 
 
