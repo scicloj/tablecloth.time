@@ -2,7 +2,7 @@
 
 
 [![](https://img.shields.io/clojars/v/scicloj/tablecloth.time)](https://clojars.org/scicloj/tablecloth.time)
-[![](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)]()
+[![build](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml/badge.svg)](https://github.com/scicloj/tablecloth.time/actions/workflows/cd.yml)
 
 
 ## Description
@@ -55,7 +55,7 @@ learn, and solve problems.
 
 We eagerly invite your participation in this project. The project is currently in an experimental phase and we are approaching its development interactively as a group in a way that is driven by openness and learning. If you are interested, please reach out.
 
-Please peruse our this project's [issues](https://github.com/scicloj/tablecloth.time/issues) to get a sense of work that is ongoing for this project.
+Please peruse this project's [issues](https://github.com/scicloj/tablecloth.time/issues) to get a sense of work that is ongoing for this project.
 
 ## License
 

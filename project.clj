@@ -1,6 +1,6 @@
-(defproject tablecloth.time "1.00-alpha1"
+(defproject org.scicloj/tablecloth.time "1.00-alpha1"
   :description "A time series manipulation library built on top of tablecloth."
-  :url "http://example.com/FIXME"
+  :url "https://github.com/scicloj/tablecloth.time"
   :license {:name "The MIT Licence"
             :url "https://opensource.org/licenses/MIT"}
 
