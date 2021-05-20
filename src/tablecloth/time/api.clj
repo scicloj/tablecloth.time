@@ -1,9 +1,11 @@
 (ns tablecloth.time.api
   {:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}}}}
   (:require [tech.v3.datatype.export-symbols :as exporter]
-            [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]))
+            [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]
+            [tablecloth.time.time-types :refer [register-additional-time-datatypes!]]))
 
 (modify-printing-of-time-literals-if-enabled!)
+(register-additional-time-datatypes!)
 
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)

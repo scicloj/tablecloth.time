@@ -1,8 +1,8 @@
 (ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
-  (:require [tablecloth.time.util.indexing-tools :refer [time-columns index-column-object-class
-                                                         index-column-name can-identify-index-column?
-                                                         auto-detect-index-column]]
+  (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-object-class
+                                                          index-column-name can-identify-index-column?
+                                                          auto-detect-index-column]]
             [tablecloth.api :refer [select-rows]]
             [tech.v3.dataset.column :refer [index-structure]]
             [tech.v3.dataset.column-index-structure :refer [select-from-index]]))
@@ -99,7 +99,7 @@
        (not= time-unit (class to-key))
        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
        :else (let [index (-> dataset auto-detect-index-column index-structure)
-                   slice-indexes (select-from-index index :slice {:from from :to to})]
+                   slice-indexes (select-from-index index :slice {:from from-key :to to-key})]
                (condp = result-type
                  :as-indexes slice-indexes
                  (select-rows dataset slice-indexes)))))))

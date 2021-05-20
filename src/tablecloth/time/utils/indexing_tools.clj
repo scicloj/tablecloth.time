@@ -1,5 +1,6 @@
-(ns tablecloth.time.util.indexing-tools
+(ns tablecloth.time.utils.indexing-tools
   (:require [tablecloth.api :refer [columns]]
+            [tablecloth.time.time-types :refer [additional-time-datatypes]]
             [tech.v3.datatype :refer [elemwise-datatype]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.dataset.column :refer [index-structure index-structure-realized?]]
@@ -11,7 +12,8 @@
 
 (def time-datatypes
   (union tech.v3.datatype.datetime.packing/datatypes
-         tech.v3.datatype.datetime.base/datatypes))
+         tech.v3.datatype.datetime.base/datatypes
+         (additional-time-datatypes)))
 
 
 (defn time-datatype? [dtype]

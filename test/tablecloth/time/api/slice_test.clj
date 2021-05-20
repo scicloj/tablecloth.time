@@ -24,17 +24,8 @@
                                     :B (range 11)})
                           (slice (:from arg-map) (:to arg-map))))
     _ {:from "1970-01-01T09:00:00.000Z" :to "1970-01-01T10:00:00.000Z"}
-    ;; _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}
-    ))
+    _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
 
-
-(def ds
-  (dataset {:A (plus-temporal-amount #time/instant "1970-01-01T00:00:00.000Z" (range 11) :hours)
-            :B (range 11)}))
-
-
-(-> ds :A tech.v3.dataset.column/index-structure
-    (tech.v3.dataset.column-index-structure/select-from-index :slice {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
 
 (deftest slice-by-local-datetime
   (are [_ arg-map] (= (dataset {:A [#time/date-time "1970-01-01T09:00"
@@ -42,7 +33,6 @@
                                 :B [9 10]})
                       (-> (dataset {:A (plus-temporal-amount #time/date-time "1970-01-01T00:00" (range 11) :hours)
                                     :B (range 11)})
-                          (index-by :A)
                           (slice (:to arg-map) (:from arg-map))))
     _ {:to "1970-01-01T09:00" :from "1970-01-01T10:00:00"}
     _ {:to #time/date-time "1970-01-01T09:00" :from #time/date-time "1970-01-01T10:00"}))
@@ -54,10 +44,21 @@
                                         #time/year "1977" #time/year "1978"
                                         #time/year "1979" #time/year "1980"]
                                     :B (range 6)})
-                          (index-by :A)
                           (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979" :from "1980"}
     _ {:to #time/year "1979" :from #time/year "1980"}))
+
+
+(def ds (dataset {:A [#time/year "1975" #time/year "1976"
+                      #time/year "1977" #time/year "1978"
+                      #time/year "1979" #time/year "1980"]
+                  :B (range 6)}))
+
+(-> (tablecloth.time.utils.indexing-tools/auto-detect-index-column ds)
+    tech.v3.dataset.column/index-structure
+    type
+    )
+
 
 ;; TODO Fix this. We need to make dtype aware of year-month. This is not done yet.
 ;; (deftest slice-by-year-month
