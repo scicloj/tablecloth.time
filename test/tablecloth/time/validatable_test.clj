@@ -20,6 +20,5 @@
             not))
     (is (-> ds-with-validatable
             (tablecloth/add-or-replace-column :z 9)
-            (validatable/valid? :id1)))))
-
-
+            (validatable/valid? :id1)
+            not))))
