@@ -3,12 +3,12 @@
             [tablecloth.time.time-types :refer [additional-time-datatypes]]
             [tech.v3.datatype :refer [elemwise-datatype]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
+            [tech.v3.datatype.packing :refer [unpack-datatype packed-datatype?]]
             [tech.v3.dataset.column :refer [index-structure index-structure-realized?]]
             [clojure.set :refer [union]]))
 
 
 (tablecloth.time.time-literals/modify-printing-of-time-literals-if-enabled!)
-
 
 (def time-datatypes
   (union tech.v3.datatype.datetime.packing/datatypes
@@ -47,7 +47,10 @@
 
 (defn index-column-object-class [dataset]
   (if-let [col-name (index-column-name dataset)]
-    (datatype->object-class (elemwise-datatype (col-name dataset)))
+    (-> (col-name dataset)
+        elemwise-datatype
+        unpack-datatype
+        datatype->object-class)
     nil))
 
 
