@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.rolling-window-test
   (:require [tablecloth.api :as tablecloth]
-            [tablecloth.time.index :refer [index-by]]
+            [tablecloth.time.utils.indexing-tools :refer [index-by]]
             [tablecloth.time.api.rolling-window :refer [rolling-window]]
             [time-literals.data-readers]
             [clojure.test :refer [deftest testing is]]))
