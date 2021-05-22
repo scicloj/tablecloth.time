@@ -1,18 +1,20 @@
 (ns tablecloth.time.api.slice-test
   (:require [tablecloth.api :refer [dataset]]
-            [tablecloth.time.index :refer [index-by]]
+            [tablecloth.time.utils.indexing-tools :refer [index-by]]
             [tablecloth.time.api :refer [slice]]
             [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
             [clojure.test :refer [deftest is are]]
             [time-literals.data-readers]))
 
-;; (deftest slice-by-long-temporal-field
-;;   (is (= (dataset {:A [2 3]
-;;                    :B [5 6]})
-;;          (-> (dataset {:A (long-temporal-field :day-of-year
-;;                                                (plus-temporal-amount #time/date "1970-01-01" (range 3) :days))
-;;                        :B [4 5 6]})
-;;              (slice 2 3)))))
+(deftest slice-by-int
+  (is (= (dataset {:A [2 3]
+                   :B [5 6]})
+         (-> (dataset {:A (long-temporal-field :day-of-year
+                                               (plus-temporal-amount #time/date "1970-01-01" (range 3) :days))
+                       :B [4 5 6]})
+             (index-by :A)
+             (slice 2 3)))))
+
 
 (deftest slice-by-instant
   (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"

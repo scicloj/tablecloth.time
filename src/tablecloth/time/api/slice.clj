@@ -1,9 +1,10 @@
 (ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
-  (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-object-class
+  (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-datatype 
                                                           index-column-name can-identify-index-column?
-                                                          auto-detect-index-column]]
+                                                          auto-detect-index-column time-datatype?]]
             [tablecloth.api :refer [select-rows]]
+            [tech.v3.datatype :refer [elemwise-datatype]]
             [tech.v3.dataset.column :refer [index-structure]]
             [tech.v3.dataset.column-index-structure :refer [select-from-index]]))
 
@@ -77,26 +78,26 @@
                          (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
          time-unit (if (can-identify-index-column? dataset)
-                     (index-column-object-class dataset)
+                     (index-column-datatype dataset)
                      (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))) 
          from-key (cond
                     (or (int? from)
-                        (instance? java.time.temporal.Temporal from)) from
+                        (time-datatype? from)) from
                     :else (try
                             (parse-datetime-str time-unit from)
                             (catch DateTimeParseException err
                               (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
          to-key (cond
-                  (or (int? from)
-                      (instance? java.time.temporal.Temporal to)) to
+                  (or (int? to)
+                      (time-datatype? from)) to
                   :else (try
                           (parse-datetime-str time-unit to)
                           (catch DateTimeParseException err
-                            (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))]
+                            (throw (Exception. ^java.lang.String (build-err-msg err "to" time-unit))))))]
      (cond
-       (not= time-unit (class from-key))
+       (not= time-unit (elemwise-datatype from-key))
        (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
-       (not= time-unit (class to-key))
+       (not= time-unit (elemwise-datatype to-key))
        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
        :else (let [index (-> dataset auto-detect-index-column index-structure)
                    slice-indexes (select-from-index index :slice {:from from-key :to to-key})]
