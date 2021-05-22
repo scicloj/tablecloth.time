@@ -6,8 +6,6 @@
             [clojure.test :refer [deftest is are]]
             [time-literals.data-readers]))
 
-;; TODO Consider switch tests to use midje: https://github.com/marick/Midje
-
 ;; (deftest slice-by-long-temporal-field
 ;;   (is (= (dataset {:A [2 3]
 ;;                    :B [5 6]})
