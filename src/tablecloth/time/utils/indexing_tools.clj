@@ -1,27 +1,14 @@
 (ns tablecloth.time.utils.indexing-tools
   (:require [tablecloth.api :refer [columns]]
             [tablecloth.time.time-types :refer [additional-time-datatypes]]
-            [tech.v3.datatype :refer [elemwise-datatype]]
+            [tablecloth.time.utils.typing :refer [get-datatype]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype packed-datatype?]]
-            [tech.v3.dataset.column :refer [index-structure index-structure-realized?]]
-            [clojure.set :refer [union]]))
-
-
-(tablecloth.time.time-literals/modify-printing-of-time-literals-if-enabled!)
-
-(def time-datatypes
-  (union tech.v3.datatype.datetime.packing/datatypes
-         tech.v3.datatype.datetime.base/datatypes
-         (additional-time-datatypes)))
-
-
-(defn time-datatype? [dtype]
-  (boolean (dtype time-datatypes)))
+            [tech.v3.dataset.column :refer [index-structure index-structure-realized?]]))
 
 
 (defn time-column? [col]
-  (time-datatype? (elemwise-datatype col)))
+  (time-datatype? (get-datatype col)))
 
 
 (defn time-columns [dataset]
@@ -41,14 +28,14 @@
 
 (defn index-column-datatype [dataset]
   (if-let [col-name (index-column-name dataset)]
-    (elemwise-datatype (col-name dataset))
+    (get-datatype (col-name dataset))
     nil))
 
 
 (defn index-column-object-class [dataset]
   (if-let [col-name (index-column-name dataset)]
     (-> (col-name dataset)
-        elemwise-datatype
+        get-datatype
         unpack-datatype
         datatype->object-class)
     nil))
@@ -69,20 +56,3 @@
   (vary-meta dataset assoc :index index-column-name))
 
 
-(comment
-  (def ds (tbl/dataset {:A [#time/date "2010-01-01"
-                            #time/date "2011-01-01"
-                            #time/date "2012-01-01"]
-                        :B [1 2 3]}))
-
-  (tbl/columns ds)
-  (:A ds)
-  
-  (->> (tbl/drop-columns ds :A)
-       tbl/columns
-       (filter #(-> % elemwise-datatype time-datatype?))
-       first
-       meta
-       :name
-       )
-  )

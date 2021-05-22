@@ -22,9 +22,14 @@
                                 :B [9 10]})
                       (-> (dataset {:A (plus-temporal-amount #time/instant "1970-01-01T00:00:00.000Z" (range 11) :hours)
                                     :B (range 11)})
+
                           (slice (:from arg-map) (:to arg-map))))
     _ {:from "1970-01-01T09:00:00.000Z" :to "1970-01-01T10:00:00.000Z"}
     _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
+
+
+(-> ds
+    (slice "1970-01-01T09:00:00.000Z" "1970-01-01T10:00:00.000Z"))
 
 
 (deftest slice-by-local-datetime

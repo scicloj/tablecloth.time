@@ -3,8 +3,8 @@
   (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-datatype 
                                                           index-column-name can-identify-index-column?
                                                           auto-detect-index-column time-datatype?]]
+            [tablecloth.time.utils.typing :refer [get-datatype]]
             [tablecloth.api :refer [select-rows]]
-            [tech.v3.datatype :refer [elemwise-datatype]]
             [tech.v3.dataset.column :refer [index-structure]]
             [tech.v3.dataset.column-index-structure :refer [select-from-index]]))
 
@@ -15,29 +15,29 @@
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
 
-(defmethod parse-datetime-str java.time.Instant
+(defmethod parse-datetime-str :instant
   [_ date-str]
   (java.time.Instant/parse date-str))
 
-(defmethod parse-datetime-str java.time.ZonedDateTime
-  [_ date-str]
-  (java.time.ZonedDateTime/parse date-str))
+;; (defmethod parse-datetime-str java.time.ZonedDateTime
+;;   [_ date-str]
+;;   (java.time.ZonedDateTime/parse date-str))
 
-(defmethod parse-datetime-str java.time.LocalDate
+(defmethod parse-datetime-str :local-date
   [_ date-str]
   (java.time.LocalDate/parse date-str))
 
-(defmethod parse-datetime-str java.time.LocalDateTime
+(defmethod parse-datetime-str :local-date-time
   [_ date-str]
   (java.time.LocalDateTime/parse date-str))
 
-(defmethod parse-datetime-str java.time.YearMonth
-  [_ date-str]
-  (java.time.YearMonth/parse date-str))
+;; (defmethod parse-datetime-str java.time.YearMonth
+;;   [_ date-str]
+;;   (java.time.YearMonth/parse date-str))
 
-(defmethod parse-datetime-str java.time.Year
-  [_ date-str]
-  (java.time.Year/parse date-str))
+;; (defmethod parse-datetime-str java.time.Year
+;;   [_ date-str]
+;;   (java.time.Year/parse date-str))
 
 (defn slice
   "Returns a subset of dataset's rows (or row indexes) as specified by from and to, inclusively.
@@ -82,22 +82,22 @@
                      (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))) 
          from-key (cond
                     (or (int? from)
-                        (time-datatype? from)) from
+                        (time-datatype? (get-datatype from))) from
                     :else (try
                             (parse-datetime-str time-unit from)
                             (catch DateTimeParseException err
                               (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
          to-key (cond
                   (or (int? to)
-                      (time-datatype? from)) to
+                      (time-datatype? (get-datatype from))) to
                   :else (try
                           (parse-datetime-str time-unit to)
                           (catch DateTimeParseException err
                             (throw (Exception. ^java.lang.String (build-err-msg err "to" time-unit))))))]
      (cond
-       (not= time-unit (elemwise-datatype from-key))
+       (not= time-unit (get-datatype from-key))
        (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
-       (not= time-unit (elemwise-datatype to-key))
+       (not= time-unit (get-datatype to-key))
        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
        :else (let [index (-> dataset auto-detect-index-column index-structure)
                    slice-indexes (select-from-index index :slice {:from from-key :to to-key})]
