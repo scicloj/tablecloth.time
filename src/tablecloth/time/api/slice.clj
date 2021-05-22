@@ -1,7 +1,7 @@
 (ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
-  (:require [tablecloth.time.utils.indexing :refer [time-columns index-column-datatype
-                                                    index-column-name can-identify-index-column?
+  (:require [tablecloth.time.utils.indexing :refer [index-column-datatype
+                                                    can-identify-index-column?
                                                     auto-detect-index-column]]
             [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tablecloth.api :refer [select-rows]]
