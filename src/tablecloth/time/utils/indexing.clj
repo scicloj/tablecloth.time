@@ -1,7 +1,7 @@
-(ns tablecloth.time.utils.indexing-tools
+(ns tablecloth.time.utils.indexing
   (:require [tablecloth.api :refer [columns]]
             [tablecloth.time.time-types :refer [additional-time-datatypes]]
-            [tablecloth.time.utils.typing :refer [get-datatype time-datatype?]]
+            [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype packed-datatype?]]
             [tech.v3.dataset.column :refer [index-structure index-structure-realized?]]))

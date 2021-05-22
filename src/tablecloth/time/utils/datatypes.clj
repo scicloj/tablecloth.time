@@ -1,4 +1,4 @@
-(ns tablecloth.time.utils.typing
+(ns tablecloth.time.utils.datatypes
   (:require [tech.v3.datatype :refer [elemwise-datatype]]
             [clojure.set :refer [union]]))
 
