@@ -2,11 +2,12 @@
   (:import java.time.format.DateTimeParseException)
   (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-datatype 
                                                           index-column-name can-identify-index-column?
-                                                          auto-detect-index-column time-datatype?]]
-            [tablecloth.time.utils.typing :refer [get-datatype]]
+                                                          auto-detect-index-column]]
+            [tablecloth.time.utils.typing :refer [get-datatype time-datatype?]]
             [tablecloth.api :refer [select-rows]]
             [tech.v3.dataset.column :refer [index-structure]]
-            [tech.v3.dataset.column-index-structure :refer [select-from-index]]))
+            [tech.v3.dataset.column-index-structure :refer [select-from-index]]
+            [tech.v3.datatype.packing :refer [unpack-datatype]]))
 
 (set! *warn-on-reflection* true)
 
@@ -78,20 +79,20 @@
                          (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
          time-unit (if (can-identify-index-column? dataset)
-                     (index-column-datatype dataset)
+                     (unpack-datatype (index-column-datatype dataset))
                      (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))) 
          from-key (cond
                     (or (int? from)
                         (time-datatype? (get-datatype from))) from
                     :else (try
-                            (parse-datetime-str time-unit from)
+                            (parse-datetime-str (unpack-datatype time-unit) from)
                             (catch DateTimeParseException err
                               (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
          to-key (cond
                   (or (int? to)
                       (time-datatype? (get-datatype from))) to
                   :else (try
-                          (parse-datetime-str time-unit to)
+                          (parse-datetime-str (unpack-datatype time-unit) to)
                           (catch DateTimeParseException err
                             (throw (Exception. ^java.lang.String (build-err-msg err "to" time-unit))))))]
      (cond

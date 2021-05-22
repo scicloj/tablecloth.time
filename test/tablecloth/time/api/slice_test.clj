@@ -28,10 +28,6 @@
     _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
 
 
-(-> ds
-    (slice "1970-01-01T09:00:00.000Z" "1970-01-01T10:00:00.000Z"))
-
-
 (deftest slice-by-local-datetime
   (are [_ arg-map] (= (dataset {:A [#time/date-time "1970-01-01T09:00"
                                     #time/date-time "1970-01-01T10:00"]
@@ -68,5 +64,3 @@
     (is (instance? tech.v3.dataset.impl.dataset.Dataset
                    (-> ds
                        (slice "1970-01-02" "1970-01-03"))))))
-
-
