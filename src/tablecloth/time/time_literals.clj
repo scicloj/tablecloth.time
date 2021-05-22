@@ -12,6 +12,6 @@
 
 (defmacro modify-printing-of-time-literals-if-enabled! []
   (when *time-literals-printing*
-    '(do 
+    '(do
        (time-literals.read-write/print-time-literals-clj!)
        (time-literals.read-write/print-time-literals-cljs!))))

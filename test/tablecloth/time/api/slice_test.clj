@@ -15,7 +15,6 @@
              (index-by :A)
              (slice 2 3)))))
 
-
 (deftest slice-by-instant
   (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
                                     #time/instant "1970-01-01T10:00:00.000Z"]
@@ -27,7 +26,6 @@
     _ {:from "1970-01-01T09:00:00.000Z" :to "1970-01-01T10:00:00.000Z"}
     _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
 
-
 (deftest slice-by-local-datetime
   (are [_ arg-map] (= (dataset {:A [#time/date-time "1970-01-01T09:00"
                                     #time/date-time "1970-01-01T10:00"]
@@ -38,7 +36,6 @@
     _ {:to "1970-01-01T09:00" :from "1970-01-01T10:00:00"}
     _ {:to #time/date-time "1970-01-01T09:00" :from #time/date-time "1970-01-01T10:00"}))
 
-
 (deftest slice-by-local-date
   (are [_ arg-map] (= (dataset {:A [#time/date "1979-01-01" #time/date "1980-01-01"]
                                 :B [9 10]})
@@ -47,7 +44,6 @@
                           (slice (:to arg-map) (:from arg-map))))
     _ {:to "1979-01-01" :from "1980-01-01"}
     _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
-
 
 (deftest slice-result-types
   (let [ds (dataset {:A [#time/date "1970-01-01"

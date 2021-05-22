@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.slice
   (:import java.time.format.DateTimeParseException)
-  (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-datatype 
+  (:require [tablecloth.time.utils.indexing-tools :refer [time-columns index-column-datatype
                                                           index-column-name can-identify-index-column?
                                                           auto-detect-index-column]]
             [tablecloth.time.utils.typing :refer [get-datatype time-datatype?]]
@@ -80,7 +80,7 @@
                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
          time-unit (if (can-identify-index-column? dataset)
                      (unpack-datatype (index-column-datatype dataset))
-                     (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))) 
+                     (throw (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`.")))
          from-key (cond
                     (or (int? from)
                         (time-datatype? (get-datatype from))) from
