@@ -7,7 +7,9 @@
 (defn time-column? [col]
   (time-datatype? (get-datatype col)))
 
-(defn time-columns [dataset]
+(defn time-columns
+  "Returns a list of columns containing time data, if any."
+  [dataset]
   (filter time-column? (columns dataset)))
 
 (defn index-column-name
@@ -22,12 +24,17 @@
       (-> dataset time-columns first meta :name)
       nil)))
 
-(defn index-column-datatype [dataset]
+(defn index-column-datatype
+  "Returns the datatype of the index column data, if it is known."
+  [dataset]
   (if-let [col-name (index-column-name dataset)]
     (get-datatype (col-name dataset))
     nil))
 
-(defn index-column-object-class [dataset]
+(defn index-column-object-class 
+  "Returns the object class of the index column data, if the index
+  column is known."
+  [dataset]
   (if-let [col-name (index-column-name dataset)]
     (-> (col-name dataset)
         get-datatype
