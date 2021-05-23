@@ -19,4 +19,10 @@
                          ->months-end
                          ->quarters-end
                          ->years-end
-                         ->every)
+                         ->every
+                         ->year
+                         ->year-month)
+
+(exporter/export-symbols tablecloth.time.api.rolling-window
+                         rolling-window)
+

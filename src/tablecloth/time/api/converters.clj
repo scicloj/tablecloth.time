@@ -1,10 +1,13 @@
 (ns tablecloth.time.api.converters
-  (:import [java.time Year]
-           [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
             [tech.v3.datatype.casting :refer [add-object-datatype!]]
-            [tick.alpha.api :as tick]))
+            [tick.alpha.api :as tick])
+
+  (:import [java.time Year]
+           [org.threeten.extra YearWeek YearQuarter]
+           [java.util Locale]
+           [java.time.format TextStyle]))
 
 (set! *warn-on-reflection* true)
 
@@ -158,3 +161,16 @@
   [datetime]
   (let [^java.time.LocalDate localDate (-> datetime ->local-date)]
     (.with localDate (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
+
+(defn ->year
+  [localdate]
+  (.getYear ^java.time.LocalDate localdate))
+
+(defn ->year-month
+  [localdate]
+  (let [yyyy (.getYear ^java.time.LocalDate localdate)
+        mmm (-> (.getMonth ^java.time.LocalDate localdate)
+                (.getDisplayName ^java.time.format.TextStyle TextStyle/SHORT
+                                 (^java.util.Locale Locale/getDefault)))]
+    [yyyy mmm]))
+
