@@ -1,9 +1,8 @@
 (ns tablecloth.time.utils.indexing
   (:require [tablecloth.api :refer [columns]]
-            [tablecloth.time.time-types :refer [additional-time-datatypes]]
             [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
-            [tech.v3.datatype.packing :refer [unpack-datatype packed-datatype?]]))
+            [tech.v3.datatype.packing :refer [unpack-datatype]]))
 
 (defn time-column? [col]
   (time-datatype? (get-datatype col)))

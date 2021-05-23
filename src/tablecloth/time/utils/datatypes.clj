@@ -1,5 +1,7 @@
 (ns tablecloth.time.utils.datatypes
   (:require [tech.v3.datatype :refer [elemwise-datatype]]
+            [tech.v3.datatype.datetime.packing :as datetime-packing]
+            [tech.v3.datatype.datetime.base :as datetime-base]
             [clojure.set :refer [union]]))
 
 (defn get-datatype
@@ -11,8 +13,8 @@
   (elemwise-datatype data))
 
 (def time-datatypes
-  (union tech.v3.datatype.datetime.packing/datatypes
-         tech.v3.datatype.datetime.base/datatypes))
+  (union datetime-packing/datatypes
+         datetime-base/datatypes))
 
 (defn time-datatype? [dtype]
   (boolean (dtype time-datatypes)))
