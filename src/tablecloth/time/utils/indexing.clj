@@ -31,7 +31,7 @@
     (get-datatype (col-name dataset))
     nil))
 
-(defn index-column-object-class 
+(defn index-column-object-class
   "Returns the object class of the index column data, if the index
   column is known."
   [dataset]
