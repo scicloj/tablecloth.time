@@ -16,9 +16,6 @@
   otherwise, if there is a single column that can be identifed as time
   data, that will be the column name."
   [dataset]
-  ;; if meta has index specified, then that is our index
-  ;; if there's only on etime-column, that is our index
-  ;; otherwise we have no index
   (if-let [idx-col-name (:index (meta dataset))]
     idx-col-name
     (if (= 1 (count (time-columns dataset)))
