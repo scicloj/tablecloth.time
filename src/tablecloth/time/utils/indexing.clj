@@ -10,7 +10,12 @@
 (defn time-columns [dataset]
   (filter time-column? (columns dataset)))
 
-(defn index-column-name [dataset]
+(defn index-column-name
+  "Returns the name of the index column or `nil`. If the `:index` meta
+  is set on the column metadata, that is the name of the index;
+  otherwise, if there is a single column that can be identifed as time
+  data, that will be the column name."
+  [dataset]
   ;; if meta has index specified, then that is our index
   ;; if there's only on etime-column, that is our index
   ;; otherwise we have no index
@@ -33,7 +38,10 @@
         datatype->object-class)
     nil))
 
-(defn can-identify-index-column? [dataset]
+(defn can-identify-index-column?
+  "Returns `true` or `false`, can the time index column be identified
+  automatically?"
+  [dataset]
   (boolean (index-column-name dataset)))
 
 (defn auto-detect-index-column [dataset]
@@ -42,7 +50,11 @@
     nil))
 
 (defn index-by
-  "Returns a dataset with an index attached as metadata."
+  "Identifies the column that should be used as the index for the
+  dataset. Useful when functions that use the index to perform their
+  operations, cannot auto-detect the index column. This can happen if
+  there are more than one time-based column; or, if it is not clear
+  that any column contains time data."
   [dataset index-column-name]
   (vary-meta dataset assoc :index index-column-name))
 
