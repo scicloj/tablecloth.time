@@ -26,3 +26,7 @@
                          ->every
                          string->time
                          year-quarter->local-date)
+
+(exporter/export-symbols tablecloth.time.api.rolling-window
+                         rolling-window)
+
