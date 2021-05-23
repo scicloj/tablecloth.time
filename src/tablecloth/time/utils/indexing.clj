@@ -39,7 +39,8 @@
 
 (defn auto-detect-index-column [dataset]
   (if (can-identify-index-column? dataset)
-    ((index-column-name dataset) dataset)))
+    ((index-column-name dataset) dataset)
+    nil))
 
 (defn index-by
   "Returns a dataset with an index attached as metadata."
