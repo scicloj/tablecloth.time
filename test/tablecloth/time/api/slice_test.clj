@@ -53,6 +53,19 @@
     _ {:to "1979-01-01" :from "1980-01-01"}
     _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
 
+
+(deftest slice-index-with-non-unique-values
+  (is (= (dataset {:A [#time/date "1979-01-01"
+                      #time/date "1979-01-01"
+                      #time/date "1980-01-01"]
+                  :B [9 12 10]})
+        (-> (dataset {:A [#time/date "1978-01-01"
+                          #time/date "1979-01-01"
+                          #time/date "1979-01-01"
+                          #time/date "1980-01-01"]
+                      :B [8 9 12 10]})
+            (slice "1979-01-01" "1980-01-01")))))
+
 (deftest slice-result-types
   (let [ds (dataset {:A [#time/date "1970-01-01"
                          #time/date "1970-01-02"
