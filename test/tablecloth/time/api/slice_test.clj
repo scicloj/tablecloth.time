@@ -15,7 +15,6 @@
              (index-by :A)
              (slice 2 3)))))
 
-
 (deftest slice-by-year
   (is (= (dataset {:A [1979 1980]
                    :B [9 10]})
@@ -23,7 +22,6 @@
                        :B (range 11)})
              (index-by :A)
              (slice 1979 1980)))))
-
 
 (deftest slice-by-instant
   (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
