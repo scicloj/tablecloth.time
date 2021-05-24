@@ -11,18 +11,14 @@
 
 (set! *warn-on-reflection* true)
 
-;; TODO Would it be better to do this with a map instead of a mutlimethod?
-
+;; These parsing tools should probably become part of our own
+;; parsing fn.
 (defmulti parse-datetime-str
   (fn [datetime-datatype _] datetime-datatype))
 
 (defmethod parse-datetime-str :instant
   [_ date-str]
   (java.time.Instant/parse date-str))
-
-;; (defmethod parse-datetime-str java.time.ZonedDateTime
-;;   [_ date-str]
-;;   (java.time.ZonedDateTime/parse date-str))
 
 (defmethod parse-datetime-str :local-date
   [_ date-str]
@@ -31,6 +27,16 @@
 (defmethod parse-datetime-str :local-date-time
   [_ date-str]
   (java.time.LocalDateTime/parse date-str))
+
+;; Leaving these around for when we generalize a parsing fn
+;; Commenting out for now b/c we aren't sure about support for
+;; these other types consdering our use of tech.datatype.datetime
+;; that doesn't support these. See this conversation:
+;; https://clojurians.zulipchat.com/#narrow/stream/236259-tech.2Eml.2Edataset.2Edev/topic/extra.20datetime.20types/near/239699398
+
+;; (defmethod parse-datetime-str java.time.ZonedDateTime
+;;   [_ date-str]
+;;   (java.time.ZonedDateTime/parse date-str))
 
 ;; (defmethod parse-datetime-str java.time.YearMonth
 ;;   [_ date-str]
