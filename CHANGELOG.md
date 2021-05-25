@@ -5,20 +5,15 @@ All notable changes to this project will be documented in this file. This change
 ### Changed
 - Add a new arity to `make-widget-async` to provide a different widget shape.
 
-## [0.1.1] - 2020-12-23
+## 1.00-alpha-2 (2021-05-24)
 ### Changed
+- `slice` now uses [tech.ml.dataset](https://github.com/techascent/tech.ml.dataset)'s new index-structure ([PR](https://github.com/techascent/tech.ml.dataset/pull/214))
 - Documentation on how to make the widgets.
 
 ### Removed
-- `make-widget-sync` - we're all async, all the time.
+- `tablecloth.time.index` namespace - not needed anymore
 
-### Fixed
-- Fixed widget maker to keep working when daylight savings switches over.
+## 1.00-alpha1
+- First alpha release
 
-## 0.1.0 - 2020-12-23
-### Added
-- Files from the new template.
-- Widget maker public API - `make-widget-sync`.
-
-[Unreleased]: https://github.com/your-name/tablecloth.time/compare/0.1.1...HEAD
-[0.1.1]: https://github.com/your-name/tablecloth.time/compare/0.1.0...0.1.1
+[Unreleased]: https://github.com/your-name/tablecloth.time/compare/1.00-alpha-2...HEAD
