@@ -1,6 +1,6 @@
 {:deps
  {org.clojure/clojure         {:mvn/version "1.10.2"}
-  scicloj/tablecloth          {:mvn/version "6.00-beta-7"}
+  scicloj/tablecloth          {:mvn/version "6.00-beta-10"}
   tick                        {:mvn/version "0.4.27-alpha"}
   org.threeten/threeten-extra {:mvn/version "1.5.0"}}
  :aliases
