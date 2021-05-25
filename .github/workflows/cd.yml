@@ -34,7 +34,7 @@ jobs:
         run: lein -v
 
       - name: Lint!
-        run: lein 
+        run: lein lint
 
   run-tests:
     if: github.event.action == 'closed' && github.event.pull_request.merged == true
