@@ -57,6 +57,13 @@
      ;;           tech.datatype.datetime offers support
      (dtdt/milliseconds->datetime datetime-type timezone millis))))
 
+(defn convert-time
+  "Convert time to different type as specified by `datetime-type`."
+  [datetime datetime-type]
+  (-> datetime
+      anytime->milliseconds
+      (milliseconds->anytime datetime-type)))
+
 ;; Make tech.v3.datatype.datetime aware of additional java.time classes.
 (add-object-datatype! :year java.time.Year true)
 (add-object-datatype! :year-month java.time.YearMonth true)
