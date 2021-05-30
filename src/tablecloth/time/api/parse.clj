@@ -2,8 +2,7 @@
   (:import [java.time LocalTime Instant OffsetDateTime ZonedDateTime
             LocalDateTime LocalDate])
   (:require [tablecloth.time.protocols.parseable :as parseable-proto]
-            [tablecloth.time.api :refer [convert-time]]
-            [tech.v3.datatype.datetime :as tddt]))
+            [tablecloth.time.api :refer [convert-time]]))
 
 (defn parse-int [x]
   (Integer/parseInt x))
