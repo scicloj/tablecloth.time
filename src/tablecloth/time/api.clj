@@ -5,6 +5,9 @@
 
 (modify-printing-of-time-literals-if-enabled!)
 
+(exporter/export-symbols tablecloth.time.api.parse
+                         string->time)
+
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
