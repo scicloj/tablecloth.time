@@ -35,9 +35,9 @@
       )))
 
 (defn string->time
-  "Given an identifiable time string or a datetime, returns the correct
-  datetime object. Optionally, you can specify a target type to also
-  convert to a different type in one step.
+  "Given an identifiable time, returns the correct datetime object.
+  Optionally, you can specify a target type to also convert to a
+  different type in one step.
 
   TODO: How do we define what an 'identifiable' string means?"
   ([str]
