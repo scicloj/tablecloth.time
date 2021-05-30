@@ -2,6 +2,7 @@
   (:import [java.time LocalTime Instant OffsetDateTime ZonedDateTime
                       LocalDateTime LocalDate])
   (:require [tablecloth.time.protocols.parseable :as parseable-proto]
+            [tablecloth.time.api :refer [convert-time]]
             [tech.v3.datatype.datetime :as tddt]))
 
 (defn parse-int [x]
@@ -35,10 +36,12 @@
       )))
 
 (defn string->time
-  "Given a string or a datetime, returns the correct
-  datetime object, otherwise nil if it cannot determine
-  the correct time."
-  [str-or-datetime]
-  (if (string? str-or-datetime)
-    (parseable-proto/parse str-or-datetime)
-    str-or-datetime))
+  "Given an identifiable time string or a datetime, returns the correct
+  datetime object. Optionally, you can specify a target type to also
+  convert to a different type in one step.
+
+  TODO: How do we define what an 'identifiable' string means?"
+  ([str]
+   (parseable-proto/parse str))
+  ([str datetime-type]
+   (convert-time (parseable-proto/parse str) datetime-type)))
