@@ -57,7 +57,7 @@
      ;;           tech.datatype.datetime offers support
      (dtdt/milliseconds->datetime datetime-type timezone millis))))
 
-(defn convert-time
+(defn convert-to
   "Convert time to different type as specified by `datetime-type`."
   [datetime datetime-type]
   (-> datetime

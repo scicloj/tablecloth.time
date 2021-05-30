@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.converters-test
   (:require [clojure.test :refer [testing deftest is function?]]
-            [tablecloth.time.api :refer [down-to-nearest ->seconds convert-time
+            [tablecloth.time.api :refer [down-to-nearest ->seconds convert-to
                                          ->minutes ->hours ->days ->weeks-end
                                          ->months-end ->quarters-end ->years-end]]))
 
@@ -52,9 +52,9 @@
   (is (= #time/date "1970-12-31"
          (->years-end #time/date "1970-01-01"))))
 
-(deftest test-convert-time
+(deftest test-convert-to
   (is (= #time/date "1970-01-01"
-         (convert-time #time/instant "1970-01-01T00:00:00Z" :local-date)))
+         (convert-to #time/instant "1970-01-01T00:00:00Z" :local-date)))
   (is (= #time/instant "1970-01-01T00:00:00Z"
-         (convert-time #time/date "1970-01-01" :instant))))
+         (convert-to #time/date "1970-01-01" :instant))))
 

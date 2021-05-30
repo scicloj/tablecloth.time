@@ -15,7 +15,7 @@
                          adjust-interval)
 
 (exporter/export-symbols tablecloth.time.api.converters
-                         convert-time
+                         convert-to
                          down-to-nearest
                          ->every
                          ->seconds
