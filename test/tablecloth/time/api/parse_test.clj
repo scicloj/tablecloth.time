@@ -1,4 +1,4 @@
-(ns tablecloth.time.api.string->time-test
+(ns tablecloth.time.api.parse-test
   (:require [tablecloth.time.api :refer [string->time]]
             [clojure.test :refer [deftest is]]))
 
