@@ -12,6 +12,7 @@
                          adjust-interval)
 
 (exporter/export-symbols tablecloth.time.api.converters
+                         convert-to
                          down-to-nearest
                          ->every
                          ->seconds
@@ -22,4 +23,5 @@
                          ->months-end
                          ->quarters-end
                          ->years-end
-                         ->every)
+                         ->every
+                         string->time)
