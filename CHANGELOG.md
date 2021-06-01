@@ -11,11 +11,11 @@ All notable changes to this project will be documented in this file. This change
 - `convert-to` method that can convert one time to another.
 
 ## Changed
-- [time-literals](https://github.com/henryw374/time-literals) as a
+- [time-literals](https://github.com/henryw374/time-literals) added as a
   dependency.
 
 ### Removed
-- [tick](https://github.com/juxt/tick) as a dependency
+- [tick](https://github.com/juxt/tick) removed as a dependency
 
 ## 1.00-alpha-2 (2021-05-24)
 ### Changed
