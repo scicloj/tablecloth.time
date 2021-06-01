@@ -5,9 +5,6 @@
 
 (modify-printing-of-time-literals-if-enabled!)
 
-(exporter/export-symbols tablecloth.time.api.parse
-                         string->time)
-
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
@@ -26,4 +23,5 @@
                          ->months-end
                          ->quarters-end
                          ->years-end
-                         ->every)
+                         ->every
+                         string->time)

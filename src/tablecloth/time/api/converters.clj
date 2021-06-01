@@ -1,10 +1,10 @@
 (ns tablecloth.time.api.converters
-  (:import [java.time Year]
+  (:import [java.time Year YearMonth]
            [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
-            [tech.v3.datatype.casting :refer [add-object-datatype!]]
-            [tick.alpha.api :as tick]))
+            [tablecloth.time.protocols.parseable :as parseable-proto]
+            [tech.v3.datatype.casting :refer [add-object-datatype!]]))
 
 (set! *warn-on-reflection* true)
 
@@ -30,13 +30,22 @@
    (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
        (.getYear))))
 
+(defn string->time
+  "Given an identifiable time, returns the correct datetime object.
+  Optionally, you can specify a target type to also convert to a
+  different type in one step.
+
+  TODO: How do we define what an 'identifiable' string means?"
+  [str]
+  (parseable-proto/parse str))
+
 (defn anytime->milliseconds
   "Converts any time unit type to milliseconds."
   ([str-or-datetime]
    (anytime->milliseconds str-or-datetime (dtdt/utc-zone-id)))
   ([str-or-datetime timezone]
    (let [datetime (if (string? str-or-datetime)
-                    (tick/parse str-or-datetime)
+                    (string->time str-or-datetime)
                     str-or-datetime)
          datetime-type (tech.v3.datatype/elemwise-datatype datetime)]
      (case datetime-type
@@ -165,3 +174,4 @@
   [datetime]
   (let [^java.time.LocalDate localDate (-> datetime ->local-date)]
     (.with localDate (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
+
