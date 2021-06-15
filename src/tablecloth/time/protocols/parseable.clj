@@ -1,6 +1,7 @@
 (ns tablecloth.time.protocols.parseable
   (:import [java.time LocalTime Instant OffsetDateTime ZonedDateTime
-            LocalDateTime LocalDate Year YearMonth]))
+            LocalDateTime LocalDate Year YearMonth]
+           [org.threeten.extra YearQuarter]))
 
 (defprotocol Parseable
   (parse [str] "Parse string to datetime."))
@@ -30,6 +31,8 @@
       :>> (fn [s] (LocalDate/parse s))
       #"\d{4}-\d{2}"
       :>> (fn [s] (YearMonth/parse s))
+      #"\d{4}-Q\d{1}"
+      :>> (fn [s] (YearQuarter/parse s))
       #"\d{4}"
       :>> (fn [s] (Year/parse s))
       (throw (ex-info "Unparseable time string" {:input str})))))
