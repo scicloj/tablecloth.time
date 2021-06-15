@@ -14,7 +14,8 @@
 
 (def time-datatypes
   (union datetime-packing/datatypes
-         datetime-base/datatypes))
+         datetime-base/datatypes
+         #{:year-quarter}))
 
 (defn time-datatype? [dtype]
   (boolean (dtype time-datatypes)))

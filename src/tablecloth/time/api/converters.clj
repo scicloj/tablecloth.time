@@ -30,6 +30,21 @@
    (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
        (.getYear))))
 
+(defn year-quarter->local-date [^YearQuarter year-quarter]
+  (.atDay year-quarter 1))
+
+(defn year-quarter->milliseconds-since-epoch [^YearQuarter year-quarter]
+  (-> year-quarter year-quarter->local-date dtdt/local-date->milliseconds-since-epoch))
+
+(defn milliseconds-since-epoch->year-quarter
+  ([millis]
+   (milliseconds-since-epoch->year-quarter millis (dtdt/utc-zone-id)))
+  ([millis timezone]
+   (let [local-date (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
+         year       (.getYear local-date)
+         quarter    (.get local-date java.time.temporal.IsoFields/QUARTER_OF_YEAR)]
+     (YearQuarter/of year quarter))))
+
 (defn string->time
   "Given an identifiable time, returns the correct datetime object.
   Optionally, you can specify a target type to also convert to a
@@ -51,6 +66,8 @@
      (case datetime-type
        :year
        (year->milliseconds-since-epoch datetime)
+       :year-quarter
+       (year-quarter->milliseconds-since-epoch datetime)
        ;; default
        (dtdt/datetime->milliseconds timezone datetime)))))
 
@@ -62,6 +79,8 @@
    (case datetime-type
      :year
      (milliseconds-since-epoch->year millis timezone)
+     :year-quarter
+     (milliseconds-since-epoch->year-quarter millis timezone)
      ;; default - for cases not specified explicilty above
      ;;           tech.datatype.datetime offers support
      (dtdt/milliseconds->datetime datetime-type timezone millis))))
@@ -72,10 +91,6 @@
   (-> datetime
       anytime->milliseconds
       (milliseconds->anytime datetime-type)))
-
-;; Make tech.v3.datatype.datetime aware of additional java.time classes.
-(add-object-datatype! :year java.time.Year true)
-(add-object-datatype! :year-month java.time.YearMonth true)
 
 (defn ->instant
   "Convert any datetime to an instant."
