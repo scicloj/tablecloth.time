@@ -23,3 +23,5 @@
 (defmethod cindex/make-index-structure :year-month
   [data _]
   (do-build-index data))
+
+

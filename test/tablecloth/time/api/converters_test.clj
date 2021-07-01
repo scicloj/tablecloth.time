@@ -80,6 +80,7 @@
          (string->time "1970-01-01")))
   (is (= #time/year-month "1970-01"
          (string->time "1970-01")))
+  ;; (is (= #time/year-quarter "1970-Q1"
+  ;;        (string->time "1970-Q1")))
   (is (= #time/year "1970"
          (string->time "1970"))))
-

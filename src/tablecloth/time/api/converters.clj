@@ -1,9 +1,17 @@
 (ns tablecloth.time.api.converters
-  (:import [java.time Year]
-           [org.threeten.extra YearWeek YearQuarter])
+  (:import [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
             [tablecloth.time.protocols.parseable :as parseable-proto]
+            [tablecloth.time.utils.year-helpers :refer [year->local-date
+                                                        year->milliseconds-since-epoch
+                                                        milliseconds-since-epoch->year]]
+            [tablecloth.time.utils.year-month-helpers :refer [year-month->local-date
+                                                              year-month->milliseconds-since-epoch
+                                                              milliseconds-since-epoch->year-month]]
+            [tablecloth.time.utils.year-quarter-helpers :refer [year-quarter->local-date
+                                                                year-quarter->milliseconds-since-epoch
+                                                                milliseconds-since-epoch->year-quarter]]
             [tech.v3.datatype.casting :refer [add-object-datatype!]]))
 
 (set! *warn-on-reflection* true)
@@ -16,34 +24,6 @@
 ;; - busness quarter end
 ;; - business year end
 ;; - business hours
-
-(defn year->local-date [^Year year]
-  (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
-
-(defn year->milliseconds-since-epoch [^Year year]
-  (-> year year->local-date dtdt/local-date->milliseconds-since-epoch))
-
-(defn milliseconds-since-epoch->year
-  ([millis]
-   (milliseconds-since-epoch->year millis (dtdt/utc-zone-id)))
-  ([millis timezone]
-   (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
-       (.getYear))))
-
-(defn year-quarter->local-date [^YearQuarter year-quarter]
-  (.atDay year-quarter 1))
-
-(defn year-quarter->milliseconds-since-epoch [^YearQuarter year-quarter]
-  (-> year-quarter year-quarter->local-date dtdt/local-date->milliseconds-since-epoch))
-
-(defn milliseconds-since-epoch->year-quarter
-  ([millis]
-   (milliseconds-since-epoch->year-quarter millis (dtdt/utc-zone-id)))
-  ([millis timezone]
-   (let [local-date (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
-         year       (.getYear local-date)
-         quarter    (.get local-date java.time.temporal.IsoFields/QUARTER_OF_YEAR)]
-     (YearQuarter/of year quarter))))
 
 (defn string->time
   "Given an identifiable time, returns the correct datetime object.
@@ -66,6 +46,8 @@
      (case datetime-type
        :year
        (year->milliseconds-since-epoch datetime)
+       :year-month
+       (year-month->milliseconds-since-epoch datetime)
        :year-quarter
        (year-quarter->milliseconds-since-epoch datetime)
        ;; default
@@ -79,6 +61,8 @@
    (case datetime-type
      :year
      (milliseconds-since-epoch->year millis timezone)
+     :year-month
+     (milliseconds-since-epoch->year-month millis timezone)
      :year-quarter
      (milliseconds-since-epoch->year-quarter millis timezone)
      ;; default - for cases not specified explicilty above
@@ -92,26 +76,35 @@
       anytime->milliseconds
       (milliseconds->anytime datetime-type)))
 
-(defn ->instant
-  "Convert any datetime to an instant."
-  [datetime]
-  (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :instant)))
-
 (defn ->local-date-time
   "Convert any datetime to a local datetime."
   [datetime]
-  (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date-time)))
+  (convert-to datetime :local-date-time))
+
+(defn ->zoned-date-time
+  "Convert any datetime type to a zoned date time."
+  [datetime]
+  (convert-to datetime :zoned-date-time))
+
+(defn ->instant
+  "Convert any datetime to an instant."
+  [datetime]
+  (convert-to datetime :instant))
 
 (defn ->local-date
   "Convert any datetime to a local date."
   [datetime]
-  (-> datetime
-      anytime->milliseconds
-      (milliseconds->anytime :local-date)))
+  (convert-to datetime :local-date))
+
+(defn ->year
+  "Convert any datetime type to a year."
+  [datetime]
+  (convert-to datetime :year))
+
+(defn ->year-month
+  "Convert any datetime type to a year month."
+  [datetime]
+  (convert-to datetime :year-month))
 
 (defn milliseconds-in [chrono-unit]
   (case chrono-unit
@@ -189,4 +182,3 @@
   [datetime]
   (let [^java.time.LocalDate localDate (-> datetime ->local-date)]
     (.with localDate (java.time.temporal.TemporalAdjusters/lastDayOfYear))))
-
