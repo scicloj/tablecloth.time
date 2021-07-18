@@ -24,4 +24,5 @@
                          ->quarters-end
                          ->years-end
                          ->every
-                         string->time)
+                         string->time
+                         year-quarter->local-date)
