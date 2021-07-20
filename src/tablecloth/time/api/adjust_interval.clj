@@ -1,16 +1,32 @@
 (ns tablecloth.time.api.adjust-interval
-  (:require [tech.v3.datatype :refer [emap elemwise-datatype]]
+  (:require [tech.v3.datatype :refer [emap]]
+            [tablecloth.time.utils.indexing :refer [get-index-column-or-error]]
+            [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.api :as tablecloth]))
 
-(defn adjust-interval
-  "Adjusts the interval of the dataset by adding a new column `new-column-name`
-  whose values are the result of applying `time-converter` to the column specified
-  by `index-column-name`, and then performing a `group-by` operation on that column
-  and any columns specified by `keys`."
-  [dataset index-column-name keys ->new-time-converter new-column-name]
-  (let [index-column (index-column-name dataset)
-        target-datatype (-> index-column first ->new-time-converter elemwise-datatype)
-        adjusted-column-data (emap ->new-time-converter target-datatype index-column)]
-    (-> dataset
-        (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
-        (tablecloth/group-by (into [new-column-name] keys)))))
+;; (defn- do-adjust-interval
+;;   [dataset index-column-name keys ->new-time-converter new-column-name]
+;;   (let [index-column (index-column-name dataset)
+;;         target-datatype (-> index-column first ->new-time-converter elemwise-datatype)
+;;         adjusted-column-data (emap ->new-time-converter target-datatype index-column)]
+;;     (-> dataset
+;;         (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
+;;         (tablecloth/group-by (into [new-column-name] keys)))))
+
+
+(defn adjust-interval 
+  "Adjusts the interval of the time index column by applying the
+  `converter` function to the values in the time index. Returns a
+  grouped dataset that can be used with `tablecloth.api.aggregate`,
+  for example."
+  ([dataset converter]
+   (adjust-interval dataset converter nil))
+  ([dataset converter {:keys [rename-index-to]}]
+   (let [index-column (get-index-column-or-error dataset)
+         target-datatype (-> index-column first converter get-datatype)
+         index-column-name (-> index-column meta :name)
+         new-column-name (or rename-index-to index-column-name)
+         new-column-data (emap converter target-datatype index-column)]
+     (-> dataset
+         (tablecloth/add-column new-column-name new-column-data)
+         (tablecloth/group-by [index-column-name])))))

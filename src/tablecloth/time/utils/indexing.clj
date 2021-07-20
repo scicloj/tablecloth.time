@@ -4,6 +4,9 @@
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype]]))
 
+(def unidentifiable-index-error
+  (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))
+
 (defn time-column? [col]
   (time-datatype? (get-datatype col)))
 
@@ -24,13 +27,6 @@
       (-> dataset time-columns first meta :name)
       nil)))
 
-(defn index-column-datatype
-  "Returns the datatype of the index column data, if it is known."
-  [dataset]
-  (if-let [col-name (index-column-name dataset)]
-    (get-datatype (col-name dataset))
-    nil))
-
 (defn index-column-object-class
   "Returns the object class of the index column data, if the index
   column is known."
@@ -42,16 +38,28 @@
         datatype->object-class)
     nil))
 
+(def unidentifiable-index-error
+  (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))
+
 (defn can-identify-index-column?
   "Returns `true` or `false`, can the time index column be identified
   automatically?"
   [dataset]
   (boolean (index-column-name dataset)))
 
-(defn auto-detect-index-column [dataset]
+(defn get-index-column-name-or-error
+  "Returns the time index column name if it can be identified."
+  [dataset]
+  (if (can-identify-index-column? dataset)
+    (index-column-name dataset)
+    (throw unidentifiable-index-error)))
+
+(defn get-index-column-or-error
+  "Returns the time index column of the dataset if it can be identified."
+  [dataset]
   (if (can-identify-index-column? dataset)
     ((index-column-name dataset) dataset)
-    nil))
+    (throw unidentifiable-index-error)))
 
 (defn index-by
   "Identifies the column that should be used as the index for the
