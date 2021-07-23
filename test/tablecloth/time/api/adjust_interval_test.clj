@@ -28,7 +28,7 @@
                                            {:also-group-by [:key-a :key-b]}))]
         (is (some #{:key-a :key-b} (column-names result)))))
 
-    (testing ":"
+    (testing ":rename-index-to option"
       (let [result (-> ds (adjust-interval ->minutes
                                            {:rename-index-to :minutes}))]
         (is (some #{:minutes} (column-names result)))))))
