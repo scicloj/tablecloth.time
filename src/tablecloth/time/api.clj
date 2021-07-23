@@ -24,8 +24,7 @@
                          ->quarters-end
                          ->years-end
                          ->every
-                         string->time
-                         year-quarter->local-date)
+                         string->time)
 
 (exporter/export-symbols tablecloth.time.api.rolling-window
                          rolling-window)
