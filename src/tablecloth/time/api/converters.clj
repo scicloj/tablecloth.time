@@ -1,6 +1,5 @@
 (ns tablecloth.time.api.converters
   (:import [java.time Year]
-           [java.time.format DateTimeFormatter]
            [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
@@ -20,11 +19,6 @@
 
 (defn year->local-date [^Year year]
   (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
-
-(defn year-quarter->local-date [year-quarter format-pattern]
-  (-> year-quarter
-      (YearQuarter/parse (DateTimeFormatter/ofPattern format-pattern))
-      .atEndOfQuarter))
 
 (defn year->milliseconds-since-epoch [^Year year]
   (-> year year->local-date dtdt/local-date->milliseconds-since-epoch))
