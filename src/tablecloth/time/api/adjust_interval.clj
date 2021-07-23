@@ -21,7 +21,7 @@
   for example."
   ([dataset converter]
    (adjust-interval dataset converter nil))
-  ([dataset converter {:keys [rename-index-to also-group-by]}]
+  ([dataset converter {:keys [also-group-by]}]
    (let [index-column (get-index-column-or-error dataset)
          target-datatype (-> index-column first converter get-datatype)
          index-column-name (-> index-column meta :name)
