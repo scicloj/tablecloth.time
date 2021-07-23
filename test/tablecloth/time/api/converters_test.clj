@@ -3,7 +3,7 @@
             [tablecloth.time.api :refer [down-to-nearest ->seconds convert-to
                                          ->minutes ->hours ->days ->weeks-end
                                          ->months-end ->quarters-end ->years-end
-                                         string->time year-quarter->local-date]]))
+                                         string->time]]))
 
 (deftest test-down-to-nearest
   (testing "returns partial fn if datetime not provided"
@@ -52,10 +52,6 @@
 (deftest test->years-end
   (is (= #time/date "1970-12-31"
          (->years-end #time/date "1970-01-01"))))
-
-(deftest test->year-quarter
-  (is (= #time/date "2016-03-31"
-         (year-quarter->local-date "2016 Q1" "yyyy 'Q'q"))))
 
 (deftest test-convert-to
   (is (= #time/date "1970-01-01"
