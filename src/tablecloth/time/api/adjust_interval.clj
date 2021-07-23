@@ -4,16 +4,6 @@
             [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.api :as tablecloth]))
 
-;; (defn- do-adjust-interval
-;;   [dataset index-column-name keys ->new-time-converter new-column-name]
-;;   (let [index-column (index-column-name dataset)
-;;         target-datatype (-> index-column first ->new-time-converter elemwise-datatype)
-;;         adjusted-column-data (emap ->new-time-converter target-datatype index-column)]
-;;     (-> dataset
-;;         (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
-;;         (tablecloth/group-by (into [new-column-name] keys)))))
-
-
 (defn adjust-interval 
   "Adjusts the interval of the time index column by applying the
   `converter` function to the values in the time index. Returns a
