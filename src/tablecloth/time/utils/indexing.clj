@@ -4,9 +4,6 @@
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype]]))
 
-(def unidentifiable-index-error
-  (Exception. "Unable to auto detect time column to serve as index. Please specify the index using `index-by`."))
-
 (defn time-column? [col]
   (time-datatype? (get-datatype col)))
 
