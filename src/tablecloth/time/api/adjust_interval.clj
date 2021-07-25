@@ -42,5 +42,5 @@
          index-column-name (-> index-column meta :name)
          new-column-data (emap converter target-datatype index-column)]
      (-> dataset
-         (tablecloth/add-column new-column-name new-column-data)
+         (tablecloth/add-column index-column-name new-column-data)
          (tablecloth/group-by (into [index-column-name] also-group-by))))))
