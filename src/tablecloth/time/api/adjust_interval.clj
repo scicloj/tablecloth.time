@@ -4,7 +4,7 @@
             [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.api :as tablecloth]))
 
-(defn adjust-interval 
+(defn adjust-interval
   "Adjusts the interval of the time index column by applying the
   `converter` function to the values in the time index. Returns a
   grouped dataset that can be used with `tablecloth.api.aggregate`,

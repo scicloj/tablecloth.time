@@ -21,7 +21,7 @@
 
     (testing "it returns a grouped dataset"
       (let [result (-> ds (adjust-interval ->minutes))]
-       (is (-> result (grouped?)))))
+        (is (-> result (grouped?)))))
 
     (testing ":also-group-by option"
       (let [result (-> ds (adjust-interval ->minutes
