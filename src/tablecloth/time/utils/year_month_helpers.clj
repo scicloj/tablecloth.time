@@ -15,4 +15,4 @@
    (let [local-date (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
          year       (.getYear local-date)
          month      (.getMonth local-date)]
-     (YearMonth/of year month)))) 
+     (YearMonth/of year month))))
