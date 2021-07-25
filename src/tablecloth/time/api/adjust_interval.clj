@@ -1,16 +1,46 @@
 (ns tablecloth.time.api.adjust-interval
-  (:require [tech.v3.datatype :refer [emap elemwise-datatype]]
+  (:require [tech.v3.datatype :refer [emap]]
+            [tablecloth.time.utils.indexing :refer [get-index-column-or-error]]
+            [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.api :as tablecloth]))
 
-(defn adjust-interval
-  "Adjusts the interval of the dataset by adding a new column `new-column-name`
-  whose values are the result of applying `time-converter` to the column specified
-  by `index-column-name`, and then performing a `group-by` operation on that column
-  and any columns specified by `keys`."
-  [dataset index-column-name keys ->new-time-converter new-column-name]
-  (let [index-column (index-column-name dataset)
-        target-datatype (-> index-column first ->new-time-converter elemwise-datatype)
-        adjusted-column-data (emap ->new-time-converter target-datatype index-column)]
-    (-> dataset
-        (tablecloth/add-or-replace-column new-column-name adjusted-column-data)
-        (tablecloth/group-by (into [new-column-name] keys)))))
+(defn adjust-interval 
+  "Adjusts the interval of the time index column by applying the
+  `converter` function to the values in the time index. Returns a
+  grouped dataset that can be used with `tablecloth.api.aggregate`,
+  for example.
+
+  
+  Options are:
+
+  - also-group-by - include other columns in the grouping if needed
+
+    Example Data:
+  
+    |         :A |  :B | :C |
+    |------------|-----|---:|
+    | 1970-01-01 | foo |  0 |
+    | 1970-01-02 | bar |  1 |
+    | 1970-02-01 | foo |  2 |
+    | 1970-02-02 | bar |  3 |
+
+    (-> data
+        (index-by :A)
+        (adjust-interval ->months-end {:also-group-by [:B]}))
+    ;; => _unnamed [3 3]:
+    ;;    | :summary |  :B |         :A |
+    ;;    |---------:|-----|------------|
+    ;;    |      0.5 | foo | 1970-01-31 |
+    ;;    |      2.0 | foo | 1970-02-28 |
+    ;;    |      3.0 | bar | 1970-02-28 |
+  "
+  ([dataset converter]
+   (adjust-interval dataset converter nil))
+  ([dataset converter {:keys [also-group-by]}]
+   (let [index-column (get-index-column-or-error dataset)
+         target-datatype (-> index-column first converter get-datatype)
+         index-column-name (-> index-column meta :name)
+         new-column-data (emap converter target-datatype index-column)]
+     (-> dataset
+         (tablecloth/add-column new-column-name new-column-data)
+         (tablecloth/group-by (into [index-column-name] also-group-by))))))
