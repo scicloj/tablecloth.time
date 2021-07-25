@@ -20,13 +20,14 @@
     |         :A |  :B | :C |
     |------------|-----|---:|
     | 1970-01-01 | foo |  0 |
-    | 1970-01-02 | bar |  1 |
+    | 1970-01-02 | foo |  1 |
     | 1970-02-01 | foo |  2 |
     | 1970-02-02 | bar |  3 |
 
     (-> data
         (index-by :A)
-        (adjust-interval ->months-end {:also-group-by [:B]}))
+        (adjust-interval ->months-end {:also-group-by [:B]})
+        (tablecloth.api/aggregate (comp tech.v3.datatype.functional/mean :C)))
     ;; => _unnamed [3 3]:
     ;;    | :summary |  :B |         :A |
     ;;    |---------:|-----|------------|
