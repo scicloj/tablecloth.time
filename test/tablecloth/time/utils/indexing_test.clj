@@ -4,7 +4,6 @@
             [tablecloth.time.api :refer [index-by]]
             [tablecloth.time.utils.indexing :as idx-utils]))
 
-
 (deftest index-column-name-test
   (testing "manual index specified by `index-by`"
     (let [ds (dataset {:x [1 2 3]

@@ -17,9 +17,9 @@
   (that is, if the columns have not changed)."
   [ds name]
   (if-let [{:keys [columns column-names]} (-> ds
-                                           meta
-                                           :validatable
-                                           (get name))]
+                                              meta
+                                              :validatable
+                                              (get name))]
     (->> column-names
          (every? (fn [column-name]
                    (identical? (ds column-name)

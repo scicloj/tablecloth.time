@@ -22,8 +22,8 @@
   (if (valid? dataset :index)
     (-> dataset meta :validatable :index :column-names first)
     (if (= 1 (count (time-columns dataset)))
-          (-> dataset time-columns first meta :name)
-          nil)))
+      (-> dataset time-columns first meta :name)
+      nil)))
 
 (defn index-column-object-class
   "Returns the object class of the index column data, if the index
