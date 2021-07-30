@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.index-by-test
   (:require [clojure.test :refer [deftest is testing]]
-            [tablecloth.time.api.index_by :refer [index-by]]
+            [tablecloth.time.api :refer [index-by]]
             [tablecloth.api :refer [dataset]]))
 
 (deftest index-by-test

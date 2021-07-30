@@ -11,7 +11,7 @@
 (exporter/export-symbols tablecloth.time.api.adjust-interval
                          adjust-interval)
 
-(exporter/export-symbols tablecloth.time.api.index_by
+(exporter/export-symbols tablecloth.time.api.index-by
                          index-by)
 
 (exporter/export-symbols tablecloth.time.api.converters

@@ -1,7 +1,6 @@
 (ns tablecloth.time.api.slice-test
   (:require [tablecloth.api :refer [dataset]]
-            [tablecloth.time.utils.indexing :refer [index-by]]
-            [tablecloth.time.api :refer [slice]]
+            [tablecloth.time.api :refer [slice index-by]]
             [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
             [clojure.test :refer [deftest is are]]
             [time-literals.data-readers]))

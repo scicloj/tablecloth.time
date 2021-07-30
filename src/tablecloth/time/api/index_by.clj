@@ -1,4 +1,4 @@
-(ns tablecloth.time.api.index_by
+(ns tablecloth.time.api.index-by
   (:require [tablecloth.time.utils.validatable :refer [add-validatable]]))
 
 (defn index-by
