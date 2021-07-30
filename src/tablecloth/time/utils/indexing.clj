@@ -1,5 +1,6 @@
 (ns tablecloth.time.utils.indexing
   (:require [tablecloth.api :refer [columns]]
+            [tablecloth.time.validatable :refer [add-validatable valid?]]
             [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype]]))
@@ -18,11 +19,11 @@
   otherwise, if there is a single column that can be identifed as time
   data, that will be the column name."
   [dataset]
-  (if-let [idx-col-name (:index (meta dataset))]
-    idx-col-name
+  (if (valid? dataset :index)
+    (-> dataset meta :validatable :index :column-names first)
     (if (= 1 (count (time-columns dataset)))
-      (-> dataset time-columns first meta :name)
-      nil)))
+          (-> dataset time-columns first meta :name)
+          nil)))
 
 (defn index-column-object-class
   "Returns the object class of the index column data, if the index
