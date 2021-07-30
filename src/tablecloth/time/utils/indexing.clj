@@ -1,6 +1,6 @@
 (ns tablecloth.time.utils.indexing
   (:require [tablecloth.api :refer [columns]]
-            [tablecloth.time.utils.validatable :refer [valid?]]
+            [tablecloth.time.utils.validatable :refer [vadd-validatable add-validatable alid?]]
             [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype]]))
