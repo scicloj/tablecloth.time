@@ -10,6 +10,9 @@
                                                          [:x]
                                                          :id1
                                                          9999)]
+    (is (-> ds ;; without validatable
+            (validatable/valid? :id1)
+            not))
     (is (-> ds-with-validatable
             (tablecloth/select-rows [0 2])
             (validatable/valid? :id1)
