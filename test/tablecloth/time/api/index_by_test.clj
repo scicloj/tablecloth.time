@@ -12,5 +12,3 @@
                      :validatable))
       (is (contains? (:validatable (meta ds-with-index))
                      :index)))))
-
-
