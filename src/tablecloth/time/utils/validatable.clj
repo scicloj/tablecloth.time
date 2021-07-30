@@ -1,4 +1,4 @@
-(ns tablecloth.time.validatable)
+(ns tablecloth.time.utils.validatable)
 
 (defn add-validatable
   "Add metadata derived from a few columns,
