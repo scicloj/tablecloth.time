@@ -9,9 +9,3 @@
   that any column contains time data."
   [dataset index-column-name]
   (add-validatable dataset [index-column-name] :index nil))
-
-(-> (tablecloth.api/dataset {:x [1 2 3]
-                             :y [4 5 6]})
-    (index-by :x)
-    (tablecloth.api/rename-columns {:x :z})
-    tablecloth.time.utils.indexing/can-identify-index-column?)
