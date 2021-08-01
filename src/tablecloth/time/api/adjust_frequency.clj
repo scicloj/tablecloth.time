@@ -1,11 +1,11 @@
-(ns tablecloth.time.api.adjust-interval
+(ns tablecloth.time.api.adjust-frequency
   (:require [tech.v3.datatype :refer [emap]]
             [tablecloth.time.utils.indexing :refer [get-index-column-or-error]]
             [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.api :as tablecloth]))
 
-(defn adjust-interval
-  "Adjusts the interval of the time index column by applying the
+(defn adjust-frequency
+  "Adjusts the frequency of the time index column by applying the
   `converter` function to the values in the time index. Returns a
   grouped dataset that can be used with `tablecloth.api.aggregate`,
   for example.
@@ -26,7 +26,7 @@
 
     (-> data
         (index-by :A)
-        (adjust-interval ->months-end {:also-group-by [:B]})
+        (adjust-frequency ->months-end {:also-group-by [:B]})
         (tablecloth.api/aggregate (comp tech.v3.datatype.functional/mean :C)))
     ;; => _unnamed [3 3]:
     ;;    | :summary |  :B |         :A |
@@ -36,7 +36,7 @@
     ;;    |      3.0 | bar | 1970-02-28 |
   "
   ([dataset converter]
-   (adjust-interval dataset converter nil))
+   (adjust-frequency dataset converter nil))
   ([dataset converter {:keys [also-group-by]}]
    (let [index-column (get-index-column-or-error dataset)
          target-datatype (-> index-column first converter get-datatype)

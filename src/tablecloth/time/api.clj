@@ -8,8 +8,8 @@
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
-(exporter/export-symbols tablecloth.time.api.adjust-interval
-                         adjust-interval)
+(exporter/export-symbols tablecloth.time.api.adjust-frequency
+                         adjust-frequency)
 
 (exporter/export-symbols tablecloth.time.api.converters
                          convert-to
