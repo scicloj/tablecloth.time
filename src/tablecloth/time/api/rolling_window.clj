@@ -19,16 +19,16 @@
 ;; The instructions function builds the map of rolling-window indices
 
 
+;; #1: simple case where we want a set of consecutive rows
+;; TODO #2: allow for lag
 (defn- rw-index
-  "left/right loc(s) of a rolling window for a given loc
-   #1: simple case where we want a set of consecutive rows
-   TODO #2: allow for lag"
-  [len]
+  "left/right edges of a rolling window for a given location"
+  [window-size]
   (fn [loc]
-    [(max 0 (+ (- loc len) 1)) loc]))
+    [(max 0 (+ (- loc window-size) 1)) loc]))
 
 (defn- rw-index-values
-  "column values at rolling window left/right loc(s)"
+  "column values at left/right edges of a window"
   [ds column-name]
   (fn [loc]
     (let [[left right] loc
@@ -36,11 +36,11 @@
       [(nth column left) (nth column right)])))
 
 (defn- rw-indices
-  "rolling-window left/right indices for a dataset"
-  [ds column-name len]
+  "left/right index values of rolling-windowss in a dataset"
+  [ds column-name window-size]
   (let [count (tablecloth/row-count ds)
         indices (take count (range))]
-    (->> (map (rw-index len) indices)
+    (->> (map (rw-index window-size) indices)
          (map (rw-index-values ds column-name)))))
 
 (defn- rw-slice
@@ -76,8 +76,8 @@
 (defn- rw-map
   "maps row location to row indices of it's rolling-window.
    it is used as an input to group-by to create a grouped dataset"
-  [ds column-name len]
-  (let [indices (rw-indices ds column-name len)
+  [ds column-name window-size]
+  (let [indices (rw-indices ds column-name window-size)
         slices (rw-slices ds indices)
         labels (map #(hash-map :loc (second %)) indices)]
     (->ordered-map labels slices)))
@@ -85,10 +85,9 @@
 
 ;; support alternate approaches to build grouped datasets for rolling-window
 
-
 (defn rolling-window
   "rolling-window dataset"
-  [ds column-name len]
-  (tablecloth/group-by ds (rw-map ds column-name len)))
+  [ds column-name window-size]
+  (tablecloth/group-by ds (rw-map ds column-name window-size)))
 
 
