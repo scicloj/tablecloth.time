@@ -13,7 +13,9 @@
   
   Options are:
 
-  - also-group-by - include other columns in the grouping if needed
+  - categories - other columns (in addition to the time index) by
+                 that should be grouped together at the specified
+                 interval.
 
     Example Data:
   
@@ -26,7 +28,7 @@
 
     (-> data
         (index-by :A)
-        (adjust-frequency ->months-end {:also-group-by [:B]})
+        (adjust-frequency ->months-end {:categories [:B]})
         (tablecloth.api/aggregate (comp tech.v3.datatype.functional/mean :C)))
     ;; => _unnamed [3 3]:
     ;;    | :summary |  :B |         :A |
@@ -37,11 +39,11 @@
   "
   ([dataset converter]
    (adjust-frequency dataset converter nil))
-  ([dataset converter {:keys [also-group-by]}]
+  ([dataset converter {:keys [categories]}]
    (let [index-column (get-index-column-or-error dataset)
          target-datatype (-> index-column first converter get-datatype)
          index-column-name (-> index-column meta :name)
          new-column-data (emap converter target-datatype index-column)]
      (-> dataset
          (tablecloth/add-column index-column-name new-column-data)
-         (tablecloth/group-by (into [index-column-name] also-group-by))))))
+         (tablecloth/group-by (into [index-column-name] categories))))))

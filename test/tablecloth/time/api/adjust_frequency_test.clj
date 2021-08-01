@@ -23,9 +23,9 @@
       (let [result (-> ds (adjust-frequency ->minutes))]
         (is (-> result (grouped?)))))
 
-    (testing ":also-group-by option"
+    (testing ":categories option"
       (let [result (-> ds (adjust-frequency ->minutes
-                                           {:also-group-by [:key-a :key-b]}))]
+                                            {:categories [:key-a :key-b]}))]
         (is (some #{:key-a :key-b} (column-names result)))))
 
     ;; No support for this now b/c we aren't doing bookeeping on the :index meta data yet
