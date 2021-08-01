@@ -36,7 +36,6 @@
                            #time/date "1970-01-03"]
                        :y [4 5 6]})]
       (is (= nil
-
              (-> ds
                  (add-column :z [#time/date "1970-01-01"
                                  #time/date "1970-01-02"
