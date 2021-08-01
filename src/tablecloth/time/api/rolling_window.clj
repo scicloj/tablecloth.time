@@ -19,10 +19,10 @@
 ;; that takes in a map of row-indices to group by, and creates the grouped dataset
 ;; The instructions function builds the map of rolling-window indices
 
-;; #1: simple case where we want a set of consecutive rows
-;; TODO #2: allow for lags in windows 
+
 (defn- rw-index
-  "left/right edges of a rolling window for a given location"
+  "left/right edges of a rolling window for a given location
+  case #1: column is an ordered seqeunce, and so computes window edges"
   [window-size]
   (fn [loc]
     [(max 0 (+ (- loc window-size) 1)) loc]))
