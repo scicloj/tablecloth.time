@@ -1,4 +1,4 @@
-(ns tablecloth.time.validatable)
+(ns tablecloth.time.utils.validatable)
 
 (defn add-validatable
   "Add metadata derived from a few columns,
@@ -16,12 +16,13 @@
   "Check if metadata derived from a few columns is still valid
   (that is, if the columns have not changed)."
   [ds name]
-  (let [{:keys [columns column-names]} (-> ds
-                                           meta
-                                           :validatable
-                                           (get name))]
+  (if-let [{:keys [columns column-names]} (-> ds
+                                              meta
+                                              :validatable
+                                              (get name))]
     (->> column-names
          (every? (fn [column-name]
                    (identical? (ds column-name)
-                               (columns column-name)))))))
+                               (columns column-name)))))
+    false))
 
