@@ -1,5 +1,6 @@
 (ns tablecloth.time.utils.indexing
   (:require [tablecloth.api :refer [columns]]
+            [tablecloth.time.utils.validatable :refer [valid?]]
             [tablecloth.time.utils.datatypes :refer [get-datatype time-datatype?]]
             [tech.v3.datatype.casting :refer [datatype->object-class]]
             [tech.v3.datatype.packing :refer [unpack-datatype]]))
@@ -18,8 +19,8 @@
   otherwise, if there is a single column that can be identifed as time
   data, that will be the column name."
   [dataset]
-  (if-let [idx-col-name (:index (meta dataset))]
-    idx-col-name
+  (if (valid? dataset :index)
+    (-> dataset meta :validatable :index :column-names first)
     (if (= 1 (count (time-columns dataset)))
       (-> dataset time-columns first meta :name)
       nil)))
@@ -58,13 +59,5 @@
     ((index-column-name dataset) dataset)
     (throw unidentifiable-index-error)))
 
-(defn index-by
-  "Identifies the column that should be used as the index for the
-  dataset. Useful when functions that use the index to perform their
-  operations, cannot auto-detect the index column. This can happen if
-  there are more than one time-based column; or, if it is not clear
-  that any column contains time data."
-  [dataset index-column-name]
-  (vary-meta dataset assoc :index index-column-name))
 
 

@@ -11,6 +11,12 @@
 (exporter/export-symbols tablecloth.time.api.adjust-frequency
                          adjust-frequency)
 
+(exporter/export-symbols tablecloth.time.api.rolling-window
+                         rolling-window)
+
+(exporter/export-symbols tablecloth.time.api.index-by
+                         index-by)
+
 (exporter/export-symbols tablecloth.time.api.converters
                          convert-to
                          down-to-nearest
