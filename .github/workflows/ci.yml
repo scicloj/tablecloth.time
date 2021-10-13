@@ -51,7 +51,7 @@ jobs:
         uses: DeLaGuardo/setup-clojure@3.2
         with:
           cli: latest
-          lein: latest
+          lein: 2.9.6 # setting b/c latest 2.9.7 broke workflow
 
       - name: Install dependencies
         run: lein deps
