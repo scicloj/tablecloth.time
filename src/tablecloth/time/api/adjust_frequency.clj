@@ -25,8 +25,8 @@
          index-column-name (-> index-column meta :name)
          new-column-data (emap converter target-datatype index-column)
          adjusted-grouped-ds (-> dataset
-                               (tablecloth/add-column index-column-name new-column-data)
-                               (tablecloth/group-by (into [index-column-name] include-columns)))]
+                                 (tablecloth/add-column index-column-name new-column-data)
+                                 (tablecloth/group-by (into [index-column-name] include-columns)))]
      (if ungroup?
        (tablecloth/ungroup adjusted-grouped-ds)
        adjusted-grouped-ds))))
