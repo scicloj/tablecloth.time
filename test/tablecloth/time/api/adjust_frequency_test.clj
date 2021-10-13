@@ -1,6 +1,6 @@
 (ns tablecloth.time.api.adjust-frequency-test
   (:require [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
-            [tablecloth.api :refer [dataset grouped? column-names]]
+            [tablecloth.api :refer [dataset grouped?]]
             [tablecloth.time.api.converters :refer [->minutes]]
             [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.time.api :refer [adjust-frequency]]
