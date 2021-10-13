@@ -8,11 +8,11 @@
 (exporter/export-symbols tablecloth.time.api.slice
                          slice)
 
+(exporter/export-symbols tablecloth.time.api.adjust-frequency
+                         adjust-frequency)
+
 (exporter/export-symbols tablecloth.time.api.rolling-window
                          rolling-window)
-
-(exporter/export-symbols tablecloth.time.api.adjust-interval
-                         adjust-interval)
 
 (exporter/export-symbols tablecloth.time.api.index-by
                          index-by)
@@ -20,7 +20,6 @@
 (exporter/export-symbols tablecloth.time.api.converters
                          convert-to
                          down-to-nearest
-                         ->every
                          ->seconds
                          ->minutes
                          ->hours
