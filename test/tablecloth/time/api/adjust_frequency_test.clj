@@ -2,6 +2,7 @@
   (:require [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
             [tablecloth.api :refer [dataset grouped? column-names]]
             [tablecloth.time.api.converters :refer [->minutes]]
+            [tablecloth.time.utils.datatypes :refer [get-datatype]]
             [tablecloth.time.api :refer [adjust-frequency]]
             [clojure.test :refer [testing deftest is]]))
 
@@ -20,13 +21,13 @@
                         :seconds)]
 
     (testing "it returns a grouped dataset"
-      (let [result (-> ds (adjust-frequency ->minutes))]
-        (is (-> result (grouped?)))))
+      (let [result (adjust-frequency ds ->minutes)]
+        (is (= :dataset (get-datatype result)))
+        (is (-> result grouped? not))))
 
-    (testing ":categories option"
-      (let [result (-> ds (adjust-frequency ->minutes
-                                            {:categories [:key-a :key-b]}))]
-        (is (some #{:key-a :key-b} (column-names result)))))
+    (testing "ungroup? option"
+      (let [result (adjust-frequency ds ->minutes {:ungroup? false})]
+        (is (-> result grouped?))))
 
     ;; No support for this now b/c we aren't doing bookeeping on the :index meta data yet
     ;; (testing ":rename-index-to option"
