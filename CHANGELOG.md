@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. This change
 ## [Unreleased]
 
 ## [1.00-alpha-4] (2021-10-16)
+### Changed
 - Changed `adjust-interval` to `adjust-frequency`. This function now
   returns an ungrouped dataset by default. This behavior can be
   overriden by specifying the `ungrouped?` option
