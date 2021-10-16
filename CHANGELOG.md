@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+## [1.00-alpha-4] (2021-10-16)
+- Changed `adjust-interval` to `adjust-frequency`. This function now
+  returns an ungrouped dataset by default. This behavior can be
+  overriden by specifying the `ungrouped?` option
+  ([PR](https://github.com/scicloj/tablecloth.time/commit/dccd91db86d4bf83d41311120a0b7eb9c1c20008)).
+- Internal changes that make working with the column indexes more easy:
+  - Added a `get-index-column-or-error` function that is used
+    internally by functions that need to fetch the index. This
+    function replaced a series of other helper functions, i.e. this
+    simplifies the internal API for working with the index.
+  - Used the `validatable` abstraction added by @daslu to set the
+    index column on a dataset when we call `index-by`. Validatable
+    makes it possible to check if the index has become invalid because
+    the column data has changed in some way that invalidates the
+    column.
+
 ## [1.00-alpha-3] (2021-06-01)
 ### Added
 - New `string->time` method will try to parse a string to the correct
