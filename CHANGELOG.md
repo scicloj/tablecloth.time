@@ -45,5 +45,7 @@ All notable changes to this project will be documented in this file. This change
 ## 1.00-alpha1
 - First alpha release
 
-[Unreleased]: https://github.com/scicloj/tablecloth.time/compare/1.00-alpha-3...HEAD
-[1.00-alpha-3]: https://github.com/scicloj/tablecloth.time/compare/1.00-alpha-2...1.00-alpha3
+[Unreleased]: https://github.com/scicloj/tablecloth.time/compare/1.00-alpha-4...HEAD
+[1.00-alpha-4]: https://github.com/scicloj/tablecloth.time/compare/1.00-alpha-3...1.00-alpha-4
+[1.00-alpha-3]: https://github.com/scicloj/tablecloth.time/compare/1.00-alpha-2...1.00-alpha-3
+[1.00-alpha-2]: https://github.com/scicloj/tablecloth.time/compare/1.00.alpha-1...1.00-alpha-2
