@@ -30,3 +30,7 @@
                          ->years-end
                          ->every
                          string->time)
+
+(exporter/export-symbols tablecloth.time.api.rolling-window
+                         rolling-window)
+
