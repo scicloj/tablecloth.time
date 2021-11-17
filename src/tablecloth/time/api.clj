@@ -18,6 +18,8 @@
                          index-by)
 
 (exporter/export-symbols tablecloth.time.api.converters
+                         milliseconds->anytime
+                         anytime->milliseconds
                          convert-to
                          down-to-nearest
                          ->seconds
