@@ -1,5 +1,5 @@
 (ns tablecloth.time.api.time-components
-  (:import [java.time Month LocalDateTime])
+  (:import [java.time LocalDateTime])
   (:require [tablecloth.time.api.converters :refer [->local-date-time]]))
 
 (defn- extract-datetime-component-simple
