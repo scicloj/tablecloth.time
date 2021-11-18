@@ -32,3 +32,13 @@
                          ->years-end
                          ->every
                          string->time)
+
+(exporter/export-symbols tablecloth.time.api.time-components
+                         year
+                         dayofyear
+                         month
+                         dayofmonth
+                         dayofweek
+                         hour
+                         minute
+                         secnd)
