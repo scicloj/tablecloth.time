@@ -50,10 +50,10 @@
              extract-datetime-component-complex
              #(.getDayOfWeek ^LocalDateTime %)))
 
-(def ^{:doc "Extracts the hour from any datetime." 
+(def ^{:doc "Extracts the hour from any datetime."
        :arglists '([datetime])}
   hour (partial extract-datetime-component-simple
-                  #(.getHour ^LocalDateTime %)))
+                #(.getHour ^LocalDateTime %)))
 
 (def ^{:doc "Extracts the minute of hour (number) from any datetime."
        :arglists '([datetime])}
@@ -63,4 +63,4 @@
 (def ^{:doc "Extracts the second of minute from any datetime."
        :arglists '([datetime])}
   secnd (partial extract-datetime-component-simple
-                  #(.getSecond ^LocalDateTime %)))
+                 #(.getSecond ^LocalDateTime %)))
