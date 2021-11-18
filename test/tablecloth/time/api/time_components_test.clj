@@ -1,5 +1,5 @@
 (ns tablecloth.time.api.time-components-test
-  (:require [clojure.test :refer [testing deftest is function?]]
+  (:require [clojure.test :refer [deftest is]]
             [tablecloth.time.api.time-components :refer [year dayofyear
                                                          month dayofmonth
                                                          dayofweek hour
