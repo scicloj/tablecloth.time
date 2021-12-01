@@ -29,8 +29,6 @@
       (let [result (adjust-frequency ds ->minutes {:ungroup? false})]
         (is (-> result grouped?))))
 
-    ;; No support for this now b/c we aren't doing bookeeping on the :index meta data yet
     (testing ":rename-index-to option"
       (let [result  (adjust-frequency ds ->minutes {:rename-index-to :minutes})]
-        (is (some #{:minutes} (column-names result)))))
-    ))
+        (is (some #{:minutes} (column-names result)))))))
