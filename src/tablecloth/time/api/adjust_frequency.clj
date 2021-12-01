@@ -36,7 +36,3 @@
      (if ungroup?
        (tablecloth/ungroup adjusted-grouped-ds)
        adjusted-grouped-ds))))
-
-
-
-
