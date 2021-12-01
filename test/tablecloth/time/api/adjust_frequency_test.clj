@@ -1,9 +1,9 @@
 (ns tablecloth.time.api.adjust-frequency-test
   (:require [tech.v3.datatype.datetime :refer [plus-temporal-amount]]
-            [tablecloth.api :refer [dataset grouped?]]
+            [tablecloth.api :refer [dataset grouped? column-names]]
             [tablecloth.time.api.converters :refer [->minutes]]
             [tablecloth.time.utils.datatypes :refer [get-datatype]]
-            [tablecloth.time.api :refer [adjust-frequency]]
+            [tablecloth.time.api.adjust-frequency :refer [adjust-frequency]]
             [clojure.test :refer [testing deftest is]]))
 
 (defn time-index [start-inst n tf]
@@ -30,8 +30,7 @@
         (is (-> result grouped?))))
 
     ;; No support for this now b/c we aren't doing bookeeping on the :index meta data yet
-    ;; (testing ":rename-index-to option"
-    ;;   (let [result (-> ds (adjust-frequency ->minutes
-    ;;                                        {:rename-index-to :minutes}))]
-    ;;     (is (some #{:minutes} (column-names result)))))
+    (testing ":rename-index-to option"
+      (let [result  (adjust-frequency ds ->minutes {:rename-index-to :minutes})]
+        (is (some #{:minutes} (column-names result)))))
     ))
