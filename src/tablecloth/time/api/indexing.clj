@@ -23,8 +23,3 @@
             (cond->
                 has-validatable? (index-by new-index-name)
                 (not has-validatable?) identity))))
-
-
-
-
-
