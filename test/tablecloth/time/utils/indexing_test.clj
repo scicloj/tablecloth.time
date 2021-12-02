@@ -1,7 +1,7 @@
 (ns tablecloth.time.utils.indexing-test
   (:require [clojure.test :refer [deftest is testing]]
             [tablecloth.api :refer [dataset rename-columns add-column]]
-            [tablecloth.time.api :refer [index-by]]
+            [tablecloth.time.api.indexing :refer [index-by]]
             [tablecloth.time.utils.indexing :as idx-utils]))
 
 (deftest index-column-name-test
