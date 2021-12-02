@@ -1,4 +1,4 @@
-(ns tablecloth.time.api.index-by-test
+(ns tablecloth.time.api.indexing-test
   (:require [clojure.test :refer [deftest is testing]]
             [tablecloth.time.api.indexing :refer [index-by rename-index]]
             [tablecloth.api :refer [dataset]]))
