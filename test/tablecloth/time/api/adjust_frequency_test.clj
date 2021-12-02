@@ -23,7 +23,7 @@
     (testing "it returns a grouped dataset"
       (let [result (adjust-frequency ds ->minutes)]
         (is (= :dataset (get-datatype result)))
-        (is (-> result grouped? not))))
+        (is (-> result grouped?))))
 
     (testing "ungroup? option"
       (let [result (adjust-frequency ds ->minutes {:ungroup? false})]
