@@ -41,3 +41,19 @@
                                  #time/date "1970-01-02"
                                  #time/date "1970-01-03"])
                  (idx-utils/index-column-name)))))))
+
+(deftest get-index-column-name-or-error-test
+  (testing "works for keyword column name"
+    (let [ds (index-by (dataset {:x [1 2 3]}) :x)]
+      (is (= (:x ds)
+             (idx-utils/get-index-column-or-error ds)))))
+  (testing "works for string column name"
+    (let [ds (index-by (dataset {"x" [1 2 3]}) "x")]
+      (is (= (get ds "x")
+             (idx-utils/get-index-column-or-error ds)))))
+  (testing "explicitly set index is invalid"
+    (let [ds (index-by (dataset {:x [1 2 3]}) "x")]
+      (is (thrown? Exception (idx-utils/get-index-column-name-or-error ds))))))
+
+
+

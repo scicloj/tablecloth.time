@@ -56,7 +56,7 @@
   "Returns the time index column of the dataset if it can be identified."
   [dataset]
   (if (can-identify-index-column? dataset)
-    ((index-column-name dataset) dataset)
+    (get dataset (index-column-name dataset))
     (throw unidentifiable-index-error)))
 
 
