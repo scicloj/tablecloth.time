@@ -15,14 +15,14 @@
   Options are:
   - rename-index-to   - Rename the index column name 
   - ungroup?          - Set to true if you want the function to return a
-                        grouped dataset. Default: true
+                        grouped dataset. Default: false
   - include-columns   - Additional columns to include when adjusting when
                         grouping at a new frequency.
   "
   ([dataset converter]
    (adjust-frequency dataset converter nil))
   ([dataset converter {:keys [include-columns ungroup? rename-index-to]
-                       :or {ungroup? true}}]
+                       :or {ungroup? false}}]
    (let [index-column (get-index-column-or-error dataset)
          target-datatype (-> index-column first converter get-datatype)
          curr-column-name (-> index-column meta :name)
