@@ -25,14 +25,12 @@
                        :or {ungroup? true}}]
    (let [index-column (get-index-column-or-error dataset)
          target-datatype (-> index-column first converter get-datatype)
-         index-column-name (-> index-column meta :name)
-         new-column-data (emap converter target-datatype index-column)
+         curr-column-name (-> index-column meta :name)
+         next-column-name (or rename-index-to curr-column-name)
          adjusted-grouped-ds (cond-> dataset
-                               (some? rename-index-to)
-                               (rename-index rename-index-to)
+                               (not= curr-column-name next-column-name)
+                               (rename-index next-column-name)
                                :always
-                               (tablecloth/group-by
-                                (into [(or rename-index-to index-column-name)] include-columns)))]
-     (if ungroup?
-       (tablecloth/ungroup adjusted-grouped-ds)
-       adjusted-grouped-ds))))
+                               (tablecloth/update-columns
+                                {next-column-name (partial emap converter target-datatype)}))]
+     adjusted-grouped-ds)))
