@@ -15,9 +15,9 @@
 
 (defn index-column-name
   "Returns the name of the index column or `nil`. If the `:index` meta
-  is set on the column metadata, that is the name of the index;
-  otherwise, if there is a single column that can be identifed as time
-  data, that will be the column name."
+  is set on the column metadata, that is the name of the index unless
+  it is invalid; otherwise, if there is a single column that can be
+  identifed as time data, that will be the column name."
   [dataset]
   (if (valid? dataset :index)
     (-> dataset meta :validatable :index :column-names first)
