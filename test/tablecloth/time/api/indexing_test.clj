@@ -1,5 +1,6 @@
 (ns tablecloth.time.api.indexing-test
   (:require [clojure.test :refer [deftest is testing]]
+            [tablecloth.time.time-literals]
             [tablecloth.time.api.indexing :refer [index-by rename-index]]
             [tablecloth.api :refer [dataset]]))
 
@@ -28,8 +29,9 @@
                    (get-in [:validatable :index :column-names]))))))
     (testing "with index detected automatically"
       (let [renamed-ds (rename-index ds :z)]
-        (is (= [:z]
-               (-> renamed-ds
-                   meta
-                   (get-in [:validatable :index :column-names]))))))))
+        (-> renamed-ds
+            :z
+            nil?
+            not)))))
+
 
