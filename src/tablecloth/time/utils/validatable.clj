@@ -12,6 +12,14 @@
                   :columns      (select-keys ds column-names)
                   :metadata         metadata})))
 
+(defn has-validatable?
+  "Returns true if dataset has a validatable metadata."
+  [ds validatable-name]
+  (-> ds
+      (meta)
+      (get-in [:validatable validatable-name])
+      ((comp not nil?))))
+
 (defn valid?
   "Check if metadata derived from a few columns is still valid
   (that is, if the columns have not changed)."
@@ -22,7 +30,8 @@
                                               (get name))]
     (->> column-names
          (every? (fn [column-name]
-                   (identical? (ds column-name)
-                               (columns column-name)))))
+                   (and (identical? (ds column-name)
+                                    (columns column-name))
+                        (some? (columns column-name))))))
     false))
 
