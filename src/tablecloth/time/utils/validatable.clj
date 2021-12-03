@@ -30,7 +30,8 @@
                                               (get name))]
     (->> column-names
          (every? (fn [column-name]
-                   (identical? (ds column-name)
-                               (columns column-name)))))
+                   (and (identical? (ds column-name)
+                                    (columns column-name))
+                        (some? (columns column-name))))))
     false))
 
