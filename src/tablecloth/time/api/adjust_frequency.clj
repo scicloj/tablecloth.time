@@ -28,11 +28,11 @@
          curr-column-name (-> index-column meta :name)
          next-column-name (or rename-index-to curr-column-name)
          adjusted-ds (cond-> dataset
-                               (not= curr-column-name next-column-name)
-                               (rename-index next-column-name)
-                               :always
-                               (tablecloth/update-columns
-                                {next-column-name (partial emap converter target-datatype)}))]
+                       (not= curr-column-name next-column-name)
+                       (rename-index next-column-name)
+                       :always
+                       (tablecloth/update-columns
+                        {next-column-name (partial emap converter target-datatype)}))]
      (if ungroup?
        adjusted-ds
        (tablecloth/group-by adjusted-ds (into [next-column-name] include-columns))))))
