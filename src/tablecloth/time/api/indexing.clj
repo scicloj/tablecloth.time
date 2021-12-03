@@ -21,5 +21,5 @@
             (tablecloth/rename-columns
              {current-index-name new-index-name})
             (cond->
-             has-validatable? (index-by new-index-name)
-             (not has-validatable?) identity))))
+             has-explicit-index? (index-by new-index-name)
+             (not has-explicit-index?) identity))))
