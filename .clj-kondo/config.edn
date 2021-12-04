@@ -1,4 +1,5 @@
 {:linters
- {:unresolved-var {:level :info} ;; set b/c seems to be triggered by fns exported with tech.datatype.export-symbols/export-symbols fn.
-  :unresolved-symbol {:level :info}
-  }}
+ ;; add modifications to linting rules here
+ ;; see example below
+ #_{:unresolved-var {:level :info}
+  :unresolved-symbol {:level :info}}}
