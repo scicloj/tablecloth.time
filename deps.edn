@@ -7,4 +7,4 @@
  {:dev
   {:extra-deps {clj-kondo         {:mvn/version "2021.12.01"}
                 scicloj/notespace {:mvn/version "3-beta3"}
-                midje/midje       {:mvn/version "1.9.10"}}}}}
+                midje/midje       {:mvn/version "1.10.5"}}}}}
