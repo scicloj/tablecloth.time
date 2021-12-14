@@ -10,11 +10,11 @@
 ;; rolling window dataset validations
 (deftest rolling-window-int-index-properties
   (let [count 10
-        len 3
+        window-size 3
         ds (-> (tablecloth/dataset [[:idx (take count (range))]
                                     [:values (map #(* 10 %) (take count (range)))]])
                (index-by :idx))
-        rw (rolling-window ds :idx len)]
+        rw (rolling-window ds window-size)]
 
     (testing
      "compare dataset sizes"
@@ -22,7 +22,7 @@
 
 ;; rolling window dataset validations of time based indices
 (deftest rolling-window-time-index-properties
-  (let [len 3
+  (let [window-size 3
         ds (-> (tablecloth/dataset {:A [#time/date "1970-01-01"
                                         #time/date "1970-01-02"
                                         #time/date "1970-01-03"
@@ -37,7 +37,7 @@
                                         #time/date "1970-01-12"]
                                     :B [1 2 3 4 5 6 7 8 9 10 11 12]})
                (index-by :A))
-        rw (rolling-window ds :A len)]
+        rw (rolling-window ds window-size)]
 
     (testing
      "compare dataset sizes"
