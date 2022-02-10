@@ -69,7 +69,7 @@
                          #time/date "1970-01-02"
                          #time/date "1970-01-03"]
                      :B [4 5 6]})]
-    (is (instance? tech.v3.datatype.ListPersistentVector
+    (is (instance? tech.v3.datatype.list.ListImpl
                    (-> ds
                        (slice "1970-01-02" "1970-01-03" {:result-type :as-indexes}))))
     (is (instance? tech.v3.dataset.impl.dataset.Dataset
