@@ -3,41 +3,10 @@
            [org.threeten.extra YearWeek YearQuarter])
   (:require [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype :as dt]
-            [tablecloth.time.protocols.parseable :as parseable-proto]
-            [tech.v3.datatype.casting :refer [add-object-datatype!]]))
+            [tech.v3.datatype.casting :refer [add-object-datatype!]]
+            [tablecloth.time.api.parse :refer [parse]]))
 
 (set! *warn-on-reflection* true)
-
-;; TODO add more support for conversion targets
-;; - nanoseconds
-;; - microseconds
-;; - business day
-;; - business month end
-;; - busness quarter end
-;; - business year end
-;; - business hours
-
-(defn year->local-date [^Year year]
-  (-> year (.atMonthDay (java.time.MonthDay/parse "--01-01"))))
-
-(defn year->milliseconds-since-epoch [^Year year]
-  (-> year year->local-date dtdt/local-date->milliseconds-since-epoch))
-
-(defn milliseconds-since-epoch->year
-  ([millis]
-   (milliseconds-since-epoch->year millis (dtdt/utc-zone-id)))
-  ([millis timezone]
-   (-> (dtdt/milliseconds-since-epoch->local-date-time millis timezone)
-       (.getYear))))
-
-(defn string->time
-  "Given an identifiable time, returns the correct datetime object.
-  Optionally, you can specify a target type to also convert to a
-  different type in one step.
-
-  TODO: How do we define what an 'identifiable' string means?"
-  [str]
-  (parseable-proto/parse str))
 
 (defn anytime->milliseconds
   "Converts any time unit type to milliseconds."
@@ -45,7 +14,7 @@
    (anytime->milliseconds str-or-datetime (dtdt/utc-zone-id)))
   ([str-or-datetime timezone]
    (let [datetime (if (string? str-or-datetime)
-                    (string->time str-or-datetime)
+                    (parse str-or-datetime)
                     str-or-datetime)
          datetime-type (tech.v3.datatype/elemwise-datatype datetime)]
      (case datetime-type
