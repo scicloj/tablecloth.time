@@ -1,6 +1,7 @@
 (ns tablecloth.time.column.api
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as fun]
+            [tech.v3.datatype.packing :as dt-packing]
             [tech.v3.datatype.casting :as casting]
             [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype.datetime.base :as dtdt-base]
@@ -25,8 +26,10 @@
    :odt :offset-date-time
    :ldt :local-date-time})
 
-(defn calendar-local-type? [type]
-  (boolean (#{:local-date :local-date-time :local-time} type)))
+(defn calendar-local-type? [dtype]
+  (let [calendar-local-types #{:local-date :local-date-time :local-time}
+        base-type (dt-packing/unpack-datatype dtype)]
+    (boolean (calendar-local-types base-type))))
 
 (defn ^:private normalize-target
   "Normalize a target designator (keyword or Class) to a canonical keyword in `targets`.
@@ -112,15 +115,14 @@
                    tgt-factor (dtdt-base/epoch->microseconds tgt-type)
                    conversion (fun// src-factor tgt-factor )]
                (fun/* col conversion)))
-           :default
            (throw
             (ex-info
-              (format
+             (format
               (str "Unsupported time conversion from %s (%s) to %s (%s). "
-                    "`convert-time` only supports conversions among temporal and "
-                    "epoch types; duration/relative types require dedicated APIs.")
+                   "`convert-time` only supports conversions among temporal and "
+                   "epoch types; duration/relative types require dedicated APIs.")
               src-type src-cat tgt-type tgt-cat)
-              {:type          ::unsupported-time-conversion
+             {:type          ::unsupported-time-conversion
               :src-type      src-type
               :src-category  src-cat
               :tgt-type      tgt-type
