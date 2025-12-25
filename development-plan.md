@@ -104,7 +104,7 @@ In practice for tablecloth:
 
 ---
 
-## 4. Column-level time primitives (to live in `tablecloth.column.time`)
+## 4. Column-level time primitives (in `tablecloth.time.column.api`)
 
 We want a small, coherent set of **column primitives** that:
 
@@ -156,6 +156,50 @@ Where useful, we can delegate to existing dtype-next datetime ops:
 
 - `long-temporal-field` for extracting `:years`, `:months`, `:day-of-week`, etc.
 - `millisecond-descriptive-statistics` for summarizing datetime/duration series.
+
+### 4.4. Column-level `convert-time` (current MVP)
+
+We now have a first version of a column-level `convert-time` in
+`tablecloth.time.column.api` with the following semantics:
+
+- **Purpose**: convert between time *representations* at the column level:
+  - temporal ↔ epoch (e.g. `:local-date` ↔ `:epoch-milliseconds`).
+  - temporal ↔ temporal (via a millis pivot).
+  - epoch ↔ epoch (via numeric scaling only).
+- **Source/target classification**:
+  - Use `dtype/elemwise-datatype` + `dtdt-base/classify-datatype` to classify
+    the source and target dtypes into `:temporal`, `:epoch`, `:duration`,
+    `:relative`, etc.
+  - Only `[:temporal …]` and `[:epoch …]` combinations are supported; anything
+    involving `:duration` or `:relative` throws a clear
+    `::unsupported-time-conversion` `ExceptionInfo`.
+- **Targets**:
+  - Accept both keywords and Java time classes.
+  - Normalize via a private `normalize-target` helper that:
+    - handles a small synonym map (e.g. `:zdt` → `:zoned-date-time`,
+      `:ldt` → `:local-date-time`).
+    - uses `casting/object-class->datatype` for class targets.
+- **Packed vs unpacked dtypes**:
+  - We use `tech.v3.datatype.packing/unpack-datatype` in
+    `calendar-local-type?` so that both logical and packed
+    `LocalDate`/`LocalDateTime`/`LocalTime` types are treated as
+    "calendar local" when deciding whether a zone is needed.
+- **Zone semantics**:
+  - The public `convert-time` default `:zone` is **UTC**, implemented via
+    `coerce-zone-id` with `{:default (dtdt/utc-zone-id)}`.
+  - Zone is only passed to dtype-next conversions when the temporal side is
+    calendar-local (no inherent zone), or when doing temporal↔temporal via the
+    millis pivot.
+  - Epoch↔epoch conversions ignore zone entirely (they are pure numeric
+    rescalings of an absolute UTC instant representation).
+- **Epoch↔epoch workaround**:
+  - We avoid going through datetime for epoch↔epoch conversions (to dodge a
+    dtype-next bug around `:epoch-seconds` + zone) and instead scale via
+    `epoch->microseconds` and `tech.v3.datatype.functional`.
+
+We should keep `convert-time` focused on **representation changes** only; all
+operations that conceptually involve *lengths* (durations/relatives) will have
+separate APIs (e.g. `between`/`time-diff`, `convert-duration`).
 
 ---
 
@@ -244,3 +288,82 @@ Here, **index-awareness is limited** to knowing which column to treat as time. T
    - Use those semantics to guide the column-level and dataset-level implementations.
 
 4. **De-prioritize gnomon as a standalone library** until/unless a clear general JVM use case emerges.
+
+---
+
+## 7. Rounding / aligning / resampling semantics (notes)
+
+We clarified terminology and design layers around bucketing and resampling:
+
+- **Aligning / flooring** (scalar or column):
+  - The old scalar `down-to-nearest` from gnomon is conceptually a
+    *time-floor/align* operation:
+    - Given `n` and a unit (`:seconds`, `:minutes`, `:days`, etc.), map each
+      timestamp to the **start of the nearest-lower interval** of that size.
+  - At the column level this becomes a vectorized op (implemented with
+    dtype-next) that is *index-agnostic*:
+
+    ```clojure
+    (down-to-nearest col 10 :seconds ...) ; or align/floor naming variant
+    ```
+
+- **Bucketing**:
+  - Use the aligned value as a **bucket key** and group by it, usually followed
+    by aggregation.
+  - This is conceptually:
+
+    ```clojure
+    (let [aligned (down-to-nearest time-col 10 :seconds)]
+      (-> ds
+          (tc/add-column :bucket aligned)
+          (tc/group-by :bucket)
+          (tc/aggregate agg-spec)))
+    ```
+
+- **Resampling / adjust-frequency**:
+  - A higher-level dataset operation that:
+    - chooses a time coordinate (index or explicit column),
+    - aligns it using `down-to-nearest`/`align-time`,
+    - and then groups/aggregates and/or constructs a new regular time index.
+  - This is where a future `adjust-frequency` or `resample-time` API will live,
+    built on top of column primitives.
+
+We will:
+
+- Keep `down-to-nearest` (or a renamed `align-time`/`floor-time`) as the
+  **primitive alignment** op (scalar + column), completely independent of any
+  dataset index concept.
+- Build dataset-level **resampling** (`adjust-frequency`, `resample-time`,
+  etc.) in terms of:
+  - a chosen time column (optionally marked via `index-by`),
+  - column-level alignment (`down-to-nearest`), and
+  - standard group/aggregate operations.
+
+Unit handling:
+
+- We'll keep a small `normalize-unit` function at the tablecloth.time layer to
+  normalize user-facing units (e.g. `:second` → `:seconds`, `:minute` →
+  `:minutes`, `:week` → `:weeks`, etc.).
+- Internally we will:
+  - Map **duration-like** units (`:seconds`, `:minutes`, `:hours`, `:days`,
+    `:weeks`, etc.) onto dtype-next's **relative dtypes** and constants.
+  - Treat **calendar-like** units (`:months`, `:quarters`, `:years`) via
+    `LocalDate`/`LocalDateTime` logic (month/quarter/year boundaries), not as
+    simple fixed-length relative durations.
+
+This aligns with how other ecosystems behave conceptually:
+
+- pandas: `Timestamp.floor` / `Series.dt.floor` for alignment, `.resample()`
+  for resampling.
+- R (lubridate/dplyr): `floor_date()` for alignment,
+  `group_by(floor_date(...)) %>% summarise(...)` for bucketing/resampling.
+- SQL (Postgres): `date_trunc()` for alignment,
+  `GROUP BY date_trunc(...)` for bucketing.
+
+---
+
+## 8. Reference: dtype-next datetime API
+
+For details on the underlying dtype-next datetime namespace (`tech.v3.datatype.datetime`) that we are lifting into `tablecloth.time`, see:
+
+- `doc/dtype-next-datetime-api-notes.md`
