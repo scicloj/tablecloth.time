@@ -26,6 +26,13 @@
    :odt :offset-date-time
    :ldt :local-date-time})
 
+(defn metric-unit? [u]
+  (boolean (#{:milliseconds :seconds :minutes :hours :days :weeks}
+            (normalize-unit u))))
+
+;; (defn calendar-unit? [u]
+;;   (boolean (#{:months :quarters :years} (normalize-unit u))))
+
 (defn calendar-local-type? [dtype]
   (let [calendar-local-types #{:local-date :local-date-time :local-time}
         base-type (dt-packing/unpack-datatype dtype)]
@@ -69,10 +76,25 @@
 
 (defn ^:private coerce-column
   "Coerce to a column."
-  [data]
+  [data opts]
   (if (tcc/column? data)
     data
     (tcc/column data)))
+
+(defn normalize-unit
+  "Normalize a unit across plural or singular usages. Plural is the
+  normalized version. Noop if type is not supported."
+  [u]
+  (case u
+    :second  :seconds
+    :minute  :minutes
+    :hour    :hours
+    :day     :days
+    :year    :years
+    ;; :week    :weeks
+    ;; :month   :months
+    ;; :quarter :quarters
+    u))
 
 (defn convert-time
   "Convert a time column between temporal and epoch representations.
@@ -123,11 +145,45 @@
                    "epoch types; duration/relative types require dedicated APIs.")
               src-type src-cat tgt-type tgt-cat)
              {:type          ::unsupported-time-conversion
+              :col-type      (type col)
               :src-type      src-type
               :src-category  src-cat
               :tgt-type      tgt-type
               :tgt-category  tgt-cat})))]
      (tcc/column data))))
+
+
+(defn milliseconds-in
+  "Return the number of epoch millis in a unit.
+
+  Units: :milliseconds :seconds :minutes :hours :days :weeks."
+  [unit]
+  (case unit
+    :milliseconds 1
+    :seconds      dtdt/milliseconds-in-second 
+    :minutes      dtdt/milliseconds-in-minute 
+    :hours        dtdt/milliseconds-in-hour
+    :days         dtdt/milliseconds-in-day
+    :weeks        dtdt/milliseconds-in-week
+    (throw (ex-info (str "Unsupported unit: " unit) {:unit unit}))))
+
+(defn down-to-nearest
+  ""
+  ([col interval unit opts]
+   (let [unit (normalize-unit unit)
+         zone (coerce-zone-id (:zone opts))]
+     (cond
+       (metric-unit? unit)
+       (let [original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
+             divisor (* (long interval) (long (milliseconds-in unit)))
+             millis-col (convert-time col :epoch-milliseconds {:zone zone})
+             rounded-col (dtype/set-datatype 
+                          ;; must set type b/c arithmetic comes back
+                          ;; as :int64 -- the storage type of
+                          ;; epoch-milliseconds
+                          (fun/- millis-col (fun/rem millis-col divisor))
+                          :epoch-milliseconds)]
+         (convert-time rounded-col original-type (:zone zone)))))))
 
 (comment
   ;; source days => target hours
@@ -138,22 +194,27 @@
 
   (fun//
    (dt-base/epoch->microseconds :epoch-milliseconds)
-   (dt-base/epoch->microseconds :epoch-days)
-   )
+   (dt-base/epoch->microseconds :epoch-days))
 
   (dt-base/epoch->microseconds :epoch-hours)
 
   (parse "2025-12-10")
 
-  (def ddata (tcc/column (map parse ["1970-01-02" "1970-01-10"])))
+  (def ddata (tcc/column
+              (map parse ["1970-01-02T13:33:00Z" "1970-01-10T03:10:10Z"])))
 
   (-> ddata
       (convert-time :epoch-milliseconds))
 
   (-> ddata
       (convert-time :epoch-milliseconds)
-      (convert-time :epoch-days)
-      )
+      (convert-time :epoch-days))
 
-)
+  (tcc/typeof ddata)
 
+  (dtdt/datetime-datatype? (dtype/elemwise-datatype ddata))
+
+  (-> ddata
+      (down-to-nearest 12 :minutes (:zone "America/Chicago")))
+
+  )
