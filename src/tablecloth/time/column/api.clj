@@ -231,7 +231,19 @@
      (convert-time result-ld original-type opts))))
 
 (defn down-to-nearest
-  ""
+  "Floor a `col` of time values to the nearest lower multiple of (interval × unit).
+
+    Arities:
+    - (down-to-nearest interval unit) => returns a function f; (f col) or (f x col)
+    - (down-to-nearest col interval unit)
+    - (down-to-nearest col interval unit opts)
+
+    Semantics:
+    - Converts x to epoch millis, floors by modulo (toward −∞), then converts back,
+      preserving x's type (Instant/LocalDateTime/LocalDate/ZonedDateTime/OffsetDateTime).
+    - If x is a number (millis), returns a number.
+    - Units: :milliseconds :seconds :minutes :hours :days :weeks, and :months/:quarters/:years (calendar-aware).
+    - LocalDate/LocalDateTime use the system default zone by default; pass opts with :zone to override."
   ([col interval unit opts]
    (let [col (coerce-column col)
          original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
@@ -249,8 +261,10 @@
                           :epoch-milliseconds)]
          (convert-time rounded-col original-type (:zone zone)))
        (calendar-unit? unit)
-       (let [column-zdt (convert-time col :zoned-date-time {:zone zone})
+       (let [col (convert-time col :local-date)
              rounded-col (case unit
-                           :months (floor-to-month interval opts))]
+                           :months (floor-to-month col interval opts)
+                           :years  (floor-to-year col interval opts)
+                           :quarters (floor-to-quarter col interval opts))]
          (convert-time rounded-col original-type))))))
 
