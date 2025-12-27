@@ -150,14 +150,151 @@ Semantics:
 
 These operations are **index-agnostic** in the sense that they are per-row transforms; they do not need ordering. They will be composed with index-aware dataset-level operations when needed.
 
-### 4.3. Field extraction and statistics
+### 4.3. Field extraction (✅ implemented)
 
-Where useful, we can delegate to existing dtype-next datetime ops:
+We have implemented field extractor functions in `tablecloth.time.column.api`:
 
-- `long-temporal-field` for extracting `:years`, `:months`, `:day-of-week`, etc.
-- `millisecond-descriptive-statistics` for summarizing datetime/duration series.
+- **Basic calendar fields**: `year`, `month`, `day`, `hour`, `minute`, `get-second`
+- **Derived calendar fields**: `day-of-week`, `day-of-year`, `week-of-year`, `quarter`
 
-### 4.4. Column-level `convert-time` (current MVP)
+All functions:
+- Wrap `dtdt-ops/long-temporal-field` for efficient vectorized extraction
+- Handle `Instant` columns automatically (convert to `LocalDateTime` UTC for extraction)
+- Work with `LocalDate`, `LocalDateTime`, `ZonedDateTime`, and `Instant` columns
+- Return wrapped `tcc/column` objects
+
+Comprehensive tests added covering all datetime types and edge cases.
+
+### 4.4. Additional column operations to consider
+
+Based on pandas dt accessor and R lubridate, here are additional column-level operations for future implementation:
+
+#### 4.4.1. Rounding operations (HIGH PRIORITY)
+
+We have `down-to-nearest` (floor) but are missing:
+
+```clojure
+(defn ceil-to-nearest [col interval unit opts] ...)  ; Round up to next boundary
+(defn round-to-nearest [col interval unit opts] ...) ; Round to nearest boundary
+```
+
+**Rationale**: Pandas provides `.round`, `.floor`, and `.ceil` methods. Lubridate provides `ceiling_date()`, `floor_date()`, and `round_date()`. For ceil, it always returns the upper bound of the period; for round, it returns the nearest bound.
+
+**Implementation notes**:
+- `ceil-to-nearest`: floor + (if not already aligned, add one interval)
+- `round-to-nearest`: floor, then check if distance to next boundary is less than half interval
+
+#### 4.4.2. Temporal arithmetic (MEDIUM PRIORITY)
+
+```clojure
+(defn plus-time [col amount unit opts] ...)   ; Add time amounts
+(defn minus-time [col amount unit opts] ...)  ; Subtract time amounts
+(defn between [col1 col2 unit opts] ...)      ; Difference between two datetime columns
+```
+
+**Rationale**: dtype-next provides `plus-temporal-amount`, `minus-temporal-amount`, and `between`. Lubridate offers efficient arithmetic operations on dates. Essential for "shift by N days" or "time since previous event" operations.
+
+**Implementation notes**:
+- Wrap `dtdt-ops/plus-temporal-amount` and `dtdt-ops/minus-temporal-amount`
+- Support same units as `down-to-nearest`: `:seconds`, `:minutes`, `:hours`, `:days`, `:weeks`, `:months`, `:years`
+- `between` wraps `dtdt-ops/between` for column-wise time differences
+- Handle zone semantics consistently with `convert-time`
+
+#### 4.4.3. Boolean predicates (LOWER PRIORITY, but useful)
+
+```clojure
+(defn is-month-start? [col] ...)   ; True if first day of month
+(defn is-month-end? [col] ...)     ; True if last day of month
+(defn is-quarter-start? [col] ...) ; True if first day of quarter
+(defn is-quarter-end? [col] ...)   ; True if last day of quarter
+(defn is-year-start? [col] ...)    ; True if first day of year
+(defn is-year-end? [col] ...)      ; True if last day of year
+(defn is-leap-year? [col] ...)     ; True if year is leap year
+(defn is-weekend? [col] ...)       ; True if Saturday or Sunday
+```
+
+**Rationale**: Pandas dt accessor provides `is_month_start`, `is_month_end`, etc. Lubridate's `leap_year()` tests for leap years. Useful for filtering and conditional logic in pipelines.
+
+**Implementation notes**:
+- Compare field extractors with boundary values
+- `is-month-start?`: day == 1
+- `is-month-end?`: compare with days-in-month (account for leap years)
+- `is-leap-year?`: `(and (= 0 (mod year 4)) (or (!= 0 (mod year 100)) (= 0 (mod year 400))))`
+- `is-weekend?`: `(or (= day-of-week 6) (= day-of-week 7))`
+
+#### 4.4.4. Timezone operations (MEDIUM PRIORITY)
+
+```clojure
+(defn with-tz [col new-zone] ...)     ; Change display timezone (same instant)
+(defn force-tz [col new-zone] ...)    ; Change zone metadata (different instant)
+```
+
+**Rationale**: Lubridate provides `with_tz()` (changes time zone display, same moment) and `force_tz()` (changes only zone metadata, describes new moment). Critical for multi-timezone datasets.
+
+**Implementation notes**:
+- `with-tz`: Convert to `ZonedDateTime` with new zone (instant unchanged)
+- `force-tz`: Reinterpret clock time in new zone (instant changes)
+- Only works with temporal types that have zone information
+
+#### 4.4.5. Descriptive statistics (LOWER PRIORITY)
+
+```clojure
+(defn datetime-min [col] ...)         ; Minimum datetime value
+(defn datetime-max [col] ...)         ; Maximum datetime value
+(defn datetime-mean [col] ...)        ; Mean datetime value
+(defn datetime-range [col] ...)       ; max - min as a duration
+```
+
+**Rationale**: dtype-next provides `millisecond-descriptive-statistics`. While these might be better as dataset-level aggregations, having column-level helpers is convenient.
+
+**Implementation notes**:
+- Wrap `dtdt-ops/millisecond-descriptive-statistics`
+- Convert results back to appropriate datetime types
+- Consider whether these belong here or in aggregation layer
+
+#### 4.4.6. Normalization operations (QUICK WIN)
+
+```clojure
+(defn normalize-date [col opts] ...)  ; Set time component to 00:00:00
+```
+
+**Rationale**: Pandas `dt.normalize` always rounds time to midnight (00:00:00). Common operation for comparing dates ignoring time components.
+
+**Implementation notes**:
+- Convert to `LocalDate` and back to original temporal type
+- Equivalent to `floor-to-day` but more explicit intent
+
+#### 4.4.7. String formatting (NICE-TO-HAVE)
+
+```clojure
+(defn strftime [col format-string opts] ...)  ; Format as string
+(defn day-name [col opts] ...)               ; "Monday", "Tuesday", etc.
+(defn month-name [col opts] ...)             ; "January", "February", etc.
+```
+
+**Rationale**: Pandas `Series.dt.strftime` converts to string using specified format. Useful for labels and display.
+
+**Implementation notes**:
+- Use Java's `DateTimeFormatter` for `strftime`
+- `day-name` and `month-name` can use built-in formatters
+- Consider locale support for internationalization
+
+#### 4.4.8. Implementation priorities
+
+**Implement immediately**:
+1. Rounding operations (`ceil-to-nearest`, `round-to-nearest`) - completes rounding trilogy
+2. Temporal arithmetic (`plus-time`, `minus-time`, `between`) - enables time-delta operations
+
+**Implement soon**:
+3. Timezone operations (`with-tz`, `force-tz`) - critical for multi-timezone use cases
+4. Normalization (`normalize-date`) - common operation, easy to implement
+
+**Nice-to-have**:
+5. Boolean predicates - useful for filtering
+6. String formatting - display and export
+7. Descriptive statistics - may fit better in aggregation layer
+
+### 4.5. Column-level `convert-time` (current MVP)
 
 We now have a first version of a column-level `convert-time` in
 `tablecloth.time.column.api` with the following semantics:
