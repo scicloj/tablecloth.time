@@ -2,7 +2,9 @@
   (:require [clojure.test :refer [deftest testing is]]
             [tablecloth.column.api :as tcc]
             [tablecloth.time.api.parse :refer [parse]]
-            [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year]])
+            [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year
+                                                year month day hour minute get-second
+                                                day-of-week day-of-year week-of-year quarter]])
   (:import [java.time Duration Instant LocalDate LocalDateTime ZonedDateTime]))
 
 (deftest convert-time-temporal->epoch-default-utc
@@ -561,3 +563,290 @@
       (is (= (vec result-utc) (vec result-berlin)))
       (is (= [(Instant/parse "1970-01-01T00:00:00Z")]
              (vec result-utc))))))
+
+;; -----------------------------------------------------------------------------
+;; Field extractors tests
+;; -----------------------------------------------------------------------------
+
+(deftest year-test
+  (testing "extract year from LocalDate"
+    (let [dates [(parse "1970-01-15")
+                 (parse "1999-12-31")
+                 (parse "2000-01-01")
+                 (parse "2024-06-15")]
+          col (tcc/column dates)
+          result (year col)]
+      (is (= [1970 1999 2000 2024] (vec result)))))
+
+  (testing "extract year from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "2024-12-31T23:59:59Z")]
+          col (tcc/column instants)
+          result (year col)]
+      (is (= [1970 2024] (vec result)))))
+
+  (testing "extract year from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 2024 6 15 12 30 45)]
+          col (tcc/column datetimes)
+          result (year col)]
+      (is (= [1970 2024] (vec result))))))
+
+(deftest month-test
+  (testing "extract month from LocalDate"
+    (let [dates [(parse "1970-01-15")
+                 (parse "1970-02-20")
+                 (parse "1970-06-10")
+                 (parse "1970-12-31")]
+          col (tcc/column dates)
+          result (month col)]
+      (is (= [1 2 6 12] (vec result)))))
+
+  (testing "extract month from Instant"
+    (let [instants [(Instant/parse "1970-03-01T00:00:00Z")
+                    (Instant/parse "1970-08-15T12:30:00Z")]
+          col (tcc/column instants)
+          result (month col)]
+      (is (= [3 8] (vec result)))))
+
+  (testing "extract month from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 7 15 12 30 45)]
+          col (tcc/column datetimes)
+          result (month col)]
+      (is (= [1 7] (vec result))))))
+
+(deftest day-test
+  (testing "extract day of month from LocalDate"
+    (let [dates [(parse "1970-01-01")
+                 (parse "1970-01-15")
+                 (parse "1970-01-31")
+                 (parse "1970-02-28")]
+          col (tcc/column dates)
+          result (day col)]
+      (is (= [1 15 31 28] (vec result)))))
+
+  (testing "extract day from Instant"
+    (let [instants [(Instant/parse "1970-01-05T00:00:00Z")
+                    (Instant/parse "1970-01-25T23:59:59Z")]
+          col (tcc/column instants)
+          result (day col)]
+      (is (= [5 25] (vec result)))))
+
+  (testing "extract day from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 1 20 12 30 45)]
+          col (tcc/column datetimes)
+          result (day col)]
+      (is (= [1 20] (vec result))))))
+
+(deftest hour-test
+  (testing "extract hour from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 1 1 6 30 0)
+                     (LocalDateTime/of 1970 1 1 12 0 0)
+                     (LocalDateTime/of 1970 1 1 23 59 59)]
+          col (tcc/column datetimes)
+          result (hour col)]
+      (is (= [0 6 12 23] (vec result)))))
+
+  (testing "extract hour from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "1970-01-01T15:30:00Z")]
+          col (tcc/column instants)
+          result (hour col)]
+      (is (= [0 15] (vec result)))))
+
+  (testing "extract hour from ZonedDateTime"
+    (let [zoned-times [(ZonedDateTime/parse "1970-01-01T08:00:00Z")
+                       (ZonedDateTime/parse "1970-01-01T20:30:00Z")]
+          col (tcc/column zoned-times)
+          result (hour col)]
+      (is (= [8 20] (vec result))))))
+
+(deftest minute-test
+  (testing "extract minute from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 1 1 12 15 0)
+                     (LocalDateTime/of 1970 1 1 12 30 0)
+                     (LocalDateTime/of 1970 1 1 12 59 59)]
+          col (tcc/column datetimes)
+          result (minute col)]
+      (is (= [0 15 30 59] (vec result)))))
+
+  (testing "extract minute from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "1970-01-01T12:45:00Z")]
+          col (tcc/column instants)
+          result (minute col)]
+      (is (= [0 45] (vec result))))))
+
+(deftest get-second-test
+  (testing "extract second from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 1 1 12 30 15)
+                     (LocalDateTime/of 1970 1 1 12 30 45)
+                     (LocalDateTime/of 1970 1 1 12 30 59)]
+          col (tcc/column datetimes)
+          result (get-second col)]
+      (is (= [0 15 45 59] (vec result)))))
+
+  (testing "extract second from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "1970-01-01T12:30:42Z")]
+          col (tcc/column instants)
+          result (get-second col)]
+      (is (= [0 42] (vec result))))))
+
+(deftest day-of-week-test
+  (testing "extract day of week from LocalDate (ISO: Monday=1, Sunday=7)"
+    ;; 1970-01-01 is Thursday
+    ;; 1970-01-02 is Friday
+    ;; 1970-01-03 is Saturday
+    ;; 1970-01-04 is Sunday
+    ;; 1970-01-05 is Monday
+    (let [dates [(parse "1970-01-01")  ; Thursday
+                 (parse "1970-01-02")  ; Friday
+                 (parse "1970-01-03")  ; Saturday
+                 (parse "1970-01-04")  ; Sunday
+                 (parse "1970-01-05")] ; Monday
+          col (tcc/column dates)
+          result (day-of-week col)]
+      (is (= [4 5 6 7 1] (vec result)))))
+
+  (testing "extract day of week from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")  ; Thursday
+                    (Instant/parse "1970-01-05T12:30:00Z")] ; Monday
+          col (tcc/column instants)
+          result (day-of-week col)]
+      (is (= [4 1] (vec result)))))
+
+  (testing "extract day of week from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)   ; Thursday
+                     (LocalDateTime/of 1970 1 4 12 30 0)] ; Sunday
+          col (tcc/column datetimes)
+          result (day-of-week col)]
+      (is (= [4 7] (vec result))))))
+
+(deftest day-of-year-test
+  (testing "extract day of year from LocalDate"
+    ;; January 1 = day 1
+    ;; January 31 = day 31
+    ;; February 1 = day 32
+    ;; December 31 (non-leap) = day 365
+    (let [dates [(parse "1970-01-01")  ; day 1
+                 (parse "1970-01-31")  ; day 31
+                 (parse "1970-02-01")  ; day 32
+                 (parse "1970-12-31")] ; day 365
+          col (tcc/column dates)
+          result (day-of-year col)]
+      (is (= [1 31 32 365] (vec result)))))
+
+  (testing "extract day of year from leap year"
+    ;; 2000 is a leap year, so December 31 = day 366
+    (let [dates [(parse "2000-02-29")  ; day 60 (leap day)
+                 (parse "2000-12-31")] ; day 366
+          col (tcc/column dates)
+          result (day-of-year col)]
+      (is (= [60 366] (vec result)))))
+
+  (testing "extract day of year from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "1970-12-31T23:59:59Z")]
+          col (tcc/column instants)
+          result (day-of-year col)]
+      (is (= [1 365] (vec result))))))
+
+(deftest week-of-year-test
+  (testing "extract ISO week of year from LocalDate"
+    ;; ISO 8601: Week 1 is the first week with a Thursday
+    ;; 1970-01-01 (Thursday) is in week 1
+    ;; 1970-01-05 (Monday) is in week 2
+    (let [dates [(parse "1970-01-01")  ; week 1
+                 (parse "1970-01-05")  ; week 2
+                 (parse "1970-06-15")  ; mid-year
+                 (parse "1970-12-28")] ; week 53
+          col (tcc/column dates)
+          result (week-of-year col)]
+      (is (= [1 2 25 53] (vec result)))))
+
+  (testing "extract week of year from Instant"
+    (let [instants [(Instant/parse "1970-01-01T00:00:00Z")
+                    (Instant/parse "1970-06-15T12:30:00Z")]
+          col (tcc/column instants)
+          result (week-of-year col)]
+      (is (= [1 25] (vec result)))))
+
+  (testing "extract week of year from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 0 0 0)
+                     (LocalDateTime/of 1970 1 5 12 30 0)]
+          col (tcc/column datetimes)
+          result (week-of-year col)]
+      (is (= [1 2] (vec result))))))
+
+(deftest quarter-test
+  (testing "extract quarter from LocalDate"
+    (let [dates [(parse "1970-01-15")  ; Q1
+                 (parse "1970-02-20")  ; Q1
+                 (parse "1970-03-31")  ; Q1
+                 (parse "1970-04-01")  ; Q2
+                 (parse "1970-05-15")  ; Q2
+                 (parse "1970-06-30")  ; Q2
+                 (parse "1970-07-01")  ; Q3
+                 (parse "1970-08-20")  ; Q3
+                 (parse "1970-09-30")  ; Q3
+                 (parse "1970-10-01")  ; Q4
+                 (parse "1970-11-15")  ; Q4
+                 (parse "1970-12-31")] ; Q4
+          col (tcc/column dates)
+          result (quarter col)]
+      (is (= [1 1 1 2 2 2 3 3 3 4 4 4] (vec result)))))
+
+  (testing "extract quarter from Instant"
+    (let [instants [(Instant/parse "1970-01-15T00:00:00Z")  ; Q1
+                    (Instant/parse "1970-04-15T00:00:00Z")  ; Q2
+                    (Instant/parse "1970-07-15T00:00:00Z")  ; Q3
+                    (Instant/parse "1970-10-15T00:00:00Z")] ; Q4
+          col (tcc/column instants)
+          result (quarter col)]
+      (is (= [1 2 3 4] (vec result)))))
+
+  (testing "extract quarter from LocalDateTime"
+    (let [datetimes [(LocalDateTime/of 1970 2 1 0 0 0)  ; Q1
+                     (LocalDateTime/of 1970 5 1 12 30 0) ; Q2
+                     (LocalDateTime/of 1970 8 1 12 30 0) ; Q3
+                     (LocalDateTime/of 1970 11 1 12 30 0)] ; Q4
+          col (tcc/column datetimes)
+          result (quarter col)]
+      (is (= [1 2 3 4] (vec result)))))
+
+  (testing "quarter boundaries are correct"
+    ;; Verify exact boundaries: month 1,2,3->Q1, 4,5,6->Q2, etc.
+    (let [dates [(parse "1970-03-31")  ; last day of Q1
+                 (parse "1970-04-01")  ; first day of Q2
+                 (parse "1970-06-30")  ; last day of Q2
+                 (parse "1970-07-01")  ; first day of Q3
+                 (parse "1970-09-30")  ; last day of Q3
+                 (parse "1970-10-01")] ; first day of Q4
+          col (tcc/column dates)
+          result (quarter col)]
+      (is (= [1 2 2 3 3 4] (vec result))))))
+
+(deftest field-extractors-return-columns-test
+  (testing "all field extractors return column objects"
+    (let [dates [(parse "1970-01-01")]
+          col (tcc/column dates)]
+      (is (tcc/column? (year col)))
+      (is (tcc/column? (month col)))
+      (is (tcc/column? (day col)))
+      (is (tcc/column? (day-of-week col)))
+      (is (tcc/column? (day-of-year col)))
+      (is (tcc/column? (week-of-year col)))
+      (is (tcc/column? (quarter col)))))
+
+  (testing "field extractors with time components return column objects"
+    (let [datetimes [(LocalDateTime/of 1970 1 1 12 30 45)]
+          col (tcc/column datetimes)]
+      (is (tcc/column? (hour col)))
+      (is (tcc/column? (minute col)))
+      (is (tcc/column? (get-second col))))))

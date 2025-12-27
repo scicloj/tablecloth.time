@@ -268,3 +268,71 @@
                            :quarters (floor-to-quarter col interval opts))]
          (convert-time rounded-col original-type))))))
 
+;; -----------------------------------------------------------------------------
+;; Field extractors
+;; -----------------------------------------------------------------------------
+
+(defn- ensure-local-datetime
+  "Convert Instant columns to LocalDateTime (UTC) for field extraction.
+  Other datetime types are left as-is since they already have calendar context."
+  [col]
+  (let [col (coerce-column col)
+        dtype (dtype/elemwise-datatype col)
+        base-dtype (dt-packing/unpack-datatype dtype)]
+    (if (= base-dtype :instant)
+      (convert-time col :local-date-time {:zone (dtdt/utc-zone-id)})
+      col)))
+
+(defn year
+  "Extract year from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :years (ensure-local-datetime col))))
+
+(defn month
+  "Extract month (1-12) from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :months (ensure-local-datetime col))))
+
+(defn day
+  "Extract day of month from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :days (ensure-local-datetime col))))
+
+(defn hour
+  "Extract hour from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :hours (ensure-local-datetime col))))
+
+(defn minute
+  "Extract minute from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :minutes (ensure-local-datetime col))))
+
+(defn get-second
+  "Extract second from a datetime column.
+  
+  Named `get-second` to avoid collision with clojure.core/second."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :seconds (ensure-local-datetime col))))
+
+(defn day-of-week
+  "Extract day of week from a datetime column. Monday=1, Sunday=7 (ISO standard)."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :iso-day-of-week (ensure-local-datetime col))))
+
+(defn day-of-year
+  "Extract day of year (1-366) from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :day-of-year (ensure-local-datetime col))))
+
+(defn week-of-year
+  "Extract ISO week of year (1-53) from a datetime column."
+  [col]
+  (tcc/column (dtdt-ops/long-temporal-field :iso-week-of-year (ensure-local-datetime col))))
+
+(defn quarter
+  "Extract quarter (1-4) from a datetime column."
+  [col]
+  (let [months (dtdt-ops/long-temporal-field :months (ensure-local-datetime col))]
+    (tcc/column (fun/+ 1 (fun/quot (fun/- months 1) 3)))))
+
