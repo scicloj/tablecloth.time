@@ -8,89 +8,95 @@
 
 (set! *warn-on-reflection* true)
 
-(defn- extract-key [key]
-  (cond
-    (or (int? key)
-        (types/temporal-type? (types/get-datatype key)))
-    key
-    :else
-    (parse/parse key)))
+(defn- extract-key [key arg-name]
+  (try
+    (cond
+      (or (int? key)
+          (types/temporal-type? (types/get-datatype key)))
+      key
+      :else
+      (parse/parse key))
+    (catch Exception e
+      (throw (ex-info (format "Unable to parse `%s` argument: %s" arg-name (.getMessage e))
+                      {:argument arg-name
+                       :value key
+                       :cause e})))))
 
-(defn- normalize-key [key]
-  (first (convert-time [key] :epoch-milliseconds)))
+(defn- normalize-key [key arg-name]
+  (try
+    (first (convert-time [key] :epoch-milliseconds))
+    (catch Exception e
+      (throw (ex-info (format "Unable to convert `%s` to epoch milliseconds: %s" arg-name (.getMessage e))
+                      {:argument arg-name
+                       :value key
+                       :cause e})))))
 
+;; TODO: Add the sorting
 (defn slice
+  "Returns a subset of dataset's rows between `from` and `to` (both inclusive).
+  
+  The time column is sliced using binary search, so it must be sorted in ascending
+  order. Future versions will add a `:sorted?` option to skip the sortedness check.
+  
+  Arguments:
+  - ds: the dataset to slice
+  - time-column: keyword or function to select the time column (e.g., :timestamp or ds)
+  - from: start time (string, datetime literal, epoch millis, or any temporal type)
+  - to: end time (string, datetime literal, epoch millis, or any temporal type)
+  - opts: optional map with:
+    - :result-type - `:as-dataset` (default) returns a dataset, `:as-indices` returns indices
+  
+  Time values are normalized to epoch milliseconds for comparison. Strings are parsed
+  using ISO-8601 format via `tablecloth.time.parse/parse`.
+  
+  Examples:
+  
+    ;; Basic usage with strings
+    (slice ds :timestamp \"2024-01-01\" \"2024-12-31\")
+    
+    ;; With datetime literals (requires time-literals data readers)
+    (slice ds :timestamp 
+           #time/instant \"2024-01-01T00:00:00Z\" 
+           #time/instant \"2024-12-31T23:59:59Z\")
+    
+    ;; Return indices instead of dataset
+    (slice ds :timestamp \"2024-01-01\" \"2024-12-31\" {:result-type :as-indices})
+    
+    ;; Using epoch milliseconds directly
+    (slice ds :timestamp 1704067200000 1704153599999)"
   ([ds time-column from to]
-   (let [col-idx (time-column ds)
-         col-millis (convert-time col-idx :epoch-milliseconds)
-         from-key (-> from extract-key normalize-key) 
-         to-key (-> to extract-key normalize-key)
+   (slice ds time-column from to nil))
+  ([ds time-column from to {:keys [result-type]
+                            :or {result-type :as-dataset}}]
+   (let [col-idx (try
+                   (time-column ds)
+                   (catch Exception e
+                     (throw (ex-info (format "Unable to extract time column from dataset: %s" (.getMessage e))
+                                     {:time-column time-column
+                                      :cause e}))))
+         _ (when (nil? col-idx)
+             (throw (ex-info "Time column is nil or does not exist in dataset"
+                             {:time-column time-column
+                              :dataset-columns (vec (tc/column-names ds))})))
+         col-millis (try
+                      (convert-time col-idx :epoch-milliseconds)
+                      (catch Exception e
+                        (throw (ex-info (format "Unable to convert time column to epoch milliseconds: %s" (.getMessage e))
+                                        {:time-column time-column
+                                         :column-dtype (dtype/elemwise-datatype col-idx)
+                                         :cause e}))))
+         from-key (-> from (extract-key "from") (normalize-key "from"))
+         to-key (-> to (extract-key "to") (normalize-key "to"))
+         _ (when (> from-key to-key)
+             (throw (ex-info "The `from` time must be less than or equal to `to` time"
+                             {:from from
+                              :to to
+                              :from-millis from-key
+                              :to-millis to-key})))
          lower-bound (binary-search/find-lower-bound col-millis from-key)
          upper-bound (binary-search/find-upper-bound col-millis to-key)
          slice-indices (dtype/->reader (range lower-bound (inc upper-bound)))]
-     (tc/select-rows ds slice-indices))))
+     (if (= result-type :as-indices)
+       slice-indices
+       (tc/select-rows ds slice-indices)))))
 
-;; (defn slice
-;;   "Returns a subset of dataset's rows (or row indexes) as specified by from and to, inclusively.
-;;   `from` and `to` are either strings or datetime type literals (e.g. #time/local-date \"1970-01-01\").
-;;   The dataset must have been indexed, and the time unit of the index must match the unit of time
-;;   by which you are attempting to slice.
-
-;;   Options are:
-
-;;   - result-type - return results as dataset (`:as-dataset`, default) or a row of indexes (`:as-indexes`).
-
-;;   Example data:
-
-;;   |   :A | :B |
-;;   |------|----|
-;;   | 1970 |  0 |
-;;   | 1971 |  1 |
-;;   | 1972 |  2 |
-;;   | 1973 |  3 |
-
-;;   Example:
-
-;;   (-> data
-;;       (index-by :A)
-;;       (slice \"1972\" \"1973\"))
-
-;;   ;; => _unnamed [2 2]:
-
-;;   |   :A | :B |
-;;   |------|----|
-;;   | 1972 |  2 |
-;;   | 1973 |  3 |
-;;   "
-;;   ([dataset from to] (slice dataset from to nil))
-;;   ([dataset from to {:keys [result-type]
-;;                      :or {result-type :as-dataset}}]
-;;    (let [build-err-msg (fn [^java.lang.Exception err arg-symbol time-unit]
-;;                          (let [msg-str "Unable to parse `%s` date string. Its format may not match the expected format for the index time unit: %s. "]
-;;                            (str (format msg-str arg-symbol time-unit) (.getMessage err))))
-;;          index-column (get-index-column-or-error dataset)
-;;          time-unit (unpack-datatype (get-datatype index-column))
-;;          from-key (cond
-;;                     (or (int? from)
-;;                         (time-datatype? (get-datatype from))) from
-;;                     :else (try
-;;                             (string->time from)
-;;                             (catch DateTimeParseException err
-;;                               (throw (Exception. ^java.lang.String (build-err-msg err "from" time-unit))))))
-;;          to-key (cond
-;;                   (or (int? to)
-;;                       (time-datatype? (get-datatype from))) to
-;;                   :else (try
-;;                           (string->time to)
-;;                           (catch DateTimeParseException err
-;;                             (throw (Exception. ^java.lang.String (build-err-msg err "to" time-unit))))))]
-;;      (cond
-;;        (not= time-unit (get-datatype from-key))
-;;        (throw (Exception. (format "Time unit of `from` does not match index time unit: %s" time-unit)))
-;;        (not= time-unit (get-datatype to-key))
-;;        (throw (Exception. (format "Time unit of `to` does not match index time unit: %s" time-unit)))
-;;        :else (let [index (index-structure index-column)
-;;                    slice-indexes (select-from-index index :slice {:from from-key :to to-key})]
-;;                (condp = result-type
-;;                  :as-indexes slice-indexes
-;;                  (select-rows dataset slice-indexes)))))))
