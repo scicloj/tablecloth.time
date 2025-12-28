@@ -1,45 +1,12 @@
 (ns tablecloth.time.api
-  {:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}}}}
-  (:require [tech.v3.datatype.export-symbols :as exporter]
-            [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]))
+  (:require [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]))
 
 (modify-printing-of-time-literals-if-enabled!)
 
-(exporter/export-symbols tablecloth.time.api.slice
-                         slice)
-
-(exporter/export-symbols tablecloth.time.api.adjust-frequency
-                         adjust-frequency)
-
-(exporter/export-symbols tablecloth.time.api.rolling-window
-                         rolling-window)
-
-(exporter/export-symbols tablecloth.time.api.indexing
-                         index-by
-                         rename-index)
-
-(exporter/export-symbols tablecloth.time.api.converters
-                         milliseconds->anytime
-                         anytime->milliseconds
-                         convert-to
-                         down-to-nearest
-                         ->seconds
-                         ->minutes
-                         ->hours
-                         ->days
-                         ->weeks-end
-                         ->months-end
-                         ->quarters-end
-                         ->years-end
-                         ->every
-                         string->time)
-
-(exporter/export-symbols tablecloth.time.api.time-components
-                         year
-                         dayofyear
-                         month
-                         dayofmonth
-                         dayofweek
-                         hour
-                         minute
-                         secnd)
+;; NOTE: The following legacy APIs have been removed and their tests archived:
+;; - tablecloth.time.api.slice (slice, index-by - to be reimplemented)
+;; - tablecloth.time.api.adjust-frequency (adjust-frequency - to be reimplemented)
+;; - tablecloth.time.api.rolling-window (rolling-window - to be reimplemented)
+;; - tablecloth.time.api.converters (various converters - functionality moved to column.api)
+;; - tablecloth.time.api.time-components (field extractors - functionality moved to column.api)
+;; See test/_archive/README.md for archived tests and development-plan.md for the new architecture.

@@ -1,6 +1,27 @@
 # tablecloth.time – development plan
 
-_Last updated: (fill via git history)_
+_Last updated: 2024-12-28_
+
+## 0. Current status and archived work
+
+**Archived legacy code** (2024-12-28):
+
+We have archived both source and tests for several defunct/legacy namespaces in `_archive/` (at project root):
+- `adjust_frequency_test.clj` - old bucketing/resampling API
+- `converters_test.clj` - old converter functions (now in `column.api`)
+- `rolling_window_test.clj` - old rolling window API
+- `slice_test.clj` - old slice/index-by API
+- `time_components_test.clj` - old time field extractors (now in `column.api`)
+- `validatable_test.clj` - dataset integrity checking utility
+
+These are preserved as **reference material** for when we reimplement similar functionality in the new column-based architecture. They provide valuable test cases, edge cases, expected behavior semantics, and implementation patterns.
+
+Both source and test files have been moved outside of `src/` and `test/` directories so they are not loaded or run. The main `tablecloth.time.api` namespace has been cleaned up to remove defunct symbol exports.
+
+**Active work**:
+- ✅ Column-level field extractors implemented in `tablecloth.column.api`
+- ✅ Column-level `convert-time` for representation changes
+- 🚧 Dataset-level operations (slice, bucket, resample) to be reimplemented per the architecture below
 
 ## 1. Scope and direction
 
@@ -53,21 +74,18 @@ We do **not** reintroduce a pandas-style Index into `tech.ml.dataset`. Instead, 
 1. Treat an **index as just a column** whose values we regard as the coordinate system (usually time).
    - Example: `:received-date` is the time axis.
 
-2. Provide an explicit way to **mark** the time axis at the dataset level, e.g.:
+2. **No metadata-based axis marking**: Time operations explicitly take column name arguments, consistent with tablecloth's patterns:
+   - `group-by`, `order-by`, `aggregate`, etc. all take explicit column selectors.
+   - Time operations follow the same pattern: `(slice-by ds :time-col start end)`.
+   - This keeps behavior clear and avoids "spooky action at a distance" from metadata.
 
-   ```clojure
-   (tct/index-by ds :received-date)
-   ```
+3. **No `index-by` function**: Deferred unless a compelling use case emerges. Explicit column arguments are simpler and more flexible.
 
-   which can:
-   - Record metadata: `{:time-axis {:column :received-date :sorted? true? ...}}`.
-   - Optionally ensure (or record) sortedness.
-
-3. Time-based operations (slicing, rolling) can:
-   - Take a **time column argument** explicitly (most honest and clear), or
-   - Default to the column recorded in `:time-axis` metadata when present.
-
-4. We **do not** cache closures tied to specific dataset values in metadata, because datasets are immutable and transforms produce new values. We only cache **declarative information** (which column is the axis, sortedness, units, etc.).
+4. **Sortedness handling**:
+   - Time slicing operations require sorted data for efficient binary search.
+   - Default behavior: check sortedness (O(n)), use binary search if sorted, error with helpful message if not.
+   - Optimization: `{:sorted? true}` option skips the sortedness check (for when user knows data is sorted).
+   - We never silently reorder data - users must explicitly `(tc/order-by ds :time-col)` first.
 
 ### Harold's "index as closure" idea
 
@@ -94,13 +112,29 @@ From the Zulip `tech.ml.dataset.dev` discussion (summarized):
 For **time / ordered data**, the analogous concept is:
 
 - Treat the **sorted time column itself** as the index.
-- Use **binary search** or dtype-next's time-window operations (e.g. `variable-rolling-window-ranges`) over that column.
-- Optionally, we could provide a `obtain-time-index` helper that returns a closure capturing a sorted time column + row indices, but we should not blindly cache that closure in dataset metadata.
+- Use **binary search** over the sorted time column (always; no conditional logic).
+- Binary search is fast even on small data (100 rows = ~7 comparisons) and provides consistent, predictable performance.
+- For more complex windowing operations, use dtype-next's `variable-rolling-window-ranges`.
+
+**Why binary search instead of tree structures?** (from Zulip discussion with Chris Nuernberger)
+
+Chris Nuernberger (dtype-next author) explained:
+> "You only need tree structures if you are adding values ad-hoc or removing them - usually with datasets we aren't adding/removing rows but rebuilding the index all at once. **Just sorting the dataset and using binary search will outperform most/all tree structures in this scenario as it is faster to sort than to construct trees. Binary search performs as well as any tree search for queries and range queries.**"
+
+Harold validated this with real-world performance: **>1M rows/s** using `java.util.Collections/binarySearch` on a 1M row time series dataset.
+
+Key insight: Datasets are typically **rebuilt wholesale** (loaded/reloaded), not incrementally modified. In this scenario:
+- **Sorting is faster than constructing trees**
+- **Binary search performs as well as tree search** for queries
+- **Simpler implementation** with predictable behavior
+
+See [`doc/zulip-indexing-discussion-summary.md`](../doc/zulip-indexing-discussion-summary.md) for full context.
 
 In practice for tablecloth:
 
-- Index awareness means: knowing **which column is time** and, when required, assuming/enforcing sortedness.
-- We base slicing, rolling, etc. on this column; we do not need a separate Index type.
+- No special Index type, no metadata tracking, no tree structures.
+- Time operations take explicit column arguments and assume/verify sortedness.
+- Binary search provides efficient O(log n) slicing over sorted time columns.
 
 ---
 
@@ -342,49 +376,48 @@ separate APIs (e.g. `between`/`time-diff`, `convert-duration`).
 
 ## 5. Dataset-level helpers (sketch)
 
-On top of column primitives and the time-axis concept, we can define dataset-level helpers that feel natural in tablecloth:
+On top of column primitives, we can define dataset-level helpers that feel natural in tablecloth. All time operations take **explicit column arguments**, consistent with tablecloth's existing API patterns.
 
-### 5.1. Marking the time axis
+### 5.1. Slicing by time
 
 ```clojure
-(index-by [ds time-col])
+(slice-by [ds time-col start end opts])
 ```
 
-- Records, in metadata, that `time-col` is the time axis.
-- Optionally ensures sortedness and stores `:sorted? true`.
-
-### 5.2. Slicing by time
-
-Two styles:
-
-- **Explicit time column:**
-
-  ```clojure
-  (slice [ds time-col start end])
-  ```
-
-- **Implicit via index-by metadata:**
-
-  ```clojure
-  (-> ds
-      (index-by :received-date)
-      (slice "2022-01-01" :end-of-year))
-  ```
+Example:
+```clojure
+(slice-by ds :received-date "2022-01-01" "2022-12-31")
+(slice-by ds :timestamp #inst "2022-01-01" #inst "2022-12-31" {:sorted? true})
+```
 
 Internal approach:
 
 - Parse `start`/`end` using millis-pivot semantics (string/date/instant → millis).
-- Normalize the chosen time column to millis and filter rows between bounds.
-- Implementation may use binary search if the axis is sorted and large; otherwise simple predicate filtering.
+- Normalize the chosen time column to millis.
+- Check sortedness (O(n)) unless `{:sorted? true}` is provided.
+- If not sorted, throw helpful error: "Time column :received-date must be sorted. Use (tc/order-by ds :received-date) first."
+- Use binary search (always, unconditionally) to find `[start-idx end-idx]` range.
+- Return `(tc/select-rows ds (range start-idx end-idx))`.
 
-### 5.3. Bucketing and rollups
+**Sortedness semantics:**
+- Default: check sortedness, use binary search if sorted, error if not.
+- `{:sorted? true}`: skip sortedness check (optimization when user knows data is sorted).
+- Never silently reorder data.
+
+**Binary search strategy:**
+- Always use binary search (no conditional logic or thresholds).
+- Fast even on small data: 100 rows = ~7 comparisons.
+- Provides consistent, predictable performance.
+- Implementation: write custom binary search for lower/upper bound finding, or use Java's `Arrays.binarySearch`.
+
+### 5.2. Bucketing and rollups
 
 Examples of higher-level helpers built on `bucket-every-col`:
 
 - Add a bucket column:
 
   ```clojure
-  (add-bucket-column [ds time-col new-col interval unit opts])
+  (add-bucket-column [ds time-col bucket-col-name interval unit opts])
   ```
 
 - Roll up by intervals:
@@ -393,14 +426,19 @@ Examples of higher-level helpers built on `bucket-every-col`:
   (rollup-every [ds time-col interval unit agg-spec opts])
   ```
 
+Example:
+```clojure
+(rollup-every ds :received-date 5 :minutes {:count tc/row-count :avg-value #(dfn/mean (% :value))})
+```
+
 Implementation pattern:
 
 - Compute bucket column via `bucket-every-col`.
-- Add it via `tc/add-column` / `tc/add-columns`.
+- Add it via `tc/add-column`.
 - `tc/group-by` the bucket column.
 - `tc/aggregate` according to `agg-spec`.
 
-Here, **index-awareness is limited** to knowing which column to treat as time. The actual grouping and aggregation uses standard dataset operations.
+These operations take explicit time column arguments, consistent with tablecloth's patterns.
 
 ---
 
@@ -413,18 +451,23 @@ Here, **index-awareness is limited** to knowing which column to treat as time. T
      - `bucket-every-col`
      - (optionally) a few basic field extractors over datetime columns.
 
-2. **Dataset API:**
-   - Add `index-by` / `with-time-axis` to mark a time axis.
-   - Implement `slice` that:
-     - Can take an explicit time column.
-     - Or uses the axis from metadata.
+2. **Binary search helper:**
+   - Implement binary search for time slicing (lower/upper bound finding).
+   - Always use binary search (no conditional logic based on size).
+   - Options: write custom implementation or leverage Java's `Arrays.binarySearch`.
+
+3. **Dataset API:**
+   - Implement `slice-by` taking explicit time column argument.
+   - Default: check sortedness (O(n)), error if not sorted.
+   - Option `{:sorted? true}`: skip sortedness check for performance.
+   - Use binary search to find range, then `tc/select-rows`.
    - Implement `add-bucket-column` and `rollup-every` built on `bucket-every-col` and standard `group-by`/`aggregate`.
 
-3. **Reuse from gnomon:**
+4. **Reuse from gnomon:**
    - Port tests and semantics from the gnomon repo (especially for `down-to-nearest`, `->every`, and conversion behaviors) into `tablecloth.time` tests.
    - Use those semantics to guide the column-level and dataset-level implementations.
 
-4. **De-prioritize gnomon as a standalone library** until/unless a clear general JVM use case emerges.
+5. **De-prioritize gnomon as a standalone library** until/unless a clear general JVM use case emerges.
 
 ---
 

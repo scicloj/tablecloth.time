@@ -1,7 +1,7 @@
 (ns tablecloth.time.column.api-test
   (:require [clojure.test :refer [deftest testing is]]
             [tablecloth.column.api :as tcc]
-            [tablecloth.time.api.parse :refer [parse]]
+            [tablecloth.time.parse :refer [parse]]
             [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year
                                                 year month day hour minute get-second
                                                 day-of-week day-of-year week-of-year quarter]])
