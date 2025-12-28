@@ -1,21 +1,12 @@
 (ns tablecloth.time.api.slice
-  (:require [tablecloth.api :as tc]
+  (:require [tech.v3.datatype :as dtype]
+            [tablecloth.api :as tc]
             [tablecloth.time.parse :as parse]
             [tablecloth.time.utils.datatypes :as types]
             [tablecloth.time.utils.binary-search :as binary-search]
             [tablecloth.time.column.api :refer [convert-time]]))
 
 (set! *warn-on-reflection* true)
-
-;; TODO: Implementation in progress - not yet functional
-;; 
-;; **Steps:**
-;; 1. **Normalize the time column to epoch millis** (long values) using `convert-time`
-;; 2. **Normalize start/end to epoch millis** (parse strings/dates/instants to longs)
-;; 3. **Check sortedness** (unless `{:sorted? true}` option)
-;; 4. **Find lower bound**: first index where `time-col[i] >= start`
-;; 5. **Find upper bound**: last index where `time-col[i] <= end`
-;; 6. **Slice the dataset**: `(tc/select-rows ds (range lower-bound (inc upper-bound)))`
 
 (defn- extract-key [key]
   (cond
@@ -36,7 +27,7 @@
          to-key (-> to extract-key normalize-key)
          lower-bound (binary-search/find-lower-bound col-millis from-key)
          upper-bound (binary-search/find-upper-bound col-millis to-key)
-         slice-indices (vec (range lower-bound (inc upper-bound)))]
+         slice-indices (dtype/->reader (range lower-bound (inc upper-bound)))]
      (tc/select-rows ds slice-indices))))
 
 ;; (defn slice
