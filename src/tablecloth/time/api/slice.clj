@@ -1,11 +1,14 @@
 (ns tablecloth.time.api.slice
-  (:require [tech.v3.datatype.datetime :as dtdt]
+  (:require [tablecloth.api :as tc]
             [tablecloth.time.parse :as parse]
-            [tablecloth.time.column.api :refer [convert-time]]
-            [tablecloth.time.parse :refer [parse]]))
+            [tablecloth.time.utils.datatypes :as types]
+            [tablecloth.time.utils.binary-search :as binary-search]
+            [tablecloth.time.column.api :refer [convert-time]]))
 
 (set! *warn-on-reflection* true)
 
+;; TODO: Implementation in progress - not yet functional
+;; 
 ;; **Steps:**
 ;; 1. **Normalize the time column to epoch millis** (long values) using `convert-time`
 ;; 2. **Normalize start/end to epoch millis** (parse strings/dates/instants to longs)
@@ -14,17 +17,27 @@
 ;; 5. **Find upper bound**: last index where `time-col[i] <= end`
 ;; 6. **Slice the dataset**: `(tc/select-rows ds (range lower-bound (inc upper-bound)))`
 
+(defn- extract-key [key]
+  (cond
+    (or (int? key)
+        (types/temporal-type? (types/get-datatype key)))
+    key
+    :else
+    (parse/parse key)))
+
+(defn- normalize-key [key]
+  (first (convert-time [key] :epoch-milliseconds)))
+
 (defn slice
-  ([dataset time-column from to]
-   (let [col-idx (time-column dataset)
-         col-millis (convert-time col-idx :milliseconds)
-         from-key (cond
-                    (or (int? from)
-                        (time-datatype? (get-datatype from))) from
-                    :else (parse from))
-         to-key (cond
-                  (or (int? to)
-                      (time-datatype? (get))))])))
+  ([ds time-column from to]
+   (let [col-idx (time-column ds)
+         col-millis (convert-time col-idx :epoch-milliseconds)
+         from-key (-> from extract-key normalize-key) 
+         to-key (-> to extract-key normalize-key)
+         lower-bound (binary-search/find-lower-bound col-millis from-key)
+         upper-bound (binary-search/find-upper-bound col-millis to-key)
+         slice-indices (vec (range lower-bound (inc upper-bound)))]
+     (tc/select-rows ds slice-indices))))
 
 ;; (defn slice
 ;;   "Returns a subset of dataset's rows (or row indexes) as specified by from and to, inclusively.
