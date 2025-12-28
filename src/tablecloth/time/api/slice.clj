@@ -31,12 +31,13 @@
                        :value key
                        :cause e})))))
 
-;; TODO: Add the sorting
+;; TODO: Add sortedness check, and then later add a `:sorted?` option
+;; to skip the sortedness check.
 (defn slice
   "Returns a subset of dataset's rows between `from` and `to` (both inclusive).
   
   The time column is sliced using binary search, so it must be sorted in ascending
-  order. Future versions will add a `:sorted?` option to skip the sortedness check.
+  order. 
   
   Arguments:
   - ds: the dataset to slice
