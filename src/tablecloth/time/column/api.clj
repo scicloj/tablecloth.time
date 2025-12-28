@@ -6,8 +6,10 @@
             [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype.datetime.base :as dtdt-base]
             [tech.v3.datatype.datetime.operations :as dtdt-ops]
-            [tablecloth.column.api :as tcc])
-  (:import [java.time ZoneId Instant ZonedDateTime LocalDate LocalDateTime
+            [tablecloth.column.api :as tcc]
+            [tablecloth.time.utils.temporal :as temporal]
+            [tablecloth.time.utils.units :as units])
+  (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
             Duration LocalTime]))
 
 (casting/add-object-datatype! :instant Instant true)
@@ -16,89 +18,6 @@
 (casting/add-object-datatype! :local-date-time LocalDateTime true)
 (casting/add-object-datatype! :duration Duration true)
 (casting/add-object-datatype! :local-time LocalTime true)
-
-(def ^:private targets
-  (apply conj dtdt-base/datatypes
-         dtdt-base/epoch-datatypes))
-
-(def ^:private synonyms
-  {:zdt :zoned-date-time
-   :odt :offset-date-time
-   :ldt :local-date-time})
-
-(defn calendar-local-type? [dtype]
-  (let [calendar-local-types #{:local-date :local-date-time :local-time}
-        base-type (dt-packing/unpack-datatype dtype)]
-    (boolean (calendar-local-types base-type))))
-
-(defn ^:private normalize-target
-  "Normalize a target designator (keyword or Class) to a canonical keyword in `targets`.
-
-  TODO: Right now dtype-next's object-class->datatype return :object for unsupported types
-  bypassing our error messaging. Need to decide if this is good."
-  [t]
-  (cond
-    (keyword? t) (let [t' (get synonyms t t)]
-                   (if (contains? targets t')
-                     t'
-                     (throw (ex-info (str "Unsupported target: " t)
-                                     {:type ::unsupported-target :target t}))))
-    (class? t) (if-some [kw (casting/object-class->datatype t)]
-                 kw
-                 (throw (ex-info (str "Unsupported target class: " t)
-                                 {:type ::unsupported-target-class :target t})))
-    :else (throw (ex-info (str "Target must be a keyword or Class: " (pr-str t))
-                          {:type ::invalid-target :target t}))))
-
-(defn ^:private coerce-zone-id
-  "Coerce nil/String/ZoneId to a ZoneId.
-
-  - 1-arg arity: nil -> system zone.
-  - 2-arg arity: nil -> (:default opts)."
-  (^ZoneId [z]
-   (coerce-zone-id z {:default (dtdt/system-zone-id)}))
-  ([z opts]
-   (cond
-     (nil? z) (:default opts)
-     (instance? ZoneId z) ^ZoneId z
-
-     (string? z) (ZoneId/of ^String z)
-     :else (throw (ex-info (str "Unsupported zone value: " (pr-str z))
-                           {:type ::unsupported-zone
-                            :value z})))))
-
-(defn ^:private coerce-column
-  "Coerce to a column."
-  [data]
-  (if (tcc/column? data)
-    data
-    (tcc/column data)))
-
-(defn normalize-unit
-  "Normalize a unit across plural or singular usages. Plural is the
-  normalized version. Noop if type is not supported."
-  [u]
-  (case u
-    :second  :seconds
-    :minute  :minutes
-    :hour    :hours
-    :day     :days
-    :week    :weeks
-    :month   :months
-    :year    :years
-    :quarter :quarters
-    u))
-
-(defn ^:private metric-unit?
-  "Check if unit is a metric/fixed-duration unit."
-  [u]
-  (boolean (#{:milliseconds :seconds :minutes :hours :days :weeks}
-            (normalize-unit u))))
-
-(defn ^:private calendar-unit?
-  "Check if unit is a calendar/variable-duration unit."
-  [u]
-  (boolean (#{:months :quarters :years} (normalize-unit u))))
 
 (defn convert-time
   "Convert a time column between temporal and epoch representations.
@@ -111,22 +30,22 @@
   ([col target]
    (convert-time col target nil))
   ([col target opts]
-   (let [col (coerce-column col)
-         zone (coerce-zone-id (:zone opts)
-                              {:default (dtdt/utc-zone-id)})
+   (let [col (temporal/coerce-column col)
+         zone (temporal/coerce-zone-id (:zone opts)
+                                       {:default (dtdt/utc-zone-id)})
          src-type (dtype/elemwise-datatype col)
          src-cat (dtdt-base/classify-datatype src-type)
-         tgt-type (normalize-target target)
+         tgt-type (temporal/normalize-target target)
          tgt-cat (dtdt-base/classify-datatype tgt-type)
          data
          (case [src-cat tgt-cat]
            [:epoch :temporal]
-           (if (calendar-local-type? tgt-type)
+           (if (temporal/calendar-local-type? tgt-type)
              ;; zone only needed when temporal is calendar local.
              (dtdt/epoch->datetime zone src-type tgt-type col)
              (dtdt/epoch->datetime tgt-type col))
            [:temporal :epoch]
-           (if (calendar-local-type? src-type)
+           (if (temporal/calendar-local-type? src-type)
              ;; zone only needed when temporal is calendar local.
              (dtdt/datetime->epoch zone tgt-type col)
              (dtdt/datetime->epoch tgt-type col))
@@ -156,20 +75,6 @@
               :tgt-category  tgt-cat})))]
      (tcc/column data))))
 
-(defn milliseconds-in
-  "Return the number of epoch millis in a unit.
-
-  Units: :milliseconds :seconds :minutes :hours :days :weeks."
-  [unit]
-  (case unit
-    :milliseconds 1
-    :seconds      dtdt/milliseconds-in-second
-    :minutes      dtdt/milliseconds-in-minute
-    :hours        dtdt/milliseconds-in-hour
-    :days         dtdt/milliseconds-in-day
-    :weeks        dtdt/milliseconds-in-week
-    (throw (ex-info (str "Unsupported unit: " unit) {:unit unit}))))
-
 (defn- local-date->epoch-month [col-ld]
   (let [col-year (dtdt-ops/long-temporal-field :years col-ld)
         col-year-month (dtdt-ops/long-temporal-field :months col-ld)
@@ -187,7 +92,7 @@
   ([col interval]
    (floor-to-year col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (coerce-column col)
+   (let [col (temporal/coerce-column col)
          original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
          col-ld (convert-time col :local-date opts)
          col-epoch-year (local-date->epoch-year col-ld)
@@ -200,7 +105,7 @@
   ([col interval]
    (floor-to-month col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (coerce-column col)
+   (let [col (temporal/coerce-column col)
          original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
          col-ld (convert-time col :local-date opts)
          col-epoch-month (local-date->epoch-month col-ld)
@@ -220,7 +125,7 @@
   ([col interval]
    (floor-to-quarter col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (coerce-column col)
+   (let [col (temporal/coerce-column col)
          original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
          col-ld (convert-time col :local-date opts)
          col-epoch-quarter (local-date->epoch-quarter col-ld)
@@ -245,13 +150,13 @@
     - Units: :milliseconds :seconds :minutes :hours :days :weeks, and :months/:quarters/:years (calendar-aware).
     - LocalDate/LocalDateTime use the system default zone by default; pass opts with :zone to override."
   ([col interval unit opts]
-   (let [col (coerce-column col)
+   (let [col (temporal/coerce-column col)
          original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
-         unit (normalize-unit unit)
-         zone (coerce-zone-id (:zone opts))]
+         unit (units/normalize-unit unit)
+         zone (temporal/coerce-zone-id (:zone opts))]
      (cond
-       (metric-unit? unit)
-       (let [divisor (* (long interval) (long (milliseconds-in unit)))
+       (units/metric-unit? unit)
+       (let [divisor (* (long interval) (long (units/milliseconds-in unit)))
              millis-col (convert-time col :epoch-milliseconds {:zone zone})
              rounded-col (dtype/set-datatype
                           ;; must set type b/c arithmetic comes back
@@ -260,7 +165,7 @@
                           (fun/- millis-col (fun/rem millis-col divisor))
                           :epoch-milliseconds)]
          (convert-time rounded-col original-type (:zone zone)))
-       (calendar-unit? unit)
+       (units/calendar-unit? unit)
        (let [col (convert-time col :local-date)
              rounded-col (case unit
                            :months (floor-to-month col interval opts)
@@ -276,7 +181,7 @@
   "Convert Instant columns to LocalDateTime (UTC) for field extraction.
   Other datetime types are left as-is since they already have calendar context."
   [col]
-  (let [col (coerce-column col)
+  (let [col (temporal/coerce-column col)
         dtype (dtype/elemwise-datatype col)
         base-dtype (dt-packing/unpack-datatype dtype)]
     (if (= base-dtype :instant)
