@@ -2,11 +2,11 @@
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as fun]
             [tech.v3.datatype.casting :as casting]
-            [tech.v3.datatype.packing :as dt-packing]
             [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype.datetime.base :as dtdt-base]
             [tech.v3.datatype.datetime.operations :as dtdt-ops]
             [tablecloth.column.api :as tcc]
+            [tablecloth.time.utils.datatypes :as datatypes]
             [tablecloth.time.utils.temporal :as temporal]
             [tablecloth.time.utils.units :as units])
   (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
@@ -19,6 +19,13 @@
 (casting/add-object-datatype! :duration Duration true)
 (casting/add-object-datatype! :local-time LocalTime true)
 
+(defn coerce-column
+  "Coerce data to a column."
+  [data]
+  (if (tcc/column? data)
+    data
+    (tcc/column data)))
+
 (defn convert-time
   "Convert a time column between temporal and epoch representations.
 
@@ -30,7 +37,7 @@
   ([col target]
    (convert-time col target nil))
   ([col target opts]
-   (let [col (temporal/coerce-column col)
+   (let [col (coerce-column col)
          zone (temporal/coerce-zone-id (:zone opts)
                                        {:default (dtdt/utc-zone-id)})
          src-type (dtype/elemwise-datatype col)
@@ -92,8 +99,8 @@
   ([col interval]
    (floor-to-year col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (temporal/coerce-column col)
-         original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
+   (let [col (coerce-column col)
+         original-type (datatypes/get-datatype col)
          col-ld (convert-time col :local-date opts)
          col-epoch-year (local-date->epoch-year col-ld)
          col-floored (fun/- col-epoch-year (fun/rem col-epoch-year interval))
@@ -105,8 +112,8 @@
   ([col interval]
    (floor-to-month col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (temporal/coerce-column col)
-         original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
+   (let [col (coerce-column col)
+         original-type (datatypes/get-datatype col)
          col-ld (convert-time col :local-date opts)
          col-epoch-month (local-date->epoch-month col-ld)
          col-floored (fun/- col-epoch-month (fun/rem col-epoch-month interval))
@@ -125,8 +132,8 @@
   ([col interval]
    (floor-to-quarter col interval {:zone (dtdt/system-zone-id)}))
   ([col interval opts]
-   (let [col (temporal/coerce-column col)
-         original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
+   (let [col (coerce-column col)
+         original-type (datatypes/get-datatype col)
          col-ld (convert-time col :local-date opts)
          col-epoch-quarter (local-date->epoch-quarter col-ld)
          col-floored (fun/- col-epoch-quarter (fun/rem col-epoch-quarter interval))
@@ -150,8 +157,8 @@
     - Units: :milliseconds :seconds :minutes :hours :days :weeks, and :months/:quarters/:years (calendar-aware).
     - LocalDate/LocalDateTime use the system default zone by default; pass opts with :zone to override."
   ([col interval unit opts]
-   (let [col (temporal/coerce-column col)
-         original-type (dt-packing/unpack-datatype (dtype/elemwise-datatype col))
+   (let [col (coerce-column col)
+         original-type (datatypes/get-datatype col)
          unit (units/normalize-unit unit)
          zone (temporal/coerce-zone-id (:zone opts))]
      (cond
@@ -181,9 +188,8 @@
   "Convert Instant columns to LocalDateTime (UTC) for field extraction.
   Other datetime types are left as-is since they already have calendar context."
   [col]
-  (let [col (temporal/coerce-column col)
-        dtype (dtype/elemwise-datatype col)
-        base-dtype (dt-packing/unpack-datatype dtype)]
+  (let [col (coerce-column col)
+        base-dtype (datatypes/get-datatype col)]
     (if (= base-dtype :instant)
       (convert-time col :local-date-time {:zone (dtdt/utc-zone-id)})
       col)))

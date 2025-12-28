@@ -2,8 +2,7 @@
   (:require [tech.v3.datatype.packing :as dt-packing]
             [tech.v3.datatype.casting :as casting]
             [tech.v3.datatype.datetime.base :as dtdt-base]
-            [tech.v3.datatype.datetime :as dtdt]
-            [tablecloth.column.api :as tcc])
+            [tech.v3.datatype.datetime :as dtdt])
   (:import [java.time ZoneId]))
 
 (def targets
@@ -58,10 +57,3 @@
      :else (throw (ex-info (str "Unsupported zone value: " (pr-str z))
                            {:type ::unsupported-zone
                             :value z})))))
-
-(defn coerce-column
-  "Coerce data to a column."
-  [data]
-  (if (tcc/column? data)
-    data
-    (tcc/column data)))
