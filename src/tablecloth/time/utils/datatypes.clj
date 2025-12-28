@@ -8,8 +8,8 @@
 
   This is typically what you want when checking temporal types, as packed
   datatypes include storage metadata that obscures the semantic type."
-  [col]
-  (dt-packing/unpack-datatype (dtype/elemwise-datatype col)))
+  [col-or-val]
+  (dt-packing/unpack-datatype (dtype/elemwise-datatype col-or-val)))
 
 (defn temporal-type? [dtype]
   (let [dtype (dt-packing/unpack-datatype dtype)
