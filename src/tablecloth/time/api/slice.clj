@@ -4,7 +4,9 @@
             [tablecloth.time.parse :as parse]
             [tablecloth.time.utils.datatypes :as types]
             [tablecloth.time.utils.binary-search :as binary-search]
-            [tablecloth.time.column.api :refer [convert-time]]))
+            [tablecloth.time.column.api :refer [convert-time]]
+            [tablecloth.time.utils.binary-search :as bs]
+            [tablecloth.column.api :as tcc]))
 
 (set! *warn-on-reflection* true)
 
@@ -31,8 +33,7 @@
                        :value key
                        :cause e})))))
 
-;; TODO: Add sortedness check, and then later add a `:sorted?` option
-;; to skip the sortedness check.
+
 (defn slice
   "Returns a subset of dataset's rows between `from` and `to` (both inclusive).
   
@@ -65,27 +66,42 @@
     
     ;; Using epoch milliseconds directly
     (slice ds :timestamp 1704067200000 1704153599999)"
-  ([ds time-column from to]
-   (slice ds time-column from to nil))
-  ([ds time-column from to {:keys [result-type]
-                            :or {result-type :as-dataset}}]
-   (let [col-idx (try
-                   (time-column ds)
-                   (catch Exception e
-                     (throw (ex-info (format "Unable to extract time column from dataset: %s" (.getMessage e))
-                                     {:time-column time-column
-                                      :cause e}))))
-         _ (when (nil? col-idx)
+  ([ds time-column-name from to]
+   (slice ds time-column-name from to nil))
+  ([ds time-column-name from to {:keys [result-type]
+                                 :or {result-type :as-dataset}}]
+   (let [time-col (try
+                    (get ds time-column-name)
+                    (catch Exception e
+                      (throw (ex-info (format "Unable to extract time column from dataset: %s"
+                                              (.getMessage e))
+                                      {:time-column time-column-name
+                                       :cause e}))))
+         _ (when (nil? time-col)
              (throw (ex-info "Time column is nil or does not exist in dataset"
-                             {:time-column time-column
+                             {:time-column time-column-name
                               :dataset-columns (vec (tc/column-names ds))})))
+
          col-millis (try
-                      (convert-time col-idx :epoch-milliseconds)
+                      (convert-time time-col :epoch-milliseconds)
                       (catch Exception e
                         (throw (ex-info (format "Unable to convert time column to epoch milliseconds: %s" (.getMessage e))
-                                        {:time-column time-column
-                                         :column-dtype (dtype/elemwise-datatype col-idx)
+                                        {:time-column time-column-name
+                                         :column-dtype (dtype/elemwise-datatype time-col)
                                          :cause e}))))
+         sort-direction (if (< (first col-millis) (last col-millis))
+                          :ascending :descending)
+         _dummy (println "sort direction:" sort-direction)
+         col-sorted? (bs/is-sorted? col-millis  sort-direction)
+         _dummy (println col-millis)
+         _dummy (println "sorted:" col-sorted?)
+         col-millis  (cond
+                       (and col-sorted? (= sort-direction :ascending))
+                       col-millis
+                       (and col-sorted? (= sort-direction :descending))
+                       (reverse col-millis)
+                       (not col-sorted?)
+                       (tcc/sort-column col-millis :asc))
          from-key (-> from (extract-key "from") (normalize-key "from"))
          to-key (-> to (extract-key "to") (normalize-key "to"))
          _ (when (> from-key to-key)
