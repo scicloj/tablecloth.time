@@ -27,3 +27,63 @@
     (is (true? (bs/is-sorted? (vec (range 1000)))))
     (is (false? (bs/is-sorted? (vec (reverse (range 1000))))))
     (is (true? (bs/is-sorted? (vec (repeat 100 5)))))))
+
+(deftest test-find-upper-bound
+  (testing "empty arr"
+    (is (= -1 (bs/find-upper-bound [] 1)))
+    (is (= -1 (bs/find-upper-bound [] -10))))
+  (testing "single element in arr"
+    (is (= 0 (bs/find-upper-bound [1] 1)))
+    (is (= 0 (bs/find-upper-bound [1] 10)))) 
+  (testing "target before all elements"
+    (is (= -1 (bs/find-upper-bound [10 20 30 40] -10))))
+  (testing "exact match on first element"
+    (is (= 0 (bs/find-upper-bound [10 20 30 40] 10))))
+  (testing "exact match on last element"
+    (is (= 3 (bs/find-upper-bound [10 20 30 40] 40))))
+  (testing "target after all elements"
+   (is (= 3 (bs/find-upper-bound [10 20 30 40] 50))))
+  (testing "target between elements"
+    (is (= 2 (bs/find-upper-bound [10 20 30 40] 35))))
+  (testing "array with duplicates"
+    (is (= 3 (bs/find-upper-bound [10 20 20 20 30 40] 20)))
+    (is (= 3 (bs/find-upper-bound [10 20 20 20 30 30 40] 22)))
+    (is (= 3 (bs/find-upper-bound [10 20 20 20] 20)))
+    (is (= 3 (bs/find-upper-bound [10 10 10 10] 10)))))
+
+(deftest test-find-lower-bound
+  (testing "empty and single element"
+    (is (= 0 (bs/find-lower-bound [] 1)))
+    (is (= 0 (bs/find-lower-bound [] -10)))
+    (is (= 0 (bs/find-lower-bound [1] 1)))
+    (is (= 1 (bs/find-lower-bound [1] 10)))
+    (is (= 0 (bs/find-lower-bound [1] -10))))
+  
+  (testing "target before all elements"
+    (is (= 0 (bs/find-lower-bound [10 20 30] 5))))
+  
+  (testing "exact match on first element"
+    (is (= 0 (bs/find-lower-bound [10 20 30 40] 10))))
+  
+  (testing "exact match on last element"
+    (is (= 3 (bs/find-lower-bound [10 20 30 40] 40))))
+  
+  (testing "exact match in middle"
+    (is (= 1 (bs/find-lower-bound [10 20 30] 20))))
+  
+  (testing "target after all elements"
+    (is (= 4 (bs/find-lower-bound [10 20 30 40] 50))))
+  
+  (testing "target between values"
+    (is (= 2 (bs/find-lower-bound [10 20 30 40] 25))))
+  
+  (testing "duplicates - finds first occurrence"
+    (is (= 1 (bs/find-lower-bound [10 20 20 20 30 40] 20)))
+    (is (= 0 (bs/find-lower-bound [10 10 10 20 30] 10)))
+    (is (= 2 (bs/find-lower-bound [10 20 30 30 30] 30))))
+  
+  (testing "all duplicates"
+    (is (= 0 (bs/find-lower-bound [5 5 5 5] 5))))
+  
+  (testing "target between duplicates"
+    (is (= 3 (bs/find-lower-bound [10 10 10 20 20 20] 15)))))

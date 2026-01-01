@@ -17,6 +17,7 @@
      false
      :else
      (let [op (if (= direction :ascending) fun/>= fun/<=)
+
            shifted (fun/shift col -1)
            compared (op shifted col)]
        (= (dtype/ecount col)
@@ -30,14 +31,29 @@
   (- (inc x)))
 
 (defn find-lower-bound [arr target]
-  (let [result (Collections/binarySearch arr target)]
-    (if (>= result 0)
-      result  ; exact match
-      (->insertion-point result))))  ; insertion point
+  (if (zero? (count arr))
+    0
+    (let [result (Collections/binarySearch arr target)]
+      (if (>= result 0)
+        ;; exact match but we need to find the FIRST occurrence
+        (loop [next-idx result]
+          (if (or (zero? next-idx) (not= target (nth arr (dec next-idx))))
+            next-idx
+            (recur (dec next-idx))))
+        (->insertion-point result)))))  ; insertion point
 
 (defn find-upper-bound [arr target]
-  (let [result (Collections/binarySearch arr target)]
-    (if (>= result 0)
-      result  ; exact match
-      (dec (->insertion-point result)))))  ; insertion point - 1
+  (if (zero? (count arr))
+    -1
+    (let [result (Collections/binarySearch arr target)]
+      (if (>= result 0)
+        ;; exact match but we need to find the LAST occurrence
+        (loop [next-idx result]
+          (if (or (= (inc next-idx) (count arr)) (not= target (nth arr (inc next-idx))))
+            next-idx
+            (recur (inc next-idx))))
+        (let [insertion-pt (->insertion-point result)]
+          (if (zero? insertion-pt)
+            -1
+            (dec insertion-pt)))))))
 
