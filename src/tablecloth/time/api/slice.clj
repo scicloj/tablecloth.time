@@ -79,7 +79,6 @@
              (throw (ex-info "Time column is nil or does not exist in dataset"
                              {:time-column time-column-name
                               :dataset-columns (vec (tc/column-names ds))})))
-
          col-millis (try
                       (convert-time time-col :epoch-milliseconds)
                       (catch Exception e
