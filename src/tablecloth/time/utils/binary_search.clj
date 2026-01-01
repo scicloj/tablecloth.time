@@ -1,5 +1,5 @@
 (ns tablecloth.time.utils.binary-search
-  (:import [java.util Collections]) 
+  (:import [java.util Collections])
   (:require [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as fun]
             [tablecloth.column.api :as tcc]))

@@ -1,6 +1,5 @@
 (ns tablecloth.time.api.slice
   (:require [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as fun]
             [tablecloth.api :as tc]
             [tablecloth.time.parse :as parse]
             [tablecloth.time.utils.datatypes :as types]
@@ -32,7 +31,6 @@
                       {:argument arg-name
                        :value key
                        :cause e})))))
-
 
 (defn slice
   "Returns a subset of dataset's rows between `from` and `to` (both inclusive).
@@ -110,8 +108,8 @@
          slice-indices (let [last-idx (dec (count col-millis))
                              range-seq (range
                                         (if (= sort-direction :descending)
-                                           (- last-idx upper-bound)
-                                           lower-bound)
+                                          (- last-idx upper-bound)
+                                          lower-bound)
                                         (inc
                                          (if (= sort-direction :descending)
                                            (- last-idx lower-bound)
