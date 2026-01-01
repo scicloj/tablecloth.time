@@ -1,9 +1,9 @@
 (ns tablecloth.time.api.slice
   (:require [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as fun]
             [tablecloth.api :as tc]
             [tablecloth.time.parse :as parse]
             [tablecloth.time.utils.datatypes :as types]
-            [tablecloth.time.utils.binary-search :as binary-search]
             [tablecloth.time.column.api :refer [convert-time]]
             [tablecloth.time.utils.binary-search :as bs]
             [tablecloth.column.api :as tcc]))
@@ -89,19 +89,14 @@
                                         {:time-column time-column-name
                                          :column-dtype (dtype/elemwise-datatype time-col)
                                          :cause e}))))
-         sort-direction (if (< (first col-millis) (last col-millis))
+         sort-direction (if (<= (first col-millis) (last col-millis))
                           :ascending :descending)
-         _dummy (println "sort direction:" sort-direction)
          col-sorted? (bs/is-sorted? col-millis  sort-direction)
-         _dummy (println col-millis)
-         _dummy (println "sorted:" col-sorted?)
-         col-millis  (cond
-                       (and col-sorted? (= sort-direction :ascending))
-                       col-millis
-                       (and col-sorted? (= sort-direction :descending))
-                       (reverse col-millis)
+         col-millis  (cond-> col-millis
                        (not col-sorted?)
-                       (tcc/sort-column col-millis :asc))
+                       (tcc/sort-column :asc)
+                       (and col-sorted? (= sort-direction :descending))
+                       (reverse))
          from-key (-> from (extract-key "from") (normalize-key "from"))
          to-key (-> to (extract-key "to") (normalize-key "to"))
          _ (when (> from-key to-key)
@@ -110,10 +105,20 @@
                               :to to
                               :from-millis from-key
                               :to-millis to-key})))
-         lower-bound (binary-search/find-lower-bound col-millis from-key)
-         upper-bound (binary-search/find-upper-bound col-millis to-key)
-         slice-indices (dtype/->reader (range lower-bound (inc upper-bound)))]
+         lower-bound (bs/find-lower-bound col-millis from-key)
+         upper-bound (bs/find-upper-bound col-millis to-key)
+         slice-indices (let [last-idx (dec (count col-millis))
+                             range-seq (range
+                                        (if (= sort-direction :descending)
+                                           (- last-idx upper-bound)
+                                           lower-bound)
+                                        (inc
+                                         (if (= sort-direction :descending)
+                                           (- last-idx lower-bound)
+                                           upper-bound)))]
+                         (if (seq range-seq)
+                           (dtype/->reader range-seq)
+                           []))]
      (if (= result-type :as-indices)
        slice-indices
        (tc/select-rows ds slice-indices)))))
-
