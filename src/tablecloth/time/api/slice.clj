@@ -32,6 +32,47 @@
                        :value key
                        :cause e})))))
 
+(defn- prepare-time-column-for-slice
+  "Prepare a dataset's time column for slicing.
+
+  - Ensures the column exists.
+  - Converts it to epoch milliseconds.
+  - Handles ascending vs descending input and returns a sorted millis column
+    plus the sort direction.
+
+  Returns a map {:col-millis col-millis-sorted :sort-direction dir}, where
+  - col-millis-sorted is an epoch-millis column (ascending order),
+  - dir is :ascending or :descending describing the *original* order."
+  [ds time-column-name]
+  (let [time-col (try
+                   (get ds time-column-name)
+                   (catch Exception e
+                     (throw (ex-info (format "Unable to extract time column from dataset: %s"
+                                             (.getMessage e))
+                                     {:time-column time-column-name
+                                      :cause e}))))]
+    (when (nil? time-col)
+      (throw (ex-info "Time column is nil or does not exist in dataset"
+                      {:time-column time-column-name
+                       :dataset-columns (vec (tc/column-names ds))})))
+    (let [col-millis (try
+                       (convert-time time-col :epoch-milliseconds)
+                       (catch Exception e
+                         (throw (ex-info (format "Unable to convert time column to epoch milliseconds: %s" (.getMessage e))
+                                         {:time-column time-column-name
+                                          :column-dtype (dtype/elemwise-datatype time-col)
+                                          :cause e}))))
+          sort-direction (if (<= (first col-millis) (last col-millis))
+                           :ascending :descending)
+          col-sorted? (bs/is-sorted? col-millis sort-direction)
+          col-millis  (cond-> col-millis
+                         (not col-sorted?)
+                         (tcc/sort-column :asc)
+                         (and col-sorted? (= sort-direction :descending))
+                         (reverse))]
+      {:col-millis     col-millis
+       :sort-direction sort-direction})))
+
 (defn slice
   "Returns a subset of dataset's rows between `from` and `to` (both inclusive).
   
@@ -68,32 +109,7 @@
    (slice ds time-column-name from to nil))
   ([ds time-column-name from to {:keys [result-type]
                                  :or {result-type :as-dataset}}]
-   (let [time-col (try
-                    (get ds time-column-name)
-                    (catch Exception e
-                      (throw (ex-info (format "Unable to extract time column from dataset: %s"
-                                              (.getMessage e))
-                                      {:time-column time-column-name
-                                       :cause e}))))
-         _ (when (nil? time-col)
-             (throw (ex-info "Time column is nil or does not exist in dataset"
-                             {:time-column time-column-name
-                              :dataset-columns (vec (tc/column-names ds))})))
-         col-millis (try
-                      (convert-time time-col :epoch-milliseconds)
-                      (catch Exception e
-                        (throw (ex-info (format "Unable to convert time column to epoch milliseconds: %s" (.getMessage e))
-                                        {:time-column time-column-name
-                                         :column-dtype (dtype/elemwise-datatype time-col)
-                                         :cause e}))))
-         sort-direction (if (<= (first col-millis) (last col-millis))
-                          :ascending :descending)
-         col-sorted? (bs/is-sorted? col-millis  sort-direction)
-         col-millis  (cond-> col-millis
-                       (not col-sorted?)
-                       (tcc/sort-column :asc)
-                       (and col-sorted? (= sort-direction :descending))
-                       (reverse))
+   (let [{:keys [col-millis sort-direction]} (prepare-time-column-for-slice ds time-column-name)
          from-key (-> from (extract-key "from") (normalize-key "from"))
          to-key (-> to (extract-key "to") (normalize-key "to"))
          _ (when (> from-key to-key)

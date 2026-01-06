@@ -21,7 +21,8 @@ Both source and test files have been moved outside of `src/` and `test/` directo
 **Active work**:
 - ✅ Column-level field extractors implemented in `tablecloth.column.api`
 - ✅ Column-level `convert-time` for representation changes
-- 🚧 Dataset-level operations (slice, bucket, resample) to be reimplemented per the architecture below
+- ✅ Dataset-level `slice` operation implemented in `tablecloth.time.api.slice`
+- 🚧 Dataset-level operations (bucket, resample) to be reimplemented per the architecture below
 
 ## 1. Scope and direction
 
@@ -378,92 +379,112 @@ separate APIs (e.g. `between`/`time-diff`, `convert-duration`).
 
 On top of column primitives, we can define dataset-level helpers that feel natural in tablecloth. All time operations take **explicit column arguments**, consistent with tablecloth's existing API patterns.
 
-### 5.1. Slicing by time
+### 5.1. Slicing by time (✅ implemented)
+
+Implemented in `tablecloth.time.api.slice/slice`:
 
 ```clojure
-(slice-by [ds time-col start end opts])
+(slice [ds time-col start end opts])
 ```
 
 Example:
 ```clojure
-(slice-by ds :received-date "2022-01-01" "2022-12-31")
-(slice-by ds :timestamp #inst "2022-01-01" #inst "2022-12-31" {:sorted? true})
+(slice ds :received-date "2022-01-01" "2022-12-31")
+(slice ds :timestamp #time/date "2022-01-01" #time/date "2022-12-31")
+(slice ds :timestamp 1704067200000 1704153599999 {:result-type :as-indices})
 ```
 
-Internal approach:
+**Implementation details:**
 
-- Parse `start`/`end` using millis-pivot semantics (string/date/instant → millis).
-- Normalize the chosen time column to millis.
-- Check sortedness (O(n)) unless `{:sorted? true}` is provided.
-- If not sorted, throw helpful error: "Time column :received-date must be sorted. Use (tc/order-by ds :received-date) first."
-- Use binary search (always, unconditionally) to find `[start-idx end-idx]` range.
-- Return `(tc/select-rows ds (range start-idx end-idx))`.
+- Parse `start`/`end` using `tablecloth.time.parse/parse` (ISO-8601 strings) or accept temporal types/epoch millis directly.
+- Normalize the chosen time column to epoch milliseconds using `convert-time`.
+- Check sortedness (O(n)) and auto-sort if needed (ascending order).
+- Support both ascending and descending sorted data.
+- Use custom binary search (`tablecloth.time.utils.binary-search`) to find `[start-idx end-idx]` range.
+- Return dataset by default or indices with `{:result-type :as-indices}`.
 
 **Sortedness semantics:**
-- Default: check sortedness, use binary search if sorted, error if not.
-- `{:sorted? true}`: skip sortedness check (optimization when user knows data is sorted).
-- Never silently reorder data.
+- Default: check sortedness using `is-sorted?`, auto-sort in ascending order if needed.
+- Supports both ascending and descending sorted data (detects direction automatically).
+- Never errors on unsorted data—just sorts it transparently.
 
 **Binary search strategy:**
 - Always use binary search (no conditional logic or thresholds).
+- Custom implementation in `tablecloth.time.utils.binary-search` for lower/upper bound finding.
 - Fast even on small data: 100 rows = ~7 comparisons.
 - Provides consistent, predictable performance.
-- Implementation: write custom binary search for lower/upper bound finding, or use Java's `Arrays.binarySearch`.
+
+**Comprehensive test coverage:**
+- Ascending and descending sorted data
+- String dates, time literals, and epoch milliseconds
+- Multi-month ranges, single-row datasets, duplicate timestamps
+- Edge cases: empty results, out-of-range queries, boundary matches
+- Error handling: invalid date ranges, missing columns
 
 ### 5.2. Bucketing and rollups
 
-Examples of higher-level helpers built on `bucket-every-col`:
+**Design decision**: No dedicated `rollup-every` or `add-bucket-column` functions.
 
-- Add a bucket column:
+Following the **R/dplyr philosophy** of composable primitives, users can easily compose bucketing workflows using our column-level time functions with standard tablecloth operations:
 
-  ```clojure
-  (add-bucket-column [ds time-col bucket-col-name interval unit opts])
-  ```
-
-- Roll up by intervals:
-
-  ```clojure
-  (rollup-every [ds time-col interval unit agg-spec opts])
-  ```
-
-Example:
 ```clojure
-(rollup-every ds :received-date 5 :minutes {:count tc/row-count :avg-value #(dfn/mean (% :value))})
+;; Bucket and aggregate
+(-> ds
+    (tc/add-column :bucket #(down-to-nearest (% :timestamp) 5 :minutes))
+    (tc/group-by :bucket)
+    (tc/aggregate {:count tc/row-count 
+                   :avg-value #(dfn/mean (% :value))}))
+
+;; Or use field extractors for natural calendar boundaries
+(-> ds
+    (tc/add-column :year #(year (% :timestamp)))
+    (tc/add-column :month #(month (% :timestamp)))
+    (tc/group-by [:year :month])
+    (tc/aggregate {:total #(dfn/sum (% :sales))}))
 ```
 
-Implementation pattern:
+This is:
+- **Transparent**: you see exactly what's happening at each step
+- **Flexible**: easy to customize (keep/drop bucket column, add filters, etc.)
+- **Consistent**: uses standard tablecloth patterns users already know
+- **Simple**: just 3 lines of straightforward code
 
-- Compute bucket column via `bucket-every-col`.
-- Add it via `tc/add-column`.
-- `tc/group-by` the bucket column.
-- `tc/aggregate` according to `agg-spec`.
+A dedicated `rollup-every` function would be too thin to justify—unlike `slice`, which handles significant complexity (parsing, sorting, binary search), bucketing workflows are simple compositions of existing tools.
 
-These operations take explicit time column arguments, consistent with tablecloth's patterns.
+**Possible future consideration**: A `rollup-every` helper might be justified if user feedback shows this is a very common pattern and convenience is valued. But we'll start with composable primitives and add convenience functions only if needed.
 
 ---
 
 ## 6. Practical next steps
 
-1. **Column API:**
-   - Define `tablecloth.column.time` with:
-     - `->millis-col`
-     - `millis->datetime-col`
-     - `bucket-every-col`
-     - (optionally) a few basic field extractors over datetime columns.
+1. **Column API:** (✅ mostly complete)
+   - ✅ Field extractors implemented in `tablecloth.time.column.api` (year, month, day, hour, minute, second, day-of-week, day-of-year, week-of-year, quarter)
+   - ✅ `convert-time` for representation changes (temporal ↔ epoch)
+   - 🚧 Still needed:
+     - `bucket-every-col` / `align-time` / `floor-time` for rounding/bucketing operations
+     - Additional rounding operations (`ceil-to-nearest`, `round-to-nearest`)
+     - Temporal arithmetic (`plus-time`, `minus-time`, `between`)
 
-2. **Binary search helper:**
-   - Implement binary search for time slicing (lower/upper bound finding).
-   - Always use binary search (no conditional logic based on size).
-   - Options: write custom implementation or leverage Java's `Arrays.binarySearch`.
+2. **Binary search helper:** (✅ complete)
+   - ✅ Custom implementation in `tablecloth.time.utils.binary-search`
+   - ✅ Supports both lower-bound and upper-bound finding
+   - ✅ Always uses binary search (no conditional logic)
 
-3. **Dataset API:**
-   - Implement `slice-by` taking explicit time column argument.
-   - Default: check sortedness (O(n)), error if not sorted.
-   - Option `{:sorted? true}`: skip sortedness check for performance.
-   - Use binary search to find range, then `tc/select-rows`.
-   - Implement `add-bucket-column` and `rollup-every` built on `bucket-every-col` and standard `group-by`/`aggregate`.
+3. **Dataset API:** (✅ slice complete, bucketing/resampling/interpolation todo)
+   - ✅ `slice` implemented in `tablecloth.time.api.slice` with:
+     - Explicit time column argument
+     - Auto-sorting if unsorted (no error-on-unsorted)
+     - Binary search for range finding
+     - Comprehensive test coverage
+   - 🚧 Still needed (downsampling/aggregation):
+     - ~~`rollup-every`~~ **Deprioritized**: users can compose `down-to-nearest` + `tc/add-column` + `tc/group-by` + `tc/aggregate`
+     - No dedicated dataset-level bucketing functions planned (composition is sufficient)
+   - 🚧 Still needed (upsampling/interpolation):
+     - `resample-to-regular-grid` for irregular → regular time series
+     - Column primitives: `generate-time-range`, `interpolate-values`
+     - Interpolation methods: `:ffill`, `:bfill`, `:linear`, `:nearest`, `:zero`
 
-4. **Reuse from gnomon:**
+4. **Reuse from gnomon:** (🚧 in progress)
    - Port tests and semantics from the gnomon repo (especially for `down-to-nearest`, `->every`, and conversion behaviors) into `tablecloth.time` tests.
    - Use those semantics to guide the column-level and dataset-level implementations.
 
@@ -507,6 +528,7 @@ We clarified terminology and design layers around bucketing and resampling:
     - and then groups/aggregates and/or constructs a new regular time index.
   - This is where a future `adjust-frequency` or `resample-time` API will live,
     built on top of column primitives.
+  - **Important**: This covers **downsampling/aggregation** (many → fewer points).
 
 We will:
 
@@ -518,6 +540,80 @@ We will:
   - a chosen time column (optionally marked via `index-by`),
   - column-level alignment (`down-to-nearest`), and
   - standard group/aggregate operations.
+
+### 7.1. Interpolation / upsampling (distinct from bucketing/aggregation)
+
+**Use case** (from [Zulip conversation with Daniel Slutsky](https://clojurians.zulipchat.com/#narrow/dm/138175,214379-dm/near/562511797)):
+
+> Just to make it concrete with an example: the beats of the heart (or our estimates of when they happen) are irregular in time. Often, when we wish to conduct some analysis regarding heart rate or heart rate variability, we will interpolate and resample, so we have a regular time series, and then we can use methods like Fourier transform for frequency analysis.
+
+This highlights a **second type of resampling** distinct from bucketing/aggregation:
+
+#### Two resampling patterns:
+
+1. **Downsampling/Aggregation** (many → fewer points)
+   - Input: High-frequency irregular data (e.g., 1000 transactions/day, irregular heartbeats)
+   - Output: Lower-frequency aggregated data (e.g., daily totals, minute-by-minute averages)
+   - Operation: **Aggregate** multiple values into buckets (sum, mean, count, etc.)
+   - Implementation: `rollup-every`, `add-bucket-column` (planned above)
+
+2. **Upsampling/Interpolation** (fewer → more points, or irregular → regular)
+   - Input: Irregular time series (e.g., heartbeats at 0ms, 850ms, 1720ms, 2540ms...)
+   - Output: Regular time grid (e.g., every 100ms: 0ms, 100ms, 200ms, 300ms...)
+   - Operation: **Interpolate** to estimate values at new time points
+   - Use cases: Signal processing (FFT), regular time grids for ML, filling gaps
+
+#### Proposed API:
+
+```clojure
+(resample-to-regular-grid [ds time-col value-col interval unit opts])
+```
+
+Example:
+```clojure
+(resample-to-regular-grid ds :beat-time :rr-interval 100 :milliseconds
+  {:method :linear        ; or :ffill, :bfill, :nearest, :zero
+   :start "2024-01-01"    ; optional: explicit start time
+   :end "2024-01-02"})    ; optional: explicit end time
+```
+
+Common interpolation methods:
+- `:ffill` - forward fill (last observation carried forward)
+- `:bfill` - backward fill  
+- `:linear` - linear interpolation between points
+- `:nearest` - nearest neighbor
+- `:zero` - fill missing with zeros
+
+#### Implementation approach:
+
+This would build on **column-level primitives** (to be added):
+
+1. **Time grid generation**:
+   ```clojure
+   (generate-time-range [start end interval unit opts])
+   ;; Returns a column of evenly-spaced time points
+   ```
+
+2. **Interpolation**:
+   ```clojure
+   (interpolate-values [time-col value-col new-times method opts])
+   ;; For each time in new-times, interpolate value from surrounding points in time-col/value-col
+   ```
+
+3. **Dataset-level operation**:
+   - Generate regular time grid (or accept explicit grid)
+   - For each output time point, interpolate value from surrounding input points
+   - Return new dataset with regular time index
+
+**Implementation notes**:
+- More complex than bucketing/aggregation because it requires:
+  - Looking at neighboring points (not just within a bucket)
+  - Mathematical interpolation logic (especially for `:linear`)
+  - Handling edge cases (before first point, after last point)
+- Could leverage dtype-next operations where applicable
+- Consider whether to support multi-column interpolation (interpolate all numeric columns)
+
+**Priority**: Medium-to-high, as it addresses a distinct and important use case (signal processing, ML pipelines) that cannot be satisfied by bucketing/aggregation alone.
 
 Unit handling:
 
@@ -542,7 +638,90 @@ This aligns with how other ecosystems behave conceptually:
 
 ---
 
-## 8. Reference: dtype-next datetime API
+## 8. Rolling windows (in-process inquiry)
+
+We have two different rolling window approaches to evaluate:
+
+### 8.1. Archived implementation (`_archive/src/api/rolling_window.clj`)
+
+**Type**: Fixed-size **row-count-based** rolling windows
+
+**Key characteristics**:
+- Window defined by **number of rows** (e.g., "previous 3 rows")
+- Works on **any column** (time or not)—just uses positional indices
+- Returns a **grouped dataset** where each group contains the window rows
+- Implementation uses row indices and leverages `tc/group-by` with custom grouping map
+
+**Use case example**:
+```clojure
+;; Window of previous 3 rows
+(rolling-window ds 3)
+;; → Each row gets a dataset containing [row-2, row-1, current-row]
+```
+
+**Characteristics**:
+- Always same number of rows per window (except at start where truncated)
+- Not time-aware—just counts rows
+- General-purpose, could work on any ordered data
+
+### 8.2. dtype-next's `variable-rolling-window-ranges`
+
+**Type**: Time-based **duration windows**
+
+**Key characteristics**:
+- Window defined by **time duration** (e.g., "previous 5 minutes")
+- Requires **sorted, monotonically increasing datetime column**
+- Works with **irregular time series** (variable number of rows per window)
+- Returns **index ranges** (just `[start-idx end-idx]` pairs, not datasets)
+- Units in microseconds (or other time units via constants)
+
+**Use case example**:
+```clojure
+;; Window of previous 5 minutes
+(variable-rolling-window-ranges time-col 5 :minutes)
+;; → For each time point, returns [start-idx end-idx] covering previous 5 minutes
+;; → Variable number of rows per window depending on data density
+```
+
+**Characteristics**:
+- Window size varies: sparse data = fewer rows, dense data = more rows
+- Time-aware—uses actual temporal values
+- Specifically designed for time-series analysis
+
+### 8.3. Comparison
+
+| Feature | Archived `rolling-window` | dtype-next `variable-rolling-window-ranges` |
+|---------|--------------------------|---------------------------------------------|
+| **Window definition** | Fixed row count | Time duration |
+| **Result** | Grouped dataset | Index ranges |
+| **Rows per window** | Always same (3 rows, 10 rows, etc.) | Variable (depends on time density) |
+| **Time-aware?** | No (just counts rows) | Yes (uses actual time values) |
+| **Use case** | "Last N observations" | "Last N minutes/hours/days" |
+| **Data requirement** | Any ordered data | Sorted datetime column |
+
+### 8.4. Design considerations (to revisit)
+
+**For time-series work**, dtype-next's approach seems more appropriate because:
+- Time-based windows are more meaningful: "5-minute rolling average" vs "3-row rolling average"
+- Handles irregular data properly: If heartbeats are irregular, you want "last 10 seconds of beats" not "last 3 beats"
+- More flexible: can build row-count windows on top of time windows, but not vice versa
+
+**However, the archived version** has value as a general-purpose utility:
+- Simpler for non-time data
+- Returns grouped datasets (higher-level abstraction)
+- Could potentially live in tablecloth itself (not time-specific)
+
+**Open questions**:
+1. Should we provide both? Row-count for simplicity, time-based for time-series?
+2. What API should we expose? Grouped datasets vs index ranges vs something else?
+3. How does this relate to aggregation? Do we want `(rolling-mean ds :value 5 :minutes)` or lower-level primitives?
+4. Should row-count rolling windows live in `tablecloth.api` rather than `tablecloth.time`?
+
+**Priority**: Medium—useful for time-series analysis but not as fundamental as slice/bucket/interpolate.
+
+---
+
+## 9. Reference: dtype-next datetime API
 
 For details on the underlying dtype-next datetime namespace (`tech.v3.datatype.datetime`) that we are lifting into `tablecloth.time`, see:
 

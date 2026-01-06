@@ -1,5 +1,6 @@
 (ns tablecloth.time.utils.binary-search-test
   (:require [clojure.test :refer [deftest testing is]]
+            [tablecloth.api :as tc]
             [tablecloth.time.utils.binary-search :as bs]))
 
 (deftest test-is-sorted?
@@ -27,6 +28,56 @@
     (is (true? (bs/is-sorted? (vec (range 1000)))))
     (is (false? (bs/is-sorted? (vec (reverse (range 1000))))))
     (is (true? (bs/is-sorted? (vec (repeat 100 5)))))))
+
+(deftest test-ensure-time-column
+  (testing "throws when column missing"
+    (let [ds (tc/dataset {:a [1 2 3]})]
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo
+           #"Time column not found"
+           (bs/ensure-time-column ds :ts {})))))
+
+  (testing "returns ds and column when already sorted"
+    (let [ds (tc/dataset {:ts [1 2 3]
+                          :x  [10 20 30]})
+          {:keys [ds time-col time-col-series sorted?]}
+          (bs/ensure-time-column ds :ts {})]
+      (is (= ds ds))
+      (is (= :ts time-col))
+      (is (= [1 2 3] (vec time-col-series)))
+      (is sorted?)))
+
+  (testing "auto-sorts when unsorted and sort? true"
+    (let [ds (tc/dataset {:ts [3 1 2]
+                          :x  [30 10 20]})
+          {:keys [ds time-col time-col-series sorted?]}
+          (bs/ensure-time-column ds :ts {:sorted? false :sort? true})]
+      (is (= :ts time-col))
+      (is sorted?)
+      (is (= [1 2 3] (vec time-col-series)))
+      ;; Make sure the whole dataset was sorted, not just the column
+      (is (= [10 20 30] (vec (tc/column ds :x))))))
+
+  (testing "does not sort when sort? false"
+    (let [ds (tc/dataset {:ts [3 1 2]
+                          :x  [30 10 20]})
+          {:keys [ds time-col time-col-series sorted?]}
+          (bs/ensure-time-column ds :ts {:sorted? false :sort? false})]
+      (is (= :ts time-col))
+      (is (not sorted?))
+      (is (= [3 1 2] (vec time-col-series)))
+      (is (= [30 10 20] (vec (tc/column ds :x))))))
+
+  (testing "respects sorted? hint"
+    (let [ds (tc/dataset {:ts [3 2 1]
+                          :x  [30 20 10]})
+          {:keys [ds time-col time-col-series sorted?]}
+          (bs/ensure-time-column ds :ts {:sorted? true :sort? true})]
+      ;; We trust the caller and do not resort
+      (is (= :ts time-col))
+      (is sorted?)
+      (is (= [3 2 1] (vec time-col-series)))
+      (is (= [30 20 10] (vec (tc/column ds :x)))))))
 
 (deftest test-find-upper-bound
   (testing "empty arr"
