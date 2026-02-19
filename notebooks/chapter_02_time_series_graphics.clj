@@ -14,7 +14,7 @@
             [tech.v3.datatype.functional :as dfn]
             [tech.v3.dataset :as ds]
             [scicloj.tableplot.v1.plotly :as plotly]
-            [tablecloth.time.api]
+            [tablecloth.time.api :as time-api]
             [tablecloth.time.column.api :as time-col])
   (:import [java.time LocalDate]))
 
@@ -118,8 +118,7 @@ olympic-running
 ;; ### Australian quarterly beer production (seasonal + no trend)
 (def recent-beer
   (-> aus-production
-      (tc/select-rows #(when-let [q (get % "Quarter")]
-                         (>= (compare (str q) "2000") 0)))
+      (tc/select-rows #(>= (.getYear (get % "Quarter")) 2000))
       (tc/select-columns ["Quarter" "Beer"])))
 
 (-> recent-beer
@@ -133,8 +132,7 @@ olympic-running
 (def google-2015
   (-> gafa
       (tc/select-rows #(and (= "GOOG" (get % "Symbol"))
-                            (.startsWith (str (get % "Date")) "2015"))))
-)
+                            (= (.getYear (get % "Date")) 2015)))))
 
 ;; Daily closing price
 (-> google-2015
@@ -156,10 +154,16 @@ olympic-running
 ;; R: `gg_season(a10, Cost)` — overlay each year on the same month axis.
 ;; We extract year and month, then plot with color = year.
 
+;; tablecloth.time has `add-time-columns` — a dataset-level operation
+;; that extracts datetime fields in one call. tablecloth auto-parses
+;; our CSV date strings into :packed-local-date, so these work out of the box.
+;;
+;; Vector form: column names match field names
+;; Map form: explicit output names
+
 (def a10-seasonal
   (-> a10
-      (tc/add-column "Year" #(mapv (fn [d] (subs (str d) 0 4)) (% "Month")))
-      (tc/add-column "MonthNum" #(mapv (fn [d] (Integer/parseInt (subs (str d) 5 7))) (% "Month")))))
+      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
 (-> a10-seasonal
     (plotly/layer-line {:=x "MonthNum"
@@ -182,8 +186,7 @@ olympic-running
 ;; Group by month, plot each month's values over years
 (def a10-subseries
   (-> a10
-      (tc/add-column "Year" #(mapv (fn [d] (Integer/parseInt (subs (str d) 0 4))) (% "Month")))
-      (tc/add-column "MonthNum" #(mapv (fn [d] (Integer/parseInt (subs (str d) 5 7))) (% "Month")))))
+      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
 ;; Faceted by month — each panel shows that month across all years
 (-> a10-subseries
@@ -200,9 +203,7 @@ olympic-running
 
 (def vic-elec-2014
   (-> vic-elec
-      (tc/select-rows #(when-let [t (get % "Time")]
-                         (.startsWith (str t) "2014")))))
-
+      (tc/select-rows #(.startsWith (str (get % "Time")) "2014"))))
 
 (-> vic-elec-2014
     (plotly/layer-point {:=x "Temperature"

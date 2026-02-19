@@ -248,13 +248,3 @@
   (let [months (dtdt-ops/long-temporal-field :months (ensure-local-datetime col))]
     (tcc/column (fun/+ 1 (fun/quot (fun/- months 1) 3)))))
 
-(def col (tcc/column [#time/date "2024-01-01"
-                      #time/date "2024-01-05"
-                      #time/date "2024-01-10"
-                      #time/date "2024-01-15"
-                      #time/date "2024-01-20"
-                      #time/date "2024-01-25"
-                      #time/date "2024-01-31"]))
-
-(tech.v3.datatype.datetime/variable-rolling-window-ranges col 2 :days)
-

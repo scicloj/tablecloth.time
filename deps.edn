@@ -5,7 +5,8 @@
   time-literals/time-literals {:mvn/version "0.1.5"}}
  :aliases
  {:dev
-  {:extra-deps {clj-kondo         {:mvn/version "2021.12.01"}
+  {:extra-paths ["test"]
+   :extra-deps {clj-kondo         {:mvn/version "2021.12.01"}
                 scicloj/notespace {:mvn/version "3-beta3"}
                 midje/midje       {:mvn/version "1.10.5"}}}
   :notebooks
