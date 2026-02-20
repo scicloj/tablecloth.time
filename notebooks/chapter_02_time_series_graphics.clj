@@ -66,7 +66,11 @@ ansett
 aus-production
 
 ;; ### vic_elec — Victorian half-hourly electricity demand
-(def vic-elec (load-fpp3 "vic_elec"))
+;; Time column is "2011-12-31 13:00:00" — not auto-parsed by tablecloth.
+;; Use tc/convert-types with a format pattern to parse it.
+(def vic-elec
+  (-> (load-fpp3 "vic_elec")
+      (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])))
 vic-elec
 
 ;; ### olympic_running — Olympic running times
@@ -185,13 +189,11 @@ olympic-running
 ;; Electricity demand has daily, weekly, and yearly patterns.
 ;; R: `gg_season(Demand, period = "day"|"week"|"year")`
 
-;; Daily pattern: extract hour from Time string, overlay each day
-;; vic_elec Time column is a string ("2011-12-31 13:00:00") — not auto-parsed.
-;; We extract fields manually from the string, or use the Date column (LocalDate).
+;; Now that Time is parsed as LocalDateTime, we can use add-time-columns directly.
 (def vic-elec-with-fields
   (-> vic-elec
-      (tc/add-column "Hour" #(mapv (fn [t] (Integer/parseInt (subs (str t) 11 13))) (% "Time")))
-      (time-api/add-time-columns "Date" {:day-of-week "DayOfWeek"
+      (time-api/add-time-columns "Time" {:hour "Hour"
+                                          :day-of-week "DayOfWeek"
                                           :day-of-year "DayOfYear"
                                           :week-of-year "WeekOfYear"
                                           :year "Year"})
@@ -254,7 +256,7 @@ olympic-running
 
 (def vic-elec-2014
   (-> vic-elec
-      (tc/select-rows #(.startsWith (str (get % "Time")) "2014"))))
+      (tc/select-rows #(= (.getYear (get % "Time")) 2014))))
 
 (-> vic-elec-2014
     (plotly/layer-point {:=x "Temperature"
