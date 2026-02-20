@@ -72,3 +72,37 @@
           result (time-api/add-lead ds :a 2 :a_lead2)]
       (is (= [3.0 4.0 5.0 nil nil] (vec (result :a_lead2))))
       (is (= :float64 (dtype/elemwise-datatype (result :a_lead2)))))))
+
+(deftest add-lags-vector-test
+  (testing "add-lags with vector auto-names and drops missing by default"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0 6.0]})
+          result (time-api/add-lags ds :a [2 4])]
+      ;; Should have dropped first 4 rows (max lag)
+      (is (= 2 (tc/row-count result)))
+      ;; Auto-named columns
+      (is (= [3.0 4.0] (vec (result :a_lag2))))
+      (is (= [1.0 2.0] (vec (result :a_lag4)))))))
+
+(deftest add-lags-map-test
+  (testing "add-lags with map uses custom names"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0 6.0]})
+          result (time-api/add-lags ds :a {2 :short 4 :long})]
+      (is (= [3.0 4.0] (vec (result :short))))
+      (is (= [1.0 2.0] (vec (result :long)))))))
+
+(deftest add-lags-no-drop-test
+  (testing "add-lags with :drop-missing false keeps nils"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0]})
+          result (time-api/add-lags ds :a [2] {:drop-missing false})]
+      (is (= 5 (tc/row-count result)))
+      (is (= [nil nil 1.0 2.0 3.0] (vec (result :a_lag2)))))))
+
+(deftest add-leads-vector-test
+  (testing "add-leads with vector auto-names and drops missing by default"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0 6.0]})
+          result (time-api/add-leads ds :a [2 4])]
+      ;; Should have dropped last 4 rows (max lead)
+      (is (= 2 (tc/row-count result)))
+      ;; Auto-named columns
+      (is (= [3.0 4.0] (vec (result :a_lead2))))
+      (is (= [5.0 6.0] (vec (result :a_lead4)))))))

@@ -83,3 +83,71 @@
     ;; Adds column :Beer_lead4 where row i contains Beer[i+4], nil for last 4 rows"
   [ds source-col k target-col]
   (tc/add-column ds target-col (time-col/lead (ds source-col) k)))
+
+(defn add-lags
+  "Add multiple lagged versions of a column to a dataset.
+
+  lags — map of {k target-col-name} or vector of lags (auto-named as source_lag{k})
+
+  Options:
+    :drop-missing — drop rows with nil values in any of the new lag columns (default true)
+
+  Examples:
+    ;; Map form with custom names
+    (add-lags ds :Beer {4 :Beer_lag4, 8 :Beer_lag8, 12 :Beer_lag12})
+
+    ;; Vector form with auto-named columns (:Beer_lag1, :Beer_lag2, etc.)
+    (add-lags ds :Beer [1 2 3 4])
+
+    ;; Keep nils (don't drop rows)
+    (add-lags ds :Beer [1 2 3 4] {:drop-missing false})"
+  ([ds source-col lags]
+   (add-lags ds source-col lags {}))
+  ([ds source-col lags opts]
+   (let [source-name (name source-col)
+         lag-map (cond
+                   (map? lags) lags
+                   (vector? lags) (into {} (map #(vector % (keyword (str source-name "_lag" %))) lags))
+                   :else (throw (ex-info "lags must be a map or vector" {:lags lags})))
+         ds-with-lags (reduce-kv (fn [d k target-col]
+                                   (add-lag d source-col k target-col))
+                                 ds
+                                 lag-map)
+         target-cols (vals lag-map)]
+     (if (:drop-missing opts true)
+       (tc/drop-missing ds-with-lags target-cols)
+       ds-with-lags))))
+
+(defn add-leads
+  "Add multiple lead (forward-shifted) versions of a column to a dataset.
+
+  leads — map of {k target-col-name} or vector of leads (auto-named as source_lead{k})
+
+  Options:
+    :drop-missing — drop rows with nil values in any of the new lead columns (default true)
+
+  Examples:
+    ;; Map form with custom names
+    (add-leads ds :Beer {4 :Beer_lead4, 8 :Beer_lead8})
+
+    ;; Vector form with auto-named columns (:Beer_lead1, :Beer_lead2, etc.)
+    (add-leads ds :Beer [1 2 3 4])
+
+    ;; Keep nils (don't drop rows)
+    (add-leads ds :Beer [1 2 3 4] {:drop-missing false})"
+  ([ds source-col leads]
+   (add-leads ds source-col leads {}))
+  ([ds source-col leads opts]
+   (let [source-name (name source-col)
+         lead-map (cond
+                    (map? leads) leads
+                    (vector? leads) (into {} (map #(vector % (keyword (str source-name "_lead" %))) leads))
+                    :else (throw (ex-info "leads must be a map or vector" {:leads leads})))
+         ds-with-leads (reduce-kv (fn [d k target-col]
+                                    (add-lead d source-col k target-col))
+                                  ds
+                                  lead-map)
+         target-cols (vals lead-map)]
+     (if (:drop-missing opts true)
+       (tc/drop-missing ds-with-leads target-cols)
+       ds-with-leads))))
