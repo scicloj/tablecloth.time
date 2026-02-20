@@ -105,9 +105,12 @@
    (add-lags ds source-col lags {}))
   ([ds source-col lags opts]
    (let [source-name (name source-col)
+         make-col-name (if (string? source-col)
+                         #(str source-name "_lag" %)
+                         #(keyword (str source-name "_lag" %)))
          lag-map (cond
                    (map? lags) lags
-                   (vector? lags) (into {} (map #(vector % (keyword (str source-name "_lag" %))) lags))
+                   (vector? lags) (into {} (map #(vector % (make-col-name %)) lags))
                    :else (throw (ex-info "lags must be a map or vector" {:lags lags})))
          ds-with-lags (reduce-kv (fn [d k target-col]
                                    (add-lag d source-col k target-col))
@@ -139,9 +142,12 @@
    (add-leads ds source-col leads {}))
   ([ds source-col leads opts]
    (let [source-name (name source-col)
+         make-col-name (if (string? source-col)
+                         #(str source-name "_lead" %)
+                         #(keyword (str source-name "_lead" %)))
          lead-map (cond
                     (map? leads) leads
-                    (vector? leads) (into {} (map #(vector % (keyword (str source-name "_lead" %))) leads))
+                    (vector? leads) (into {} (map #(vector % (make-col-name %)) leads))
                     :else (throw (ex-info "leads must be a map or vector" {:leads leads})))
          ds-with-leads (reduce-kv (fn [d k target-col]
                                     (add-lead d source-col k target-col))
