@@ -192,16 +192,21 @@ olympic-running
 ;; Now that Time is parsed as LocalDateTime, we can use add-time-columns directly.
 ;; vic_elec is half-hourly, so we compute fractional hour (e.g. 13.5 for 13:30)
 ;; to avoid duplicate x-values per hour.
+;; NOTE: The "Date" column is the billing/reporting date (next day), not the
+;; calendar date of the timestamp. We derive all groupings from the Time column.
 (def vic-elec-with-fields
   (-> vic-elec
       (time-api/add-time-columns "Time" {:hour "Hour"
                                           :minute "Minute"
+                                          :day "Day"
+                                          :month "Month"
                                           :day-of-week "DayOfWeek"
                                           :day-of-year "DayOfYear"
                                           :week-of-year "WeekOfYear"
                                           :year "Year"})
       (tc/add-column "HourOfDay" #(dfn/+ (% "Hour") (dfn// (% "Minute") 60.0)))
-      (tc/add-column "DateStr" #(mapv str (% "Date")))
+      ;; Derive date string from Time (not the Date column)
+      (tc/add-column "TimeDate" #(mapv (fn [t] (str (.toLocalDate t))) (% "Time")))
       (tc/add-column "YearStr" #(mapv str (% "Year")))
       (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))))
 
@@ -213,7 +218,7 @@ olympic-running
                           (<= 1 (get % "DayOfYear") 14)))
     (plotly/layer-line {:=x "HourOfDay"
                         :=y "Demand"
-                        :=color "DateStr"
+                        :=color "TimeDate"
                         :=title "Electricity demand: Victoria (daily pattern, Jan 2014)"
                         :=x-title "Hour of day"
                         :=y-title "MWh"}))
