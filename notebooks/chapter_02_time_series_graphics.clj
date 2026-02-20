@@ -247,10 +247,11 @@ visitors-by-state
 
 ;; For beer production, lag 4 should show strong positive correlation (seasonal)
 ;; Using tablecloth.time.api/add-lags with auto-drop of missing values:
+;; Note: add-lags creates keyword columns like :Beer_lag4
 (-> recent-beer
     (time-api/add-lags "Beer" [4])
-    (plotly/layer-point {:=x "Beer_lag4"
-                         :=y "Beer"
+    (plotly/layer-point {:=x :Beer_lag4
+                         :=y :Beer
                          :=title "Lag 4 plot: Australian beer production"
                          :=x-title "Beer (t-4)"
                          :=y-title "Beer (t)"}))
