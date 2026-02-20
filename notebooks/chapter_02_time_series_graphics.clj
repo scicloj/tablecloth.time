@@ -181,6 +181,52 @@ olympic-running
 ;; - Generally higher in second half of year
 ;; - The whole pattern shifts upward year over year (trend)
 
+;; ### Multiple seasonal periods — vic_elec
+;; Electricity demand has daily, weekly, and yearly patterns.
+;; R: `gg_season(Demand, period = "day"|"week"|"year")`
+
+;; Daily pattern: extract hour from Time string, overlay each day
+;; vic_elec Time column is a string ("2011-12-31 13:00:00") — not auto-parsed.
+;; We extract fields manually from the string, or use the Date column (LocalDate).
+(def vic-elec-with-fields
+  (-> vic-elec
+      (tc/add-column "Hour" #(mapv (fn [t] (Integer/parseInt (subs (str t) 11 13))) (% "Time")))
+      (time-api/add-time-columns "Date" {:day-of-week "DayOfWeek"
+                                          :day-of-year "DayOfYear"
+                                          :week-of-year "WeekOfYear"
+                                          :year "Year"})
+      (tc/add-column "DateStr" #(mapv str (% "Date")))
+      (tc/add-column "YearStr" #(mapv str (% "Year")))
+      (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))))
+
+;; Daily pattern: x = hour of day, each day is a line
+;; (too many lines to color individually — shows the envelope)
+(-> vic-elec-with-fields
+    (plotly/layer-line {:=x "Hour"
+                        :=y "Demand"
+                        :=color "DateStr"
+                        :=title "Electricity demand: Victoria (daily pattern)"
+                        :=x-title "Hour of day"
+                        :=y-title "MWh"}))
+
+;; Weekly pattern: x = day of week, each week is a line
+(-> vic-elec-with-fields
+    (plotly/layer-line {:=x "DayOfWeek"
+                        :=y "Demand"
+                        :=color "WeekLabel"
+                        :=title "Electricity demand: Victoria (weekly pattern)"
+                        :=x-title "Day of week"
+                        :=y-title "MWh"}))
+
+;; Yearly pattern: x = day of year, each year is a line
+(-> vic-elec-with-fields
+    (plotly/layer-line {:=x "DayOfYear"
+                        :=y "Demand"
+                        :=color "YearStr"
+                        :=title "Electricity demand: Victoria (yearly pattern)"
+                        :=x-title "Day of year"
+                        :=y-title "MWh"}))
+
 ;; ## 2.5 — Seasonal subseries plots
 ;;
 ;; R: `gg_subseries(a10, Cost)` — for each month, show values across years
