@@ -188,11 +188,13 @@ olympic-running
   (-> a10
       (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
-;; Faceted by month — each panel shows that month across all years
+;; Faceted by month — each panel shows that month across all years.
+;; Convert MonthNum to string so tableplot treats it as categorical.
 (-> a10-subseries
+    (tc/add-column "MonthLabel" #(mapv str (% "MonthNum")))
     (plotly/layer-line {:=x "Year"
                         :=y "Cost"
-                        :=color "MonthNum"
+                        :=color "MonthLabel"
                         :=title "Seasonal subseries plot: Antidiabetic drug sales"
                         :=y-title "$ (millions)"}))
 
@@ -244,15 +246,15 @@ visitors-by-state
 ;; This is the visual precursor to autocorrelation.
 
 ;; For beer production, lag 4 should show strong positive correlation (seasonal)
-(let [beer-vals (vec (remove nil? (recent-beer "Beer")))
-      n (count beer-vals)]
-  (-> (tc/dataset {"Beer" (subvec beer-vals 4 n)
-                    "Beer_lag4" (subvec beer-vals 0 (- n 4))})
-      (plotly/layer-point {:=x "Beer_lag4"
-                           :=y "Beer"
-                           :=title "Lag 4 plot: Australian beer production"
-                           :=x-title "Beer (t-4)"
-                           :=y-title "Beer (t)"})))
+;; Using tablecloth.time.api/add-lag to create the lagged column:
+(-> recent-beer
+    (time-api/add-lag "Beer" 4 "Beer_lag4")
+    (tc/drop-rows #(nil? (% "Beer_lag4")))
+    (plotly/layer-point {:=x "Beer_lag4"
+                         :=y "Beer"
+                         :=title "Lag 4 plot: Australian beer production"
+                         :=x-title "Beer (t-4)"
+                         :=y-title "Beer (t)"}))
 
 ;; Strong positive diagonal = strong correlation at lag 4
 ;; (Q4 peaks align with Q4 peaks from the previous year)

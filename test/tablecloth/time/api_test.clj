@@ -1,5 +1,6 @@
 (ns tablecloth.time.api-test
   (:require [clojure.test :refer [deftest testing is]]
+            [tech.v3.datatype :as dtype]
             [tablecloth.api :as tc]
             [tablecloth.time.api :as time-api])
   (:import [java.time LocalDate LocalDateTime]))
@@ -57,3 +58,17 @@
           result (time-api/add-time-columns ds "Date" [:year :month])]
       (is (= [2024] (vec (result :year))))
       (is (= [7] (vec (result :month)))))))
+
+(deftest add-lag-test
+  (testing "lag shifts values forward with nil at start"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0]})
+          result (time-api/add-lag ds :a 2 :a_lag2)]
+      (is (= [nil nil 1.0 2.0 3.0] (vec (result :a_lag2))))
+      (is (= :float64 (dtype/elemwise-datatype (result :a_lag2)))))))
+
+(deftest add-lead-test
+  (testing "lead shifts values backward with nil at end"
+    (let [ds (tc/dataset {:a [1.0 2.0 3.0 4.0 5.0]})
+          result (time-api/add-lead ds :a 2 :a_lead2)]
+      (is (= [3.0 4.0 5.0 nil nil] (vec (result :a_lead2))))
+      (is (= :float64 (dtype/elemwise-datatype (result :a_lead2)))))))

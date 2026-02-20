@@ -1,5 +1,6 @@
 (ns tablecloth.time.column.api
   (:require [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.base :as dtype-base]
             [tech.v3.datatype.functional :as fun]
             [tech.v3.datatype.casting :as casting]
             [tech.v3.datatype.datetime :as dtdt]
@@ -247,4 +248,42 @@
   [col]
   (let [months (dtdt-ops/long-temporal-field :months (ensure-local-datetime col))]
     (tcc/column (fun/+ 1 (fun/quot (fun/- months 1) 3)))))
+
+;; -----------------------------------------------------------------------------
+;; Lag and Lead operations
+;; -----------------------------------------------------------------------------
+
+(defn lag
+  "Shift values forward by k positions, filling the first k positions with nil.
+
+  Returns a new column of the same type with nil at the start and the
+  original values shifted forward. The nil values are properly tracked
+  by tech.ml.dataset's missing value system.
+
+  Example:
+    (lag [A B C D E] 2)  ;; => [nil nil A B C]
+    (lag col 4)          ;; => [nil nil nil nil ...first n-4 values...]"
+  [col k]
+  (let [col (coerce-column col)
+        n (dtype/ecount col)
+        values (dtype-base/select col (range 0 (- n k)))]
+    ;; Build new column: k nils + values
+    ;; tcc/column handles nil properly in numeric columns via TMD's missing value support
+    (tcc/column (concat (repeat k nil) values))))
+
+(defn lead
+  "Shift values backward by k positions, filling the last k positions with nil.
+
+  Returns a new column of the same type with nil at the end and the
+  original values shifted backward.
+
+  Example:
+    (lead [A B C D E] 2)  ;; => [C D E nil nil]
+    (lead col 4)          ;; => [...values from index 4 onward... nil nil nil nil]"
+  [col k]
+  (let [col (coerce-column col)
+        n (dtype/ecount col)
+        values (dtype-base/select col (range k n))]
+    ;; Build new column: values + k nils
+    (tcc/column (concat values (repeat k nil)))))
 

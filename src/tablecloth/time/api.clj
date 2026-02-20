@@ -59,3 +59,27 @@
                                    {:field field}))))
                ds
                field->col)))
+
+(defn add-lag
+  "Add a lagged version of a column to a dataset.
+
+  Creates a new column with values shifted forward by k positions,
+  filling the first k positions with nil (tracked as missing values).
+
+  Example:
+    (add-lag ds :Beer 4 :Beer_lag4)
+    ;; Adds column :Beer_lag4 where row i contains Beer[i-4], nil for i<4"
+  [ds source-col k target-col]
+  (tc/add-column ds target-col (time-col/lag (ds source-col) k)))
+
+(defn add-lead
+  "Add a lead (forward-shifted) version of a column to a dataset.
+
+  Creates a new column with values shifted backward by k positions,
+  filling the last k positions with nil (tracked as missing values).
+
+  Example:
+    (add-lead ds :Beer 4 :Beer_lead4)
+    ;; Adds column :Beer_lead4 where row i contains Beer[i+4], nil for last 4 rows"
+  [ds source-col k target-col]
+  (tc/add-column ds target-col (time-col/lead (ds source-col) k)))
