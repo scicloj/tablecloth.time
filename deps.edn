@@ -10,5 +10,5 @@
                 scicloj/notespace {:mvn/version "3-beta3"}
                 midje/midje       {:mvn/version "1.10.5"}}}
   :notebooks
-  {:extra-deps {org.scicloj/clay       {:mvn/version "2-beta22"}
+  {:extra-deps {org.scicloj/clay       {:mvn/version "2.0.11"}
                 org.scicloj/tableplot  {:mvn/version "1-beta9.1"}}}}}

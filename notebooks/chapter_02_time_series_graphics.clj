@@ -14,6 +14,8 @@
             [tech.v3.datatype.functional :as dfn]
             [tech.v3.dataset :as ds]
             [scicloj.tableplot.v1.plotly :as plotly]
+            [scicloj.kindly.v4.kind :as kind]
+            [clojure.data.json :as json]
             [tablecloth.time.api :as time-api]
             [tablecloth.time.column.api :as time-col])
   (:import [java.time LocalDate]))
@@ -208,32 +210,60 @@ olympic-running
       ;; Derive date string from Time (not the Date column)
       (tc/add-column "TimeDate" #(mapv (fn [t] (str (.toLocalDate t))) (% "Time")))
       (tc/add-column "YearStr" #(mapv str (% "Year")))
-      (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))))
+      (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))
+      ;; Proper week index for seasonal plots (ISO weeks cause cross-cutting lines)
+      (tc/add-column "WeekIndex" #(dfn// (dfn/- (% "DayOfYear") 1) 7))))
 
 ;; Daily pattern: x = hour of day, each day overlaid.
-;; R hides the legend for these — too many days to color individually.
-;; We sample 2 weeks of data to keep plotly responsive.
-(-> vic-elec-with-fields
-    (tc/select-rows #(and (= 2014 (get % "Year"))
-                          (<= 1 (get % "DayOfYear") 14)))
-    (plotly/layer-line {:=x "HourOfDay"
-                        :=y "Demand"
-                        :=color "TimeDate"
-                        :=title "Electricity demand: Victoria (daily pattern, Jan 2014)"
-                        :=x-title "Hour of day"
-                        :=y-title "MWh"}))
+;; Like fpp3's gg_season with legend hidden. We build plotly traces directly
+;; to handle 1000+ days without overwhelming the legend.
+(let [year-colors {"2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+      grouped (tc/group-by vic-elec-with-fields ["TimeDate"])
+      traces (mapv (fn [ds]
+                     (let [year (str (first (ds "Year")))]
+                       {"x" (vec (ds "HourOfDay"))
+                        "y" (vec (ds "Demand"))
+                        "type" "scatter"
+                        "mode" "lines"
+                        "line" {"color" (get year-colors year "gray") "width" 0.3}
+                        "showlegend" false}))
+                   (vals (tc/groups->map grouped)))]
+  (kind/hiccup
+   [:div {:style {:height "400px" :width "100%"}}
+    [:script (str "Plotly.newPlot(document.currentScript.parentElement,"
+                  (json/write-str traces)
+                  ",{\"title\":\"Electricity demand: Victoria (daily pattern)\","
+                  "\"xaxis\":{\"title\":\"Hour of day\"},"
+                  "\"yaxis\":{\"title\":\"MWh\"},"
+                  "\"showlegend\":false},"
+                  "{})")]]))
 
-;; Weekly pattern: x = day of week, each week overlaid.
-;; Sample first 8 weeks of 2014.
-(-> vic-elec-with-fields
-    (tc/select-rows #(and (= 2014 (get % "Year"))
-                          (<= (get % "WeekOfYear") 8)))
-    (plotly/layer-line {:=x "DayOfWeek"
-                        :=y "Demand"
-                        :=color "WeekLabel"
-                        :=title "Electricity demand: Victoria (weekly pattern, early 2014)"
-                        :=x-title "Day of week"
-                        :=y-title "MWh"}))
+;; Weekly pattern: x = day of week + fractional hour, each week overlaid.
+(let [year-colors {"2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+      grouped (tc/group-by vic-elec-with-fields ["Year" "WeekIndex"])
+      traces (mapv (fn [ds]
+                     (let [;; Sort by x-value (day-of-week hour) to avoid cross-cutting lines
+                           xs (dfn/+ (dfn/* (dfn/- (ds "DayOfWeek") 1) 24) (ds "HourOfDay"))
+                           ys (ds "Demand")
+                           sorted-pairs (sort-by first (map vector xs ys))
+                           year (str (first (ds "Year")))]
+                       {"x" (vec (map first sorted-pairs))
+                        "y" (vec (map second sorted-pairs))
+                        "type" "scatter"
+                        "mode" "lines"
+                        "line" {"color" (get year-colors year "gray") "width" 0.3}
+                        "showlegend" false}))
+                   (vals (tc/groups->map grouped)))]
+  (kind/hiccup
+   [:div {:style {:height "400px" :width "100%"}}
+    [:script (str "Plotly.newPlot(document.currentScript.parentElement,"
+                  (json/write-str traces)
+                  ",{\"title\":\"Electricity demand: Victoria (weekly pattern)\","
+                  "\"xaxis\":{\"title\":\"Day of week (hours)\"},"
+                  "\"yaxis\":{\"title\":\"MWh\"},"
+                  "\"showlegend\":false},"
+                  "{})")]]))
+
 
 ;; Yearly pattern: x = day of year, each year is a line.
 ;; All 3 years fit — only 3 traces.
