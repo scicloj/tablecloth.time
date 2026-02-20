@@ -165,10 +165,13 @@ olympic-running
   (-> a10
       (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
+;; Year is int64 — tableplot treats numeric columns as continuous color scales.
+;; Convert to string so it's treated as categorical (one line per year).
 (-> a10-seasonal
+    (tc/add-column "YearStr" #(mapv str (% "Year")))
     (plotly/layer-line {:=x "MonthNum"
                         :=y "Cost"
-                        :=color "Year"
+                        :=color "YearStr"
                         :=title "Seasonal plot: Antidiabetic drug sales"
                         :=x-title "Month"
                         :=y-title "$ (millions)"}))
