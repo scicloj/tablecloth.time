@@ -51,14 +51,16 @@
   (let [field->col (if (map? fields)
                      fields
                      (zipmap fields fields))]
-    (reduce-kv (fn [ds field col-name]
-                 (if-let [extractor (field->extractor field)]
-                   (tc/add-column ds col-name (extractor (ds time-col)))
-                   (throw (ex-info (str "Unknown time field: " field
-                                        ". Supported: " (keys field->extractor))
-                                   {:field field}))))
-               ds
-               field->col)))
+    (let [src-col (ds time-col)]
+      (tc/add-columns ds
+        (reduce-kv (fn [m field col-name]
+                     (if-let [extractor (field->extractor field)]
+                       (assoc m col-name (extractor src-col))
+                       (throw (ex-info (str "Unknown time field: " field
+                                            ". Supported: " (keys field->extractor))
+                                       {:field field}))))
+                   {}
+                   field->col)))))
 
 (defn add-lag
   "Add a lagged version of a column to a dataset.
