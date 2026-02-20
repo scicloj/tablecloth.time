@@ -201,26 +201,33 @@ olympic-running
       (tc/add-column "YearStr" #(mapv str (% "Year")))
       (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))))
 
-;; Daily pattern: x = hour of day, each day is a line
-;; (too many lines to color individually — shows the envelope)
+;; Daily pattern: x = hour of day, each day overlaid.
+;; R hides the legend for these — too many days to color individually.
+;; We sample 2 weeks of data to keep plotly responsive.
 (-> vic-elec-with-fields
+    (tc/select-rows #(and (= 2014 (get % "Year"))
+                          (<= 1 (get % "DayOfYear") 14)))
     (plotly/layer-line {:=x "Hour"
                         :=y "Demand"
                         :=color "DateStr"
-                        :=title "Electricity demand: Victoria (daily pattern)"
+                        :=title "Electricity demand: Victoria (daily pattern, Jan 2014)"
                         :=x-title "Hour of day"
                         :=y-title "MWh"}))
 
-;; Weekly pattern: x = day of week, each week is a line
+;; Weekly pattern: x = day of week, each week overlaid.
+;; Sample first 8 weeks of 2014.
 (-> vic-elec-with-fields
+    (tc/select-rows #(and (= 2014 (get % "Year"))
+                          (<= (get % "WeekOfYear") 8)))
     (plotly/layer-line {:=x "DayOfWeek"
                         :=y "Demand"
                         :=color "WeekLabel"
-                        :=title "Electricity demand: Victoria (weekly pattern)"
+                        :=title "Electricity demand: Victoria (weekly pattern, early 2014)"
                         :=x-title "Day of week"
                         :=y-title "MWh"}))
 
-;; Yearly pattern: x = day of year, each year is a line
+;; Yearly pattern: x = day of year, each year is a line.
+;; All 3 years fit — only 3 traces.
 (-> vic-elec-with-fields
     (plotly/layer-line {:=x "DayOfYear"
                         :=y "Demand"
