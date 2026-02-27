@@ -1,7 +1,10 @@
 (ns tablecloth.time.api
   (:require [tablecloth.api :as tc]
+            [tablecloth.column.api :as tcc]
             [tablecloth.time.column.api :as time-col]
-            [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]))
+            [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]
+            [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as dfn]))
 
 (modify-printing-of-time-literals-if-enabled!)
 
@@ -16,8 +19,6 @@
 ;; -----------------------------------------------------------------------------
 ;; Dataset-level time operations
 ;; -----------------------------------------------------------------------------
-
-(require '[tech.v3.datatype.functional :as dfn])
 
 ;; Simple extractors (single field from datetime)
 (def ^:private field->extractor
@@ -53,30 +54,11 @@
         hours-since-monday (dfn/+ (dfn/* (dfn/- dow 1) 24) hf)]
     (dfn// hours-since-monday 168.0)))
 
-(defn- date-string
-  "Extract date portion as string (YYYY-MM-DD). Useful for grouping by day."
+(defn- yearly-phase
+  "Phase within year, normalized 0→1 (0=Jan 1, ~0.5=July 1, 1=Dec 31).
+   Computed as: (day-of-year - 1) / 365"
   [col]
-  (mapv #(str (.toLocalDate %)) col))
-
-(defn- year-string
-  "Year as string. Useful for categorical coloring (avoids gradient)."
-  [col]
-  (mapv str (time-col/year col)))
-
-(defn- month-string
-  "Month (1-12) as string. Useful for categorical coloring."
-  [col]
-  (mapv str (time-col/month col)))
-
-(defn- week-string
-  "Week of year as string. Useful for categorical coloring."
-  [col]
-  (mapv str (time-col/week-of-year col)))
-
-(defn- day-of-week-string
-  "Day of week (1-7) as string. Useful for categorical coloring."
-  [col]
-  (mapv str (time-col/day-of-week col)))
+  (dfn// (dfn/- (time-col/day-of-year col) 1) 365.0))
 
 (defn- week-index
   "Continuous week index (0-52) based on day-of-year.
@@ -84,24 +66,52 @@
   [col]
   (dfn// (dfn/- (time-col/day-of-year col) 1) 7))
 
+(defn- date-string
+  "Extract date portion as string (YYYY-MM-DD). Useful for grouping by day."
+  [col]
+  ;; Must use mapv for Java interop (.toLocalDate)
+  (tcc/column (mapv #(str (.toLocalDate %)) col)))
+
+(defn- year-string
+  "Year as string. Useful for categorical coloring (avoids gradient)."
+  [col]
+  (tcc/column (dtype/emap str :string (time-col/year col))))
+
+(defn- month-string
+  "Month (1-12) as string. Useful for categorical coloring."
+  [col]
+  (tcc/column (dtype/emap str :string (time-col/month col))))
+
+(defn- week-string
+  "Week of year as string. Useful for categorical coloring."
+  [col]
+  (tcc/column (dtype/emap str :string (time-col/week-of-year col))))
+
+(defn- day-of-week-string
+  "Day of week (1-7) as string. Useful for categorical coloring."
+  [col]
+  (tcc/column (dtype/emap str :string (time-col/day-of-week col))))
+
 (defn- year-week-string
   "Year and week as string 'YYYY-Www' for grouping weekly seasonal plots.
    Uses week-index (not ISO week) to avoid boundary issues."
   [col]
+  ;; Must use mapv for format string
   (let [years (time-col/year col)
         weeks (week-index col)]
-    (mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) years weeks)))
+    (tcc/column (mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) years weeks))))
 
 (def ^:private field->computed
   {:hour-fractional    hour-fractional
    :daily-phase        daily-phase
    :weekly-phase       weekly-phase
+   :yearly-phase       yearly-phase
+   :week-index         week-index
    :date-string        date-string
    :year-string        year-string
    :month-string       month-string
    :week-string        week-string
    :day-of-week-string day-of-week-string
-   :week-index         week-index
    :year-week-string   year-week-string})
 
 (defn add-time-columns
@@ -119,6 +129,7 @@
       :hour-fractional  — decimal hour (e.g., 13.5 for 13:30)
       :daily-phase      — position in day, 0→1 (0=midnight, 0.5=noon)
       :weekly-phase     — position in week, 0→1 (0=Monday 00:00)
+      :yearly-phase     — position in year, 0→1 (0=Jan 1, ~0.5=July 1)
       :week-index       — continuous week (0-52), avoids ISO week boundary issues
       :date-string      — date as \"YYYY-MM-DD\" string (for grouping)
       :year-string      — year as string (for categorical color)
