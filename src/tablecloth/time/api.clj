@@ -78,15 +78,31 @@
   [col]
   (mapv str (time-col/day-of-week col)))
 
+(defn- week-index
+  "Continuous week index (0-52) based on day-of-year.
+   Avoids ISO week boundary issues where Jan 1 can be week 52/53."
+  [col]
+  (dfn// (dfn/- (time-col/day-of-year col) 1) 7))
+
+(defn- year-week-string
+  "Year and week as string 'YYYY-Www' for grouping weekly seasonal plots.
+   Uses week-index (not ISO week) to avoid boundary issues."
+  [col]
+  (let [years (time-col/year col)
+        weeks (week-index col)]
+    (mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) years weeks)))
+
 (def ^:private field->computed
-  {:hour-fractional   hour-fractional
-   :daily-phase       daily-phase
-   :weekly-phase      weekly-phase
-   :date-string       date-string
-   :year-string       year-string
-   :month-string      month-string
-   :week-string       week-string
-   :day-of-week-string day-of-week-string})
+  {:hour-fractional    hour-fractional
+   :daily-phase        daily-phase
+   :weekly-phase       weekly-phase
+   :date-string        date-string
+   :year-string        year-string
+   :month-string       month-string
+   :week-string        week-string
+   :day-of-week-string day-of-week-string
+   :week-index         week-index
+   :year-week-string   year-week-string})
 
 (defn add-time-columns
   "Add columns extracted from a datetime column to a dataset.
@@ -103,11 +119,13 @@
       :hour-fractional  — decimal hour (e.g., 13.5 for 13:30)
       :daily-phase      — position in day, 0→1 (0=midnight, 0.5=noon)
       :weekly-phase     — position in week, 0→1 (0=Monday 00:00)
+      :week-index       — continuous week (0-52), avoids ISO week boundary issues
       :date-string      — date as \"YYYY-MM-DD\" string (for grouping)
       :year-string      — year as string (for categorical color)
       :month-string     — month as string (for categorical color)
       :week-string      — week number as string (for categorical color)
       :day-of-week-string — day of week as string (for categorical color)
+      :year-week-string — \"YYYY-Www\" format (for weekly seasonal grouping)
 
   Examples:
     ;; vector form — column names match field names

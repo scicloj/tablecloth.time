@@ -207,14 +207,11 @@ olympic-running
          :hour-fractional "HourOfDay"
          :daily-phase "DailyPhase"
          :weekly-phase "WeeklyPhase"
+         :week-index "WeekIndex"
          :date-string "TimeDate"
          :year-string "YearStr"
-         :week-string "WeekLabel"})
-      ;; Proper week index for seasonal plots (ISO weeks cause cross-cutting lines)
-      (tc/add-column "WeekIndex" #(dfn// (dfn/- (% "DayOfYear") 1) 7))
-      ;; Combined year-week for grouping in seasonal plots
-      (tc/add-column "YearWeek" #(mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) 
-                                        (% "Year") (% "WeekIndex")))))
+         :week-string "WeekLabel"
+         :year-week-string "YearWeek"})))
 
 ;; ### Helper: seasonal-plot-spec
 ;; Generate a Plotly spec for seasonal plots using tableplot as the base.
