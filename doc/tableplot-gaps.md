@@ -35,6 +35,25 @@ Issues and missing features encountered while translating fpp3 examples.
 - **Problem:** No built-in way to overlay horizontal reference lines (±1.96/√T bounds) on a bar chart
 - **Workaround:** Added bound columns to dataset, but can't render them as horizontal lines
 
+### No per-trace customization or post-processing hook
+- **Context:** §2.4 seasonal plots with 700+ traces (one per day)
+- **Problem:** Need to hide legend, set custom colors by year, thin line widths — but tableplot only exposes uniform options (`:=mark-color` applies to ALL traces)
+- **Workaround:** Call `plotly/plot` to force evaluation, then post-process the `:data` traces manually
+- **Desired:** One or more of:
+  ```clojure
+  ;; Option A: per-trace transform function
+  {:=trace-fn (fn [trace] (assoc trace :showlegend false))}
+  
+  ;; Option B: full spec post-process hook
+  {:=post-process (fn [spec] (update spec :data ...))}
+  
+  ;; Option C: more granular built-in options
+  {:=showlegend false        ; per-trace
+   :=line-width 0.3          ; already have :=mark-size, but not for lines
+   :=color-fn #(case ...)}   ; function instead of just column + palette
+  ```
+- **Note:** `plotly/plot` is the official API for forcing evaluation, which is good. But the pattern of "tableplot gets 90% there, need to tweak output" seems common enough to warrant a hook.
+
 ---
 
 ## Template for future entries
