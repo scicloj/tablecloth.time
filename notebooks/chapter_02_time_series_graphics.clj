@@ -207,7 +207,7 @@ olympic-running
          :hour-fractional "HourOfDay"
          :daily-phase "DailyPhase"
          :weekly-phase "WeeklyPhase"
-         :week-index "WeekIndex"
+         :week-of-year-index "WeekIndex"
          :date-string "TimeDate"
          :year-string "YearStr"
          :week-string "WeekLabel"

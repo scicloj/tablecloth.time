@@ -275,6 +275,20 @@
   (let [col-ld (convert-time (coerce-column col) :local-date)]
     (tcc/column (local-date->epoch-week col-ld))))
 
+(defn week-of-year-index
+  "Week within year (0-52), computed as epoch-week minus epoch-week of Jan 1.
+   Unlike ISO week-of-year, this avoids boundary issues where Jan 1 can be week 52/53.
+   Useful for seasonal weekly plots."
+  [col]
+  (let [col-ld (convert-time (coerce-column col) :local-date)
+        col-year (dtdt-ops/long-temporal-field :years col-ld)
+        ;; Build Jan 1 of each row's year
+        jan1-dates (dtype/emap #(LocalDate/of % 1 1) :local-date col-year)
+        ;; Compute epoch-weeks
+        col-epoch-week (local-date->epoch-week col-ld)
+        jan1-epoch-week (local-date->epoch-week jan1-dates)]
+    (tcc/column (fun/- col-epoch-week jan1-epoch-week))))
+
 ;; -----------------------------------------------------------------------------
 ;; Lag and Lead operations
 ;; -----------------------------------------------------------------------------

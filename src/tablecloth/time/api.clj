@@ -22,18 +22,19 @@
 
 ;; Simple extractors (single field from datetime)
 (def ^:private field->extractor
-  {:year         time-col/year
-   :month        time-col/month
-   :day          time-col/day
-   :hour         time-col/hour
-   :minute       time-col/minute
-   :second       time-col/get-second
-   :day-of-week  time-col/day-of-week
-   :day-of-year  time-col/day-of-year
-   :week-of-year time-col/week-of-year
-   :quarter      time-col/quarter
-   :epoch-day    time-col/epoch-day
-   :epoch-week   time-col/epoch-week})
+  {:year              time-col/year
+   :month             time-col/month
+   :day               time-col/day
+   :hour              time-col/hour
+   :minute            time-col/minute
+   :second            time-col/get-second
+   :day-of-week       time-col/day-of-week
+   :day-of-year       time-col/day-of-year
+   :week-of-year      time-col/week-of-year
+   :quarter           time-col/quarter
+   :epoch-day         time-col/epoch-day
+   :epoch-week        time-col/epoch-week
+   :week-of-year-index time-col/week-of-year-index})
 
 ;; Computed fields (derived from multiple extractors or require transformation)
 (defn- hour-fractional
@@ -62,11 +63,8 @@
   [col]
   (dfn// (dfn/- (time-col/day-of-year col) 1) 365.0))
 
-(defn- week-index
-  "Continuous week index (0-52) based on day-of-year.
-   Avoids ISO week boundary issues where Jan 1 can be week 52/53."
-  [col]
-  (dfn// (dfn/- (time-col/day-of-year col) 1) 7))
+;; week-index now delegates to column.api/week-of-year-index
+;; which is built on epoch-week primitives from dtype-next
 
 (defn- date-string
   "Extract date portion as string (YYYY-MM-DD). Useful for grouping by day."
@@ -96,11 +94,11 @@
 
 (defn- year-week-string
   "Year and week as string 'YYYY-Www' for grouping weekly seasonal plots.
-   Uses week-index (not ISO week) to avoid boundary issues."
+   Uses week-of-year-index (not ISO week) to avoid boundary issues."
   [col]
   ;; Must use mapv for format string
   (let [years (time-col/year col)
-        weeks (week-index col)]
+        weeks (time-col/week-of-year-index col)]
     (tcc/column (mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) years weeks))))
 
 (def ^:private field->computed
@@ -108,7 +106,6 @@
    :daily-phase        daily-phase
    :weekly-phase       weekly-phase
    :yearly-phase       yearly-phase
-   :week-index         week-index
    :date-string        date-string
    :year-string        year-string
    :month-string       month-string
@@ -133,7 +130,7 @@
       :daily-phase      — position in day, 0→1 (0=midnight, 0.5=noon)
       :weekly-phase     — position in week, 0→1 (0=Monday 00:00)
       :yearly-phase     — position in year, 0→1 (0=Jan 1, ~0.5=July 1)
-      :week-index       — continuous week (0-52), avoids ISO week boundary issues
+      :week-of-year-index — week within year (0-52), avoids ISO week boundary issues
       :date-string      — date as \"YYYY-MM-DD\" string (for grouping)
       :year-string      — year as string (for categorical color)
       :month-string     — month as string (for categorical color)
