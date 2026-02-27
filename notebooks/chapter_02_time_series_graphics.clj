@@ -212,58 +212,74 @@ olympic-running
       (tc/add-column "YearStr" #(mapv str (% "Year")))
       (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))
       ;; Proper week index for seasonal plots (ISO weeks cause cross-cutting lines)
-      (tc/add-column "WeekIndex" #(dfn// (dfn/- (% "DayOfYear") 1) 7))))
+      (tc/add-column "WeekIndex" #(dfn// (dfn/- (% "DayOfYear") 1) 7))
+      ;; Phase columns for seasonal plots
+      (tc/add-column "DailyPhase" #(dfn// (% "HourOfDay") 24.0))
+      (tc/add-column "WeeklyPhase" #(dfn// (dfn/+ (dfn/* (dfn/- (% "DayOfWeek") 1) 24) (% "HourOfDay")) 168.0))
+      ;; Combined year-week for grouping in seasonal plots
+      (tc/add-column "YearWeek" #(mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) 
+                                        (% "Year") (% "WeekIndex")))))
 
-;; Daily pattern: x = hour of day, each day overlaid.
-;; Like fpp3's gg_season with legend hidden. We build plotly traces directly
-;; to handle 1000+ days without overwhelming the legend.
-(let [year-colors {"2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
-      grouped (tc/group-by vic-elec-with-fields ["TimeDate"])
-      traces (mapv (fn [ds]
-                     (let [year (str (first (ds "Year")))]
-                       {"x" (vec (ds "HourOfDay"))
-                        "y" (vec (ds "Demand"))
-                        "type" "scatter"
-                        "mode" "lines"
-                        "line" {"color" (get year-colors year "gray") "width" 0.3}
-                        "showlegend" false}))
-                   (vals (tc/groups->map grouped)))]
-  (kind/hiccup
-   [:div {:style {:height "400px" :width "100%"}}
-    [:script (str "Plotly.newPlot(document.currentScript.parentElement,"
-                  (json/write-str traces)
-                  ",{\"title\":\"Electricity demand: Victoria (daily pattern)\","
-                  "\"xaxis\":{\"title\":\"Hour of day\"},"
-                  "\"yaxis\":{\"title\":\"MWh\"},"
-                  "\"showlegend\":false},"
-                  "{})")]]))
+;; ### Helper: seasonal-plot-spec
+;; Generate a Plotly spec for seasonal plots using tableplot as the base.
+;; This uses tableplot's layer-line with :=color to generate multiple traces,
+;; then post-processes to hide legend and set custom colors.
+(defn seasonal-plot-spec
+  "Generate a Plotly spec for a seasonal plot.
+   - ds: dataset (should include phase column)
+   - phase-col: column for x-axis (phase within period, 0 to 1)
+   - value-col: column for y-axis  
+   - group-col: column to group by (creates one trace per unique value)
+   - color-fn: fn from group-name (string) -> color string
+   Options:
+   - :line-width (default 0.3)
+   - :title, :x-title, :y-title for axis labels"
+  [ds phase-col value-col group-col color-fn 
+   & {:keys [line-width title x-title y-title]
+      :or {line-width 0.3}}]
+  (let [;; Use tableplot to generate base spec with traces
+        viz (-> ds
+                (tc/order-by phase-col)
+                (plotly/layer-line {:=x phase-col 
+                                    :=y value-col 
+                                    :=color group-col
+                                    :=title title
+                                    :=x-title x-title
+                                    :=y-title y-title}))
+        ;; Extract final Plotly spec using tableplot's official API
+        spec (plotly/plot viz)]
+    ;; Post-process traces: hide legend, set colors
+    (update spec :data 
+            #(mapv (fn [trace]
+                     (-> trace
+                         (assoc :showlegend false)
+                         (assoc-in [:line :color] (color-fn (:name trace)))
+                         (assoc-in [:line :width] line-width)))
+                   %))))
 
-;; Weekly pattern: x = day of week + fractional hour, each week overlaid.
-(let [year-colors {"2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
-      grouped (tc/group-by vic-elec-with-fields ["Year" "WeekIndex"])
-      traces (mapv (fn [ds]
-                     (let [;; Sort by x-value (day-of-week hour) to avoid cross-cutting lines
-                           xs (dfn/+ (dfn/* (dfn/- (ds "DayOfWeek") 1) 24) (ds "HourOfDay"))
-                           ys (ds "Demand")
-                           sorted-pairs (sort-by first (map vector xs ys))
-                           year (str (first (ds "Year")))]
-                       {"x" (vec (map first sorted-pairs))
-                        "y" (vec (map second sorted-pairs))
-                        "type" "scatter"
-                        "mode" "lines"
-                        "line" {"color" (get year-colors year "gray") "width" 0.3}
-                        "showlegend" false}))
-                   (vals (tc/groups->map grouped)))]
-  (kind/hiccup
-   [:div {:style {:height "400px" :width "100%"}}
-    [:script (str "Plotly.newPlot(document.currentScript.parentElement,"
-                  (json/write-str traces)
-                  ",{\"title\":\"Electricity demand: Victoria (weekly pattern)\","
-                  "\"xaxis\":{\"title\":\"Day of week (hours)\"},"
-                  "\"yaxis\":{\"title\":\"MWh\"},"
-                  "\"showlegend\":false},"
-                  "{})")]]))
+;; Daily pattern: phase = hour/24, each day overlaid.
+;; Using seasonal-plot-spec helper with tableplot as base.
+(let [year-color #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+                       (subs % 0 4) "gray")]
+  (kind/plotly
+    (seasonal-plot-spec vic-elec-with-fields
+                        "DailyPhase" "Demand" "TimeDate"
+                        year-color
+                        :title "Electricity demand: Victoria (daily pattern)"
+                        :x-title "Phase of day (0=midnight, 0.5=noon)"
+                        :y-title "MWh")))
 
+;; Weekly pattern: phase = hours_since_monday / 168, each week overlaid.
+;; Using seasonal-plot-spec helper with tableplot as base.
+(let [year-color #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+                       (subs % 0 4) "gray")]
+  (kind/plotly
+    (seasonal-plot-spec vic-elec-with-fields
+                        "WeeklyPhase" "Demand" "YearWeek"
+                        year-color
+                        :title "Electricity demand: Victoria (weekly pattern)"
+                        :x-title "Phase of week (0=Mon, 0.5=Thu noon, 1=Sun midnight)"
+                        :y-title "MWh")))
 
 ;; Yearly pattern: x = day of year, each year is a line.
 ;; All 3 years fit — only 3 traces.
@@ -446,6 +462,83 @@ beer-acf
 
 ;; All spikes should be within ±0.28 (= 1.96/√50)
 ;; → Confirms: no signal to model.
+
+;; ## Appendix: Benchmarking seasonal plot approaches
+;;
+;; Two approaches to building seasonal plots with many traces:
+;;
+;; 1. **tableplot + kindly/f post-processing**: Let tableplot build traces,
+;;    extract via `:kindly/f`, then post-process each trace
+;; 2. **Pure manual traces**: Build Plotly traces directly with reduce
+;;
+;; Let's time them:
+
+(defn seasonal-plot-manual
+  "Build seasonal Plotly spec manually (no tableplot)."
+  [ds phase-col value-col group-col color-fn
+   & {:keys [line-width title x-title y-title]
+      :or {line-width 0.3}}]
+  (let [groups (-> ds (tc/group-by group-col) :data)
+        traces (mapv (fn [group-ds]
+                       (let [group-name (first (group-ds group-col))
+                             sorted-ds (tc/order-by group-ds phase-col)]
+                         {:x (vec (sorted-ds phase-col))
+                          :y (vec (sorted-ds value-col))
+                          :type "scatter"
+                          :mode "lines"
+                          :name group-name
+                          :showlegend false
+                          :line {:color (color-fn group-name)
+                                 :width line-width}}))
+                     groups)]
+    {:data traces
+     :layout {:title title
+              :xaxis {:title x-title}
+              :yaxis {:title y-title}}}))
+
+;; ### Benchmark: tableplot+plot vs manual
+;; Using the daily seasonal plot (700+ days = 700+ traces)
+
+(let [color-fn #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+                     (subs % 0 4) "gray")
+      n 10]
+  {:tableplot+post-process
+   (let [start (System/nanoTime)]
+     (dotimes [_ n]
+       (seasonal-plot-spec vic-elec-with-fields "DailyPhase" "Demand" "TimeDate" color-fn))
+     (/ (- (System/nanoTime) start) 1e6 n))
+   
+   :manual-traces
+   (let [start (System/nanoTime)]
+     (dotimes [_ n]
+       (seasonal-plot-manual vic-elec-with-fields "DailyPhase" "Demand" "TimeDate" color-fn))
+     (/ (- (System/nanoTime) start) 1e6 n))})
+
+;; ## Understanding kindly/f and plotly/plot
+;;
+;; Kindly is a portable notation protocol for Clojure visualizations.
+;; When tableplot builds a plot, it returns a "recipe" map like:
+;;
+;; ```clojure
+;; {:kindly/f #'plotly-xform        ;; transform function
+;;  :data :=traces                  ;; placeholder
+;;  ::ht/defaults {:=x "col" ...}}  ;; our bindings + dataset
+;; ```
+;;
+;; The `:kindly/f` function transforms the recipe into actual Plotly JSON.
+;; This defers evaluation — Clay/Portal call it when rendering.
+;;
+;; To get the raw spec for post-processing, use `plotly/plot`:
+;; ```clojure
+;; (let [viz (plotly/layer-line ...)
+;;       spec (plotly/plot viz)]    ;; official API to force evaluation
+;;   (update spec :data ...))       ;; now we can modify traces
+;; ```
+;;
+;; Why deferred execution?
+;; - Lazy composition (chain `layer-*` calls before computing)
+;; - Tool flexibility (Clay, Portal render differently)
+;; - Introspection (inspect the recipe without triggering evaluation)
 
 ;; ## Summary
 ;;
