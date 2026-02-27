@@ -192,30 +192,26 @@ olympic-running
 ;; R: `gg_season(Demand, period = "day"|"week"|"year")`
 
 ;; Now that Time is parsed as LocalDateTime, we can use add-time-columns directly.
-;; vic_elec is half-hourly, so we compute fractional hour (e.g. 13.5 for 13:30)
-;; to avoid duplicate x-values per hour.
+;; The new computed fields handle fractional hours, phases, and string conversions.
 ;; NOTE: The "Date" column is the billing/reporting date (next day), not the
 ;; calendar date of the timestamp. We derive all groupings from the Time column.
 (def vic-elec-with-fields
   (-> vic-elec
-      (time-api/add-time-columns "Time" {:hour "Hour"
-                                          :minute "Minute"
-                                          :day "Day"
-                                          :month "Month"
-                                          :day-of-week "DayOfWeek"
-                                          :day-of-year "DayOfYear"
-                                          :week-of-year "WeekOfYear"
-                                          :year "Year"})
-      (tc/add-column "HourOfDay" #(dfn/+ (% "Hour") (dfn// (% "Minute") 60.0)))
-      ;; Derive date string from Time (not the Date column)
-      (tc/add-column "TimeDate" #(mapv (fn [t] (str (.toLocalDate t))) (% "Time")))
-      (tc/add-column "YearStr" #(mapv str (% "Year")))
-      (tc/add-column "WeekLabel" #(mapv str (% "WeekOfYear")))
+      (time-api/add-time-columns "Time" 
+        {;; Basic fields
+         :day-of-week "DayOfWeek"
+         :day-of-year "DayOfYear"
+         :week-of-year "WeekOfYear"
+         :year "Year"
+         ;; Computed fields for seasonal plots
+         :hour-fractional "HourOfDay"
+         :daily-phase "DailyPhase"
+         :weekly-phase "WeeklyPhase"
+         :date-string "TimeDate"
+         :year-string "YearStr"
+         :week-string "WeekLabel"})
       ;; Proper week index for seasonal plots (ISO weeks cause cross-cutting lines)
       (tc/add-column "WeekIndex" #(dfn// (dfn/- (% "DayOfYear") 1) 7))
-      ;; Phase columns for seasonal plots
-      (tc/add-column "DailyPhase" #(dfn// (% "HourOfDay") 24.0))
-      (tc/add-column "WeeklyPhase" #(dfn// (dfn/+ (dfn/* (dfn/- (% "DayOfWeek") 1) 24) (% "HourOfDay")) 168.0))
       ;; Combined year-week for grouping in seasonal plots
       (tc/add-column "YearWeek" #(mapv (fn [y w] (str y "-W" (format "%02d" (int w)))) 
                                         (% "Year") (% "WeekIndex")))))

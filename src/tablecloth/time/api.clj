@@ -17,6 +17,9 @@
 ;; Dataset-level time operations
 ;; -----------------------------------------------------------------------------
 
+(require '[tech.v3.datatype.functional :as dfn])
+
+;; Simple extractors (single field from datetime)
 (def ^:private field->extractor
   {:year         time-col/year
    :month        time-col/month
@@ -29,6 +32,62 @@
    :week-of-year time-col/week-of-year
    :quarter      time-col/quarter})
 
+;; Computed fields (derived from multiple extractors or require transformation)
+(defn- hour-fractional
+  "Hour of day as decimal (e.g., 13.5 for 13:30). Useful for sub-hourly data."
+  [col]
+  (dfn/+ (time-col/hour col)
+         (dfn// (time-col/minute col) 60.0)))
+
+(defn- daily-phase
+  "Phase within day, normalized 0→1 (0=midnight, 0.5=noon, 1=midnight)."
+  [col]
+  (dfn// (hour-fractional col) 24.0))
+
+(defn- weekly-phase
+  "Phase within week, normalized 0→1 (0=Monday midnight, 1=Sunday midnight).
+   Computed as: ((day-of-week - 1) * 24 + hour-fractional) / 168"
+  [col]
+  (let [dow (time-col/day-of-week col)   ; Monday=1, Sunday=7
+        hf (hour-fractional col)
+        hours-since-monday (dfn/+ (dfn/* (dfn/- dow 1) 24) hf)]
+    (dfn// hours-since-monday 168.0)))
+
+(defn- date-string
+  "Extract date portion as string (YYYY-MM-DD). Useful for grouping by day."
+  [col]
+  (mapv #(str (.toLocalDate %)) col))
+
+(defn- year-string
+  "Year as string. Useful for categorical coloring (avoids gradient)."
+  [col]
+  (mapv str (time-col/year col)))
+
+(defn- month-string
+  "Month (1-12) as string. Useful for categorical coloring."
+  [col]
+  (mapv str (time-col/month col)))
+
+(defn- week-string
+  "Week of year as string. Useful for categorical coloring."
+  [col]
+  (mapv str (time-col/week-of-year col)))
+
+(defn- day-of-week-string
+  "Day of week (1-7) as string. Useful for categorical coloring."
+  [col]
+  (mapv str (time-col/day-of-week col)))
+
+(def ^:private field->computed
+  {:hour-fractional   hour-fractional
+   :daily-phase       daily-phase
+   :weekly-phase      weekly-phase
+   :date-string       date-string
+   :year-string       year-string
+   :month-string      month-string
+   :week-string       week-string
+   :day-of-week-string day-of-week-string})
+
 (defn add-time-columns
   "Add columns extracted from a datetime column to a dataset.
 
@@ -36,8 +95,19 @@
   fields   — vector of field keywords, or map of {field target-col-name}
 
   Supported fields:
-    :year, :month, :day, :hour, :minute, :second,
-    :day-of-week, :day-of-year, :week-of-year, :quarter
+    Basic:
+      :year, :month, :day, :hour, :minute, :second,
+      :day-of-week, :day-of-year, :week-of-year, :quarter
+
+    Computed:
+      :hour-fractional  — decimal hour (e.g., 13.5 for 13:30)
+      :daily-phase      — position in day, 0→1 (0=midnight, 0.5=noon)
+      :weekly-phase     — position in week, 0→1 (0=Monday 00:00)
+      :date-string      — date as \"YYYY-MM-DD\" string (for grouping)
+      :year-string      — year as string (for categorical color)
+      :month-string     — month as string (for categorical color)
+      :week-string      — week number as string (for categorical color)
+      :day-of-week-string — day of week as string (for categorical color)
 
   Examples:
     ;; vector form — column names match field names
@@ -46,21 +116,27 @@
 
     ;; map form — explicit output names
     (add-time-columns ds :Month {:year :Year, :month :MonthNum})
-    ;; => adds :Year and :MonthNum columns"
+    ;; => adds :Year and :MonthNum columns
+
+    ;; computed fields for seasonal plots
+    (add-time-columns ds :Time {:daily-phase \"DailyPhase\"
+                                 :date-string \"DateStr\"
+                                 :year-string \"YearStr\"})"
   [ds time-col fields]
   (let [field->col (if (map? fields)
                      fields
-                     (zipmap fields fields))]
-    (let [src-col (ds time-col)]
-      (tc/add-columns ds
-        (reduce-kv (fn [m field col-name]
-                     (if-let [extractor (field->extractor field)]
-                       (assoc m col-name (extractor src-col))
-                       (throw (ex-info (str "Unknown time field: " field
-                                            ". Supported: " (keys field->extractor))
-                                       {:field field}))))
-                   {}
-                   field->col)))))
+                     (zipmap fields fields))
+        all-extractors (merge field->extractor field->computed)
+        src-col (ds time-col)]
+    (tc/add-columns ds
+      (reduce-kv (fn [m field col-name]
+                   (if-let [extractor (all-extractors field)]
+                     (assoc m col-name (extractor src-col))
+                     (throw (ex-info (str "Unknown time field: " field
+                                          ". Supported: " (keys all-extractors))
+                                     {:field field}))))
+                 {}
+                 field->col))))
 
 (defn add-lag
   "Add a lagged version of a column to a dataset.
