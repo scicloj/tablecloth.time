@@ -129,6 +129,19 @@
         col-epoch-quarter (fun/quot col-epoch-month 3)]
     col-epoch-quarter))
 
+(defn- local-date->epoch-day
+  "Convert LocalDate column to days since epoch (1970-01-01)."
+  [col-ld]
+  (let [millis (dtdt-ops/datetime->milliseconds col-ld)
+        epoch-millis (dtdt-ops/datetime->milliseconds (LocalDate/of 1970 1 1))]
+    (fun/quot (fun/- millis epoch-millis) (* 24 60 60 1000))))
+
+(defn- local-date->epoch-week
+  "Convert LocalDate column to epoch-weeks (weeks since 1970-01-01).
+   Week 0 contains 1970-01-01 (Thursday). Uses integer division."
+  [col-ld]
+  (fun/quot (local-date->epoch-day col-ld) 7))
+
 (defn floor-to-quarter
   "Floor temporal column values to the closest quarter interval."
   ([col interval]
@@ -248,6 +261,19 @@
   [col]
   (let [months (dtdt-ops/long-temporal-field :months (ensure-local-datetime col))]
     (tcc/column (fun/+ 1 (fun/quot (fun/- months 1) 3)))))
+
+(defn epoch-day
+  "Days since epoch (1970-01-01). Useful for continuous day numbering across years."
+  [col]
+  (let [col-ld (convert-time (coerce-column col) :local-date)]
+    (tcc/column (local-date->epoch-day col-ld))))
+
+(defn epoch-week
+  "Weeks since epoch (1970-01-01). Week 0 contains 1970-01-01.
+   Useful for continuous week numbering across years."
+  [col]
+  (let [col-ld (convert-time (coerce-column col) :local-date)]
+    (tcc/column (local-date->epoch-week col-ld))))
 
 ;; -----------------------------------------------------------------------------
 ;; Lag and Lead operations

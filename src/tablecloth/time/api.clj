@@ -31,7 +31,9 @@
    :day-of-week  time-col/day-of-week
    :day-of-year  time-col/day-of-year
    :week-of-year time-col/week-of-year
-   :quarter      time-col/quarter})
+   :quarter      time-col/quarter
+   :epoch-day    time-col/epoch-day
+   :epoch-week   time-col/epoch-week})
 
 ;; Computed fields (derived from multiple extractors or require transformation)
 (defn- hour-fractional
@@ -123,7 +125,8 @@
   Supported fields:
     Basic:
       :year, :month, :day, :hour, :minute, :second,
-      :day-of-week, :day-of-year, :week-of-year, :quarter
+      :day-of-week, :day-of-year, :week-of-year, :quarter,
+      :epoch-day, :epoch-week
 
     Computed:
       :hour-fractional  — decimal hour (e.g., 13.5 for 13:30)
