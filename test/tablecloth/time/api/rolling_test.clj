@@ -22,9 +22,12 @@
              330.0 332.0 331.5 333.0 334.5]}))
 
 (deftest test-rolling
-  (= (r/rolling stocks-ds
-                :date
-                {:window [2 :days]}
-                {:ma20 (fn [ds] (tc/mean ds :close))})))
+  (testing "rolling is not yet implemented"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"not implemented"
+                          (r/rolling stocks-ds
+                                     :date
+                                     {:window [2 :days]}
+                                     {:ma20 (fn [ds] (tc/mean ds :close))})))))
 
 

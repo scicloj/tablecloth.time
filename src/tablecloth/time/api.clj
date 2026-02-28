@@ -1,6 +1,7 @@
 (ns tablecloth.time.api
   (:require [tablecloth.api :as tc]
             [tablecloth.column.api :as tcc]
+            [tablecloth.time.api.slice :as slice-impl]
             [tablecloth.time.column.api :as time-col]
             [tablecloth.time.time-literals :refer [modify-printing-of-time-literals-if-enabled!]]
             [tech.v3.datatype :as dtype]
@@ -8,13 +9,13 @@
 
 (modify-printing-of-time-literals-if-enabled!)
 
-;; NOTE: The following legacy APIs have been removed and their tests archived:
-;; - tablecloth.time.api.slice (slice, index-by - to be reimplemented)
-;; - tablecloth.time.api.adjust-frequency (adjust-frequency - to be reimplemented)
-;; - tablecloth.time.api.rolling-window (rolling-window - to be reimplemented)
-;; - tablecloth.time.api.converters (various converters - functionality moved to column.api)
-;; - tablecloth.time.api.time-components (field extractors - functionality moved to column.api)
-;; See test/_archive/README.md for archived tests and development-plan.md for the new architecture.
+;; NOTE on legacy APIs:
+;; - slice: reimplemented with explicit column argument (see below)
+;; - adjust-frequency: not needed — use add-time-columns + tc/group-by + tc/aggregate
+;; - rolling-window: deferred — will implement when fpp3 requires it
+;; - index-by: intentionally removed — we use explicit column arguments
+;; - converters/time-components: moved to tablecloth.time.column.api
+;; See development-plan.md for the explicit-column architecture rationale.
 
 ;; -----------------------------------------------------------------------------
 ;; Dataset-level time operations
@@ -264,3 +265,30 @@
      (if (:drop-missing opts true)
        (tc/drop-missing ds-with-leads target-cols)
        ds-with-leads))))
+
+;; -----------------------------------------------------------------------------
+;; Time slicing
+;; -----------------------------------------------------------------------------
+
+(def slice
+  "Select rows from a dataset within a time range.
+
+  Usage:
+    (slice ds :time-col start end)
+    (slice ds :time-col start end {:sorted? true})
+
+  Arguments:
+    ds       — dataset
+    time-col — name of the time column to slice on
+    start    — start time (inclusive), or nil for unbounded
+    end      — end time (inclusive), or nil for unbounded
+    opts     — optional map with :sorted? (skip sortedness check if true)
+
+  Examples:
+    (slice ds :timestamp #time/date \"2024-01-01\" #time/date \"2024-03-31\")
+    (slice ds :timestamp nil #time/date \"2024-06-30\")  ; everything up to June
+    (slice ds :timestamp #time/date \"2024-07-01\" nil)  ; July onwards
+
+  Note: Data must be sorted by time-col. Use (tc/order-by ds :time-col) first
+  if needed. Pass {:sorted? true} to skip the sortedness check for performance."
+  slice-impl/slice)
