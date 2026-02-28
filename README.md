@@ -27,27 +27,27 @@ Previous versions implemented index-aware functions built on a now-removed index
 
 ```clojure
 (require '[tablecloth.api :as tc]
-         '[tablecloth.time.api :as time-api]
-         '[tablecloth.time.column.api :as time-col])
+         '[tablecloth.time.api :as tct]
+         '[tablecloth.time.column.api :as tct-col])
 
 ;; Add temporal fields to a dataset
 (-> my-dataset
-    (time-api/add-time-columns :timestamp {:year "Year" 
-                                           :month "Month"
-                                           :day-of-week "DayOfWeek"}))
+    (tct/add-time-columns :timestamp {:year "Year" 
+                                      :month "Month"
+                                      :day-of-week "DayOfWeek"}))
 
 ;; Slice a time range
 (-> my-dataset
     (tc/order-by :timestamp)
-    (time-api/slice :timestamp #time/date "2024-01-01" #time/date "2024-03-31"))
+    (tct/slice :timestamp #time/date "2024-01-01" #time/date "2024-03-31"))
 
 ;; Add lag columns for time series analysis
 (-> my-dataset
-    (time-api/add-lags :price [1 2 3 4]))
+    (tct/add-lags :price [1 2 3 4]))
 
 ;; Column-level operations
-(time-col/year (my-dataset :timestamp))        ; extract year
-(time-col/floor-to-month (my-dataset :timestamp))  ; truncate to month
+(tct-col/year (my-dataset :timestamp))        ; extract year
+(tct-col/floor-to-month (my-dataset :timestamp))  ; truncate to month
 ```
 
 ### Resampling Example
@@ -62,7 +62,7 @@ Resample half-hourly electricity data to daily averages — no magic, just compo
 ;; 1. Extract date from datetime using add-time-columns
 ;; 2. Group and aggregate with standard tablecloth
 (-> vic-elec
-    (time-api/add-time-columns :Time {:date-string "Day"})
+    (tct/add-time-columns :Time {:date-string "Day"})
     (tc/group-by ["Day"])
     (tc/mean :Demand))
 ```
