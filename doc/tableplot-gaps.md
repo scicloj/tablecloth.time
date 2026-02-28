@@ -18,7 +18,26 @@ Issues and missing features encountered while translating fpp3 examples.
 ### No subseries plot / faceting by field
 - **Context:** §2.5 `gg_subseries()` equivalent
 - **Problem:** No built-in faceting support (one panel per month, with mean line per panel)
-- **Workaround:** Used color grouping as a poor substitute
+- **Workaround:** Built Plotly subplots manually:
+  - Manual axis domain calculations (`xaxis`, `xaxis2`, ... with domain arrays)
+  - Manual trace assignment (`{:xaxis "x3" :yaxis "y3"}`)
+  - Manual shared y-axis range calculation and application
+  - Manual mean line traces (one horizontal line per facet)
+  - ~80 lines of layout/trace construction code
+- **Desired:** Something like:
+  ```clojure
+  (-> ds
+      (plotly/layer-line {:=x "Year" :=y "Cost"})
+      (plotly/facet-wrap {:=facet "MonthNum" :=ncol 12})
+      (plotly/add-hline {:=y :mean :=per-facet true}))  ; or similar
+  ```
+- **Note:** This was the most labor-intensive plot in Chapter 2. The time-series concepts (subseries decomposition, monthly means) were trivial — the work was entirely Plotly layout gymnastics. Faceting would be high-value for tableplot.
+
+### No reference line helpers (hline, vline, abline)
+- **Context:** §2.5 mean lines per facet, §2.8 ACF significance bounds
+- **Problem:** Adding horizontal/vertical reference lines requires manual trace construction
+- **Workaround:** Created additional `{:type "scatter" :mode "lines" :y [mean mean]}` traces
+- **Desired:** `plotly/add-hline`, `plotly/add-vline` helpers that work with facets
 
 ### No scatterplot matrix
 - **Context:** §2.6 `GGally::ggpairs()` equivalent
