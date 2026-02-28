@@ -287,29 +287,75 @@ olympic-running
 ;;
 ;; R: `gg_subseries(a10, Cost)` — for each month, show values across years
 ;; with the mean as a horizontal line.
+;;
+;; Plotly doesn't have declarative faceting like ggplot2, so we:
+;; 1. Group by month
+;; 2. Create a trace per month, each assigned to its own axis
+;; 3. Manually set axis domains to create the subplot grid
 
-;; Group by month, plot each month's values over years
-(def a10-subseries
+(defn make-subseries-traces
+  "Generate Plotly traces for a subseries plot.
+   Each group becomes a trace assigned to its own axis."
+  [grouped-data x-col y-col]
+  (->> grouped-data
+       (map-indexed
+        (fn [idx group-ds]
+          (let [axis-num (inc idx)  ; 1-indexed for Plotly
+                xaxis (if (= axis-num 1) "x" (str "x" axis-num))
+                yaxis (if (= axis-num 1) "y" (str "y" axis-num))]
+            {:x (vec (group-ds x-col))
+             :y (vec (group-ds y-col))
+             :type "scatter"
+             :mode "lines+markers"
+             :marker {:size 4}
+             :line {:width 1}
+             :xaxis xaxis
+             :yaxis yaxis
+             :name (str "Month " axis-num)
+             :showlegend false})))))
+
+(defn make-subseries-layout
+  "Generate layout with axis domains for n subplots in a row."
+  [n title]
+  (let [width (/ 0.95 n)
+        gap 0.01]
+    (reduce
+     (fn [layout idx]
+       (let [axis-num (inc idx)
+             x-key (if (= axis-num 1) :xaxis (keyword (str "xaxis" axis-num)))
+             y-key (if (= axis-num 1) :yaxis (keyword (str "yaxis" axis-num)))
+             x-anchor (if (= axis-num 1) "y" (str "y" axis-num))
+             y-anchor (if (= axis-num 1) "x" (str "x" axis-num))
+             start (+ (* idx (+ width gap)) 0.02)
+             end (+ start width)]
+         (-> layout
+             (assoc x-key {:domain [start end]
+                           :anchor x-anchor
+                           :tickangle 45
+                           :tickfont {:size 8}})
+             (assoc y-key {:anchor y-anchor}))))
+     {:title title
+      :showlegend false
+      :height 300}
+     (range n))))
+
+;; Build the subseries plot
+(def a10-with-fields
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year"
-                                          :month "MonthNum"})
+      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+
+(def a10-grouped
+  (-> a10-with-fields
+      (tc/order-by ["MonthNum" "Year"])
       (tc/group-by ["MonthNum"])
-      :data
-      (->> (map-indexed
-            (fn [idx group-ds]
-              (let [axis-suffix (if (zero? idx) "" (str (inc idx)))]
-                {:x (vec (group-ds "Year"))
-                 :y (vec (group-ds "Cost"))
-                 :xaxis (str "x" axis-suffix)
-                 :yaxis (str "y" axis-suffix)}))))))
+      :data))
+
+(def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
+(def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"))
 
 (kind/plotly
- {:data a10-subseries
-  :layout {:grid {:rows 1
-                  :columns 12
-                  :pattern "independent"
-                  :subplots [(mapv (fn [group] (str "x" (:yaxis group)))
-                                   a10-subseries)]}}})
+ {:data a10-subseries-traces
+  :layout a10-subseries-layout})
 
 ;; ## 2.6 — Scatterplots
 ;;
