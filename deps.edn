@@ -1,10 +1,15 @@
 {:deps
- {org.clojure/clojure         {:mvn/version "1.10.2"}
-  scicloj/tablecloth          {:mvn/version "6.051"}
+ {org.clojure/clojure         {:mvn/version "1.12.0"}
+  scicloj/tablecloth          {:mvn/version "7.062"}
   org.threeten/threeten-extra {:mvn/version "1.5.0"}
   time-literals/time-literals {:mvn/version "0.1.5"}}
  :aliases
  {:dev
-  {:extra-deps {clj-kondo         {:mvn/version "2021.12.01"}
+  {:extra-paths ["test"]
+   :extra-deps {clj-kondo         {:mvn/version "2021.12.01"}
                 scicloj/notespace {:mvn/version "3-beta3"}
-                midje/midje       {:mvn/version "1.10.5"}}}}}
+                midje/midje       {:mvn/version "1.10.5"}}}
+  :notebooks
+  {:extra-paths ["src"]
+   :extra-deps {org.scicloj/clay       {:mvn/version "2.0.11"}
+                org.scicloj/tableplot  {:mvn/version "1-beta9.1"}}}}}

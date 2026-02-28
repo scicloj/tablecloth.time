@@ -1,21 +1,18 @@
 (ns tablecloth.time.utils.datatypes
-  (:require [tech.v3.datatype :refer [elemwise-datatype]]
-            [tech.v3.datatype.datetime.packing :as datetime-packing]
-            [tech.v3.datatype.datetime.base :as datetime-base]
-            [clojure.set :refer [union]]))
+  (:require [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.packing :as dt-packing]
+            [tech.v3.datatype.datetime.base :as dtdt-base]))
 
 (defn get-datatype
-  "Returns the datatype keyword of `data` as identified by dtype-next's
-  type system. If it is not a known type, it will return `:object`. `data`
-  can be a column (or some type of 'reader' as defined by dtype-next) or
-  an individual element of data."
-  [data]
-  (elemwise-datatype data))
+  "Get the unpacked datatype of a column.
 
-(def time-datatypes
-  (union datetime-packing/datatypes
-         datetime-base/datatypes))
+  This is typically what you want when checking temporal types, as packed
+  datatypes include storage metadata that obscures the semantic type."
+  [col-or-val]
+  (dt-packing/unpack-datatype (dtype/elemwise-datatype col-or-val)))
 
-(defn time-datatype? [dtype]
-  (boolean (dtype time-datatypes)))
+(defn temporal-type? [dtype]
+  (let [dtype (dt-packing/unpack-datatype dtype)
+        dtype-cat (dtdt-base/classify-datatype dtype)]
+    (= dtype-cat :temporal)))
 

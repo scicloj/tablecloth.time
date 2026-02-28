@@ -1,81 +1,152 @@
 (ns tablecloth.time.api.slice-test
-  (:require [tablecloth.api :refer [dataset]]
-            [tablecloth.time.api :refer [slice index-by]]
-            [tech.v3.datatype.datetime :refer [long-temporal-field plus-temporal-amount]]
-            [clojure.test :refer [deftest is are]]
-            [time-literals.data-readers]))
+  (:require [clojure.test :refer [deftest testing is]]
+            [tablecloth.api :as tc]
+            [tablecloth.time.api.slice :as slice]
+            [tablecloth.time.time-literals]))
 
-(deftest slice-by-int
-  (is (= (dataset {:A [2 3]
-                   :B [5 6]})
-         (-> (dataset {:A (long-temporal-field :day-of-year
-                                               (plus-temporal-amount #time/date "1970-01-01" (range 3) :days))
-                       :B [4 5 6]})
-             (index-by :A)
-             (slice 2 3)))))
+(deftest test-slice-basic-ascending
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-01"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-10"
+                                    #time/date "2024-01-15"
+                                    #time/date "2024-01-20"
+                                    #time/date "2024-01-25"
+                                    #time/date "2024-01-31"]
+                        :value [10 20 30 40 50 60 70]})]
+    (testing "slices ascending data with string dates"
+      (let [result (slice/slice ds :timestamp "2024-01-07" "2024-01-18")]
+        (is (= 2 (tc/row-count result)))
+        (is (= [30 40] (vec (:value result))))))
 
-(deftest slice-by-year
-  (is (= (dataset {:A [1979 1980]
-                   :B [9 10]})
-         (-> (dataset {:A (map #(+ % 1970) (range 11))
-                       :B (range 11)})
-             (index-by :A)
-             (slice 1979 1980)))))
+    (testing "slices to include exact boundary matches"
+      (let [result (slice/slice ds :timestamp "2024-01-10" "2024-01-20")]
+        (is (= 3 (tc/row-count result)))
+        (is (= [30 40 50] (vec (:value result))))))
 
-(deftest slice-by-instant
-  (are [_ arg-map] (= (dataset {:A [#time/instant "1970-01-01T09:00:00.000Z"
-                                    #time/instant "1970-01-01T10:00:00.000Z"]
-                                :B [9 10]})
-                      (-> (dataset {:A (plus-temporal-amount #time/instant "1970-01-01T00:00:00.000Z" (range 11) :hours)
-                                    :B (range 11)})
+    (testing "slices entire range"
+      (let [result (slice/slice ds :timestamp "2024-01-01" "2024-01-31")]
+        (is (= 7 (tc/row-count result)))
+        (is (= [10 20 30 40 50 60 70] (vec (:value result))))))
 
-                          (slice (:from arg-map) (:to arg-map))))
-    _ {:from "1970-01-01T09:00:00.000Z" :to "1970-01-01T10:00:00.000Z"}
-    _ {:from #time/instant "1970-01-01T09:00:00.000Z" :to #time/instant "1970-01-01T10:00:00.000Z"}))
+    (testing "returns empty dataset when no rows in range"
+      (let [result (slice/slice ds :timestamp "2024-02-01" "2024-02-28")]
+        (is (= 0 (tc/row-count result)))))
 
-(deftest slice-by-local-datetime
-  (are [_ arg-map] (= (dataset {:A [#time/date-time "1970-01-01T09:00"
-                                    #time/date-time "1970-01-01T10:00"]
-                                :B [9 10]})
-                      (-> (dataset {:A (plus-temporal-amount #time/date-time "1970-01-01T00:00" (range 11) :hours)
-                                    :B (range 11)})
-                          (slice (:to arg-map) (:from arg-map))))
-    _ {:to "1970-01-01T09:00" :from "1970-01-01T10:00:00"}
-    _ {:to #time/date-time "1970-01-01T09:00" :from #time/date-time "1970-01-01T10:00"}))
+    (testing "returns empty dataset when range is before all data"
+      (let [result (slice/slice ds :timestamp "2023-01-01" "2023-12-31")]
+        (is (= 0 (tc/row-count result)))))))
 
-(deftest slice-by-local-date
-  (are [_ arg-map] (= (dataset {:A [#time/date "1979-01-01" #time/date "1980-01-01"]
-                                :B [9 10]})
-                      (-> (dataset {:A (plus-temporal-amount #time/date "1970-01-01" (range 11) :years)
-                                    :B (range 11)})
-                          (slice (:to arg-map) (:from arg-map))))
-    _ {:to "1979-01-01" :from "1980-01-01"}
-    _ {:to #time/date "1979-01-01" :from #time/date "1980-01-01"}))
+(deftest test-slice-with-time-literals
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-01"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-10"
+                                    #time/date "2024-01-15"
+                                    #time/date "2024-01-20"
+                                    #time/date "2024-01-25"
+                                    #time/date "2024-01-31"]
+                        :value [10 20 30 40 50 60 70]})]
+    (testing "works with #time/date literals"
+      (let [result (slice/slice ds :timestamp
+                                #time/date "2024-01-10"
+                                #time/date "2024-01-20")]
+        (is (= 3 (tc/row-count result)))
+        (is (= [30 40 50] (vec (:value result))))))))
 
-(deftest slice-index-with-non-unique-values
-  (is (= (dataset {:A [#time/date "1979-01-01"
-                       #time/date "1979-01-01"
-                       #time/date "1980-01-01"]
-                   :B [9 12 10]})
-         (-> (dataset {:A [#time/date "1978-01-01"
-                           #time/date "1979-01-01"
-                           #time/date "1979-01-01"
-                           #time/date "1980-01-01"]
-                       :B [8 9 12 10]})
-             (slice "1979-01-01" "1980-01-01")))))
+(deftest test-slice-descending
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-31"
+                                    #time/date "2024-01-25"
+                                    #time/date "2024-01-20"
+                                    #time/date "2024-01-15"
+                                    #time/date "2024-01-10"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-01"]
+                        :value [70 60 50 40 30 20 10]})]
+    (testing "slices descending data"
+      (let [result (slice/slice ds :timestamp "2024-01-07" "2024-01-18")]
+        (is (= 2 (tc/row-count result)))
+        ;; Descending data, so values are in reverse order
+        (is (= [40 30] (vec (:value result))))))))
 
-(deftest slice-result-types
-  (let [ds (dataset {:A [#time/date "1970-01-01"
-                         #time/date "1970-01-02"
-                         #time/date "1970-01-03"]
-                     :B [4 5 6]})]
-    (is (instance? tech.v3.datatype.list.ListImpl
-                   (-> ds
-                       (slice "1970-01-02" "1970-01-03" {:result-type :as-indexes}))))
-    (is (instance? tech.v3.dataset.impl.dataset.Dataset
-                   (-> ds
-                       (slice "1970-01-02" "1970-01-03" {:result-type :as-dataset}))))
-    ;; default behavior
-    (is (instance? tech.v3.dataset.impl.dataset.Dataset
-                   (-> ds
-                       (slice "1970-01-02" "1970-01-03"))))))
+(deftest test-slice-multi-month
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-15"
+                                    #time/date "2024-02-10"
+                                    #time/date "2024-03-05"
+                                    #time/date "2024-04-20"
+                                    #time/date "2024-05-12"]
+                        :value [100 200 300 400 500]})]
+    (testing "slices across multiple months"
+      (let [result (slice/slice ds :timestamp
+                                "2024-02-01"
+                                "2024-04-30")]
+        (is (= 3 (tc/row-count result)))
+        (is (= [200 300 400] (vec (:value result))))))))
+
+(deftest test-slice-single-row
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-15"]
+                        :value [42]})]
+    (testing "slices single-row dataset when in range"
+      (let [result (slice/slice ds :timestamp
+                                "2024-01-01"
+                                "2024-01-31")]
+        (is (= 1 (tc/row-count result)))
+        (is (= [42] (vec (:value result))))))
+
+    (testing "returns empty when single row is out of range"
+      (let [result (slice/slice ds :timestamp
+                                "2024-02-01"
+                                "2024-02-28")]
+        (is (= 0 (tc/row-count result)))))))
+
+(deftest test-slice-duplicates
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-01"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-10"]
+                        :value [10 20 21 22 30]})]
+    (testing "includes all duplicate timestamps in range"
+      (let [result (slice/slice ds :timestamp
+                                "2024-01-05"
+                                "2024-01-05")]
+        (is (= 3 (tc/row-count result)))
+        (is (= [20 21 22] (vec (:value result))))))))
+
+(deftest test-slice-result-type
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-01"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-10"
+                                    #time/date "2024-01-15"
+                                    #time/date "2024-01-20"
+                                    #time/date "2024-01-25"
+                                    #time/date "2024-01-31"]
+                        :value [10 20 30 40 50 60 70]})]
+    (testing "returns dataset by default"
+      (let [result (slice/slice ds :timestamp "2024-01-10" "2024-01-20")]
+        (is (tc/dataset? result))))
+
+    (testing "returns indices with :as-indices option"
+      (let [result (slice/slice ds :timestamp "2024-01-10" "2024-01-20"
+                                {:result-type :as-indices})]
+        (is (not (tc/dataset? result)))
+        (is (= [2 3 4] (vec result)))))))
+
+(deftest test-slice-errors
+  (let [ds (tc/dataset {:timestamp [#time/date "2024-01-01"
+                                    #time/date "2024-01-05"
+                                    #time/date "2024-01-10"
+                                    #time/date "2024-01-15"
+                                    #time/date "2024-01-20"
+                                    #time/date "2024-01-25"
+                                    #time/date "2024-01-31"]
+                        :value [10 20 30 40 50 60 70]})]
+    (testing "throws error when from > to"
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo
+           #"from.*must be less than or equal to.*to"
+           (slice/slice ds :timestamp "2024-01-31" "2024-01-01"))))
+
+    (testing "throws error when time column doesn't exist"
+      (is (thrown-with-msg?
+           clojure.lang.ExceptionInfo
+           #"Time column is nil"
+           (slice/slice ds :nonexistent "2024-01-01" "2024-01-31"))))))
