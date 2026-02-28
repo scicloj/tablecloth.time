@@ -58,13 +58,16 @@ Resample half-hourly electricity data to daily averages — no magic, just compo
 ;; Load half-hourly Victorian electricity data
 (def vic-elec (tc/dataset "data/fpp3/vic_elec.csv" {:key-fn keyword}))
 
-;; Resample to daily averages using standard tablecloth operations
+;; Resample to daily averages:
+;; 1. Extract date from datetime using add-time-columns
+;; 2. Group and aggregate with standard tablecloth
 (-> vic-elec
-    (tc/group-by [:Date])
+    (time-api/add-time-columns :Time {:date-string "Day"})
+    (tc/group-by ["Day"])
     (tc/mean :Demand))
 ```
 
-The philosophy: `add-time-columns` extracts what you need, then standard tablecloth does the rest. Explicit columns throughout — no implicit index, no magic.
+The philosophy: `add-time-columns` extracts temporal components you need, then standard tablecloth does the rest. Explicit columns throughout — no implicit index, no magic.
 
 ![Victorian electricity demand (daily average)](doc/images/daily-demand-example.png)
 
