@@ -21,45 +21,33 @@ This library is experimental and has evolved since its inception. The current ap
 
 In practice, this means we do not store metadata on the dataset indicating which column contains temporal data. Rather than providing functions like `adjust-frequency` that implicitly operate on a designated time index, we provide primitives like `add-time-columns` that make it easy to derive temporal fields explicitly. Users then compose these with standard tablecloth operations (`group-by`, `aggregate`, etc.).
 
-### A Note on Indexing
-
-Previous versions of tablecloth.time implemented index-aware functions built on an indexing mechanism in `tech.ml.dataset`. That indexing mechanism was removed as part of TMD v7's simplification effort ([discussion on Zulip](https://clojurians.zulipchat.com/#narrow/channel/236259-tech.2Eml.2Edataset.2Edev/topic/index.20structures.20in.20Columns.20-.20scope)).
-
-Key points:
-
-1. **This doesn't preclude future indexing.** A future version of tablecloth.time or tech.ml.dataset may reintroduce an optional mechanism for designating a temporal index.
-
-2. **The SciCloj community is experimenting with index-free approaches.** The current thinking is that explicit column arguments + binary search performs well enough for most time-series workloads, without the complexity that indexing adds. As Chris Nuernberger (dtype-next author) noted: "Just sorting the dataset and using binary search will outperform most/all tree structures in this scenario."
-
-3. **Pandas-style indexing is complex.** Harold observed that "there is about as much code in Pandas doing indexing stuff as there is _all of the code in TMD_." The removal was a deliberate choice to keep the core library focused.
-
-For now, we prioritize explicit column arguments and composable primitives. See `doc/zulip-indexing-discussion-summary.md` for the full context.
+Previous versions implemented index-aware functions built on a now-removed indexing mechanism in `tech.ml.dataset`. A future version of this library may reintroduce an optional mechanism for designating a temporal index, but for now we prioritize explicit column arguments and composable primitives.
 
 ## Usage
 
 ```clojure
 (require '[tablecloth.api :as tc]
-         '[tablecloth.time.api :as tct]
-         '[tablecloth.time.column.api :as tct-col])
+         '[tablecloth.time.api :as time-api]
+         '[tablecloth.time.column.api :as time-col])
 
 ;; Add temporal fields to a dataset
 (-> my-dataset
-    (tct/add-time-columns :timestamp {:year "Year" 
-                                      :month "Month"
-                                      :day-of-week "DayOfWeek"}))
+    (time-api/add-time-columns :timestamp {:year "Year" 
+                                           :month "Month"
+                                           :day-of-week "DayOfWeek"}))
 
 ;; Slice a time range
 (-> my-dataset
     (tc/order-by :timestamp)
-    (tct/slice :timestamp #time/date "2024-01-01" #time/date "2024-03-31"))
+    (time-api/slice :timestamp #time/date "2024-01-01" #time/date "2024-03-31"))
 
 ;; Add lag columns for time series analysis
 (-> my-dataset
-    (tct/add-lags :price [1 2 3 4]))
+    (time-api/add-lags :price [1 2 3 4]))
 
 ;; Column-level operations
-(tct-col/year (my-dataset :timestamp))        ; extract year
-(tct-col/floor-to-month (my-dataset :timestamp))  ; truncate to month
+(time-col/year (my-dataset :timestamp))        ; extract year
+(time-col/floor-to-month (my-dataset :timestamp))  ; truncate to month
 ```
 
 ### Resampling Example
@@ -70,16 +58,13 @@ Resample half-hourly electricity data to daily averages — no magic, just compo
 ;; Load half-hourly Victorian electricity data
 (def vic-elec (tc/dataset "data/fpp3/vic_elec.csv" {:key-fn keyword}))
 
-;; Resample to daily averages:
-;; 1. Extract date from datetime using add-time-columns
-;; 2. Group and aggregate with standard tablecloth
+;; Resample to daily averages using standard tablecloth operations
 (-> vic-elec
-    (tct/add-time-columns :Time {:date-string "Day"})
-    (tc/group-by ["Day"])
+    (tc/group-by [:Date])
     (tc/mean :Demand))
 ```
 
-The philosophy: `add-time-columns` extracts temporal components you need, then standard tablecloth does the rest. Explicit columns throughout — no implicit index, no magic.
+The philosophy: `add-time-columns` extracts what you need, then standard tablecloth does the rest. Explicit columns throughout — no implicit index, no magic.
 
 ![Victorian electricity demand (daily average)](doc/images/daily-demand-example.png)
 
