@@ -295,10 +295,10 @@ olympic-running
 
 (defn make-subseries-traces
   "Generate Plotly traces for a subseries plot.
-   Each group becomes a trace assigned to its own axis."
+   Each group becomes a data trace + mean line, assigned to its own axis."
   [grouped-data x-col y-col]
   (->> grouped-data
-       (mapcat
+       (map-indexed
         (fn [idx group-ds]
           (let [axis-num (inc idx)  ; 1-indexed for Plotly
                 xaxis (if (= axis-num 1) "x" (str "x" axis-num))
@@ -324,15 +324,18 @@ olympic-running
               :xaxis xaxis
               :yaxis yaxis
               :showlegend false}])))
-       (map-indexed (fn [i v] (assoc v :_idx i)))  ; re-index if needed
+       (apply concat)  ; flatten the pairs
        vec))
 
 (def month-names ["Jan" "Feb" "Mar" "Apr" "May" "Jun"
                   "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
 
 (defn make-subseries-layout
-  "Generate layout with axis domains for n subplots in a row."
-  [n title]
+  "Generate layout with axis domains for n subplots in a row.
+   Options:
+   - :y-range [min max] - shared y-axis range across all subplots
+   - :y-title - y-axis label (shown on first subplot only)"
+  [n title & {:keys [y-range y-title] :or {y-title "$ (millions)"}}]
   (let [width (/ 0.92 n)
         gap 0.005
         month-annotations
@@ -356,18 +359,20 @@ olympic-running
              y-anchor (if (= axis-num 1) "x" (str "x" axis-num))
              start (+ (* idx (+ width gap)) 0.04)
              end (+ start width)
-             ;; Only show y-axis title on first subplot
-             y-title (when (= idx 0) "$ (millions)")]
+             first-subplot? (= idx 0)
+             y-axis-config (cond-> {:domain [0.15 0.95]
+                                    :anchor y-anchor
+                                    :tickfont {:size 8}}
+                             first-subplot? (assoc :title y-title)
+                             (not first-subplot?) (assoc :showticklabels false)
+                             y-range (assoc :range y-range))]
          (-> layout
              (assoc x-key {:domain [start end]
                            :anchor x-anchor
                            :tickangle 45
                            :tickfont {:size 7}
                            :dtick 5})
-             (assoc y-key {:domain [0.15 0.95]
-                           :anchor y-anchor
-                           :tickfont {:size 8}
-                           :title y-title}))))
+             (assoc y-key y-axis-config))))
      {:title title
       :showlegend false
       :height 350
@@ -391,8 +396,17 @@ olympic-running
       (tc/group-by ["MonthNum"])
       :data))
 
+;; Calculate shared y-axis range across all months (with 5% padding)
+(def a10-y-range
+  (let [all-costs (a10-with-fields "Cost")
+        y-min (dfn/reduce-min all-costs)
+        y-max (dfn/reduce-max all-costs)
+        padding (* 0.05 (- y-max y-min))]
+    [(- y-min padding) (+ y-max padding)]))
+
 (def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
-(def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"))
+(def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"
+                                                  :y-range a10-y-range))
 
 (kind/plotly
  {:data a10-subseries-traces
