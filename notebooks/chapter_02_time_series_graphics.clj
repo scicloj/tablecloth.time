@@ -298,21 +298,34 @@ olympic-running
    Each group becomes a trace assigned to its own axis."
   [grouped-data x-col y-col]
   (->> grouped-data
-       (map-indexed
+       (mapcat
         (fn [idx group-ds]
           (let [axis-num (inc idx)  ; 1-indexed for Plotly
                 xaxis (if (= axis-num 1) "x" (str "x" axis-num))
-                yaxis (if (= axis-num 1) "y" (str "y" axis-num))]
-            {:x (vec (group-ds x-col))
-             :y (vec (group-ds y-col))
-             :type "scatter"
-             :mode "lines+markers"
-             :marker {:size 4}
-             :line {:width 1}
-             :xaxis xaxis
-             :yaxis yaxis
-             :name (str "Month " axis-num)
-             :showlegend false})))))
+                yaxis (if (= axis-num 1) "y" (str "y" axis-num))
+                xs (vec (group-ds x-col))
+                ys (vec (group-ds y-col))
+                mean-y (tcc/mean (group-ds y-col))]
+            [{:x xs
+              :y ys
+              :type "scatter"
+              :mode "lines+markers"
+              :marker {:size 4}
+              :line {:width 1}
+              :xaxis xaxis
+              :yaxis yaxis
+              :name (str "Month " axis-num)
+              :showlegend false}
+             {:x [(first xs) (last xs)]
+              :y [mean-y mean-y]
+              :type "scatter"
+              :mode "lines"
+              :line {:color "blue" :width 2}
+              :xaxis xaxis
+              :yaxis yaxis
+              :showlegend false}])))
+       (map-indexed (fn [i v] (assoc v :_idx i)))  ; re-index if needed
+       vec))
 
 (def month-names ["Jan" "Feb" "Mar" "Apr" "May" "Jun"
                   "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
