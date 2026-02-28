@@ -66,10 +66,10 @@
                            :ascending :descending)
           col-sorted? (bs/is-sorted? col-millis sort-direction)
           col-millis  (cond-> col-millis
-                         (not col-sorted?)
-                         (tcc/sort-column :asc)
-                         (and col-sorted? (= sort-direction :descending))
-                         (reverse))]
+                        (not col-sorted?)
+                        (tcc/sort-column :asc)
+                        (and col-sorted? (= sort-direction :descending))
+                        (reverse))]
       {:col-millis     col-millis
        :sort-direction sort-direction})))
 

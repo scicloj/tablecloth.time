@@ -159,14 +159,14 @@
         all-extractors (merge field->extractor field->computed)
         src-col (ds time-col)]
     (tc/add-columns ds
-      (reduce-kv (fn [m field col-name]
-                   (if-let [extractor (all-extractors field)]
-                     (assoc m col-name (extractor src-col))
-                     (throw (ex-info (str "Unknown time field: " field
-                                          ". Supported: " (keys all-extractors))
-                                     {:field field}))))
-                 {}
-                 field->col))))
+                    (reduce-kv (fn [m field col-name]
+                                 (if-let [extractor (all-extractors field)]
+                                   (assoc m col-name (extractor src-col))
+                                   (throw (ex-info (str "Unknown time field: " field
+                                                        ". Supported: " (keys all-extractors))
+                                                   {:field field}))))
+                               {}
+                               field->col))))
 
 (defn add-lag
   "Add a lagged version of a column to a dataset.
