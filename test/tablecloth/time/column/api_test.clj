@@ -4,7 +4,8 @@
             [tablecloth.time.parse :refer [parse]]
             [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year
                                                 year month day hour minute get-second
-                                                day-of-week day-of-year week-of-year quarter]])
+                                                day-of-week day-of-year week-of-year quarter
+                                                epoch-day epoch-week week-of-year-index lag lead]])
   (:import [java.time Duration Instant LocalDate LocalDateTime ZonedDateTime]))
 
 (deftest convert-time-temporal->epoch-default-utc
@@ -850,3 +851,115 @@
       (is (tcc/column? (hour col)))
       (is (tcc/column? (minute col)))
       (is (tcc/column? (get-second col))))))
+
+(deftest epoch-day-test
+  (testing "epoch-day returns days since 1970-01-01"
+    (let [dates [(parse "1970-01-01")
+                 (parse "1970-01-02")
+                 (parse "1970-01-10")
+                 (parse "1971-01-01")]  ; day 365
+          col (tcc/column dates)
+          result (epoch-day col)]
+      (is (= [0 1 9 365] (vec result)))))
+
+  (testing "epoch-day works with dates before epoch"
+    (let [dates [(parse "1969-12-31")
+                 (parse "1969-12-01")]
+          col (tcc/column dates)
+          result (epoch-day col)]
+      (is (= [-1 -31] (vec result)))))
+
+  (testing "epoch-day returns column"
+    (let [col (tcc/column [(parse "2024-01-01")])]
+      (is (tcc/column? (epoch-day col))))))
+
+(deftest epoch-week-test
+  (testing "epoch-week returns weeks since 1970-01-01"
+    ;; 1970-01-01 is week 0, 1970-01-08 is week 1
+    (let [dates [(parse "1970-01-01")
+                 (parse "1970-01-07")  ; still week 0
+                 (parse "1970-01-08")  ; week 1
+                 (parse "1970-01-15")] ; week 2
+          col (tcc/column dates)
+          result (epoch-week col)]
+      (is (= [0 0 1 2] (vec result)))))
+
+  (testing "epoch-week handles year boundaries"
+    (let [dates [(parse "1970-12-31")
+                 (parse "1971-01-01")]
+          col (tcc/column dates)
+          result (epoch-week col)]
+      ;; Dec 31 1970 is day 364, week 52
+      ;; Jan 1 1971 is day 365, week 52
+      (is (= [52 52] (vec result)))))
+
+  (testing "epoch-week returns column"
+    (let [col (tcc/column [(parse "2024-01-01")])]
+      (is (tcc/column? (epoch-week col))))))
+
+(deftest week-of-year-index-test
+  (testing "week-of-year-index returns 0-based week within year"
+    (let [dates [(parse "2024-01-01")
+                 (parse "2024-01-08")
+                 (parse "2024-01-15")
+                 (parse "2024-12-31")]
+          col (tcc/column dates)
+          result (week-of-year-index col)]
+      ;; First week is 0, then increments
+      (is (= 0 (first (vec result))))
+      (is (= 1 (second (vec result))))
+      (is (= 2 (nth (vec result) 2)))))
+
+  (testing "week-of-year-index resets at year boundary"
+    (let [dates [(parse "2023-12-31")
+                 (parse "2024-01-01")]
+          col (tcc/column dates)
+          result (week-of-year-index col)]
+      ;; Both should be week 0 of their respective years
+      ;; (or close to it - Dec 31 is end of year)
+      (is (>= (first (vec result)) 51))  ; late in year
+      (is (= 0 (second (vec result))))))  ; start of new year
+
+  (testing "week-of-year-index returns column"
+    (let [col (tcc/column [(parse "2024-01-01")])]
+      (is (tcc/column? (week-of-year-index col))))))
+
+(deftest lag-column-test
+  (testing "lag shifts values forward with nil at start"
+    (let [col (tcc/column [1 2 3 4 5])
+          result (lag col 2)]
+      (is (= [nil nil 1 2 3] (vec result)))))
+
+  (testing "lag with k=1"
+    (let [col (tcc/column [10 20 30])
+          result (lag col 1)]
+      (is (= [nil 10 20] (vec result)))))
+
+  (testing "lag with k=0 returns original values"
+    (let [col (tcc/column [1 2 3])
+          result (lag col 0)]
+      (is (= [1 2 3] (vec result)))))
+
+  (testing "lag returns column"
+    (let [col (tcc/column [1 2 3])]
+      (is (tcc/column? (lag col 1))))))
+
+(deftest lead-column-test
+  (testing "lead shifts values backward with nil at end"
+    (let [col (tcc/column [1 2 3 4 5])
+          result (lead col 2)]
+      (is (= [3 4 5 nil nil] (vec result)))))
+
+  (testing "lead with k=1"
+    (let [col (tcc/column [10 20 30])
+          result (lead col 1)]
+      (is (= [20 30 nil] (vec result)))))
+
+  (testing "lead with k=0 returns original values"
+    (let [col (tcc/column [1 2 3])
+          result (lead col 0)]
+      (is (= [1 2 3] (vec result)))))
+
+  (testing "lead returns column"
+    (let [col (tcc/column [1 2 3])]
+      (is (tcc/column? (lead col 1))))))
