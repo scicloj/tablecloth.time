@@ -388,29 +388,25 @@ olympic-running
 ;; Build the subseries plot
 (def a10-with-fields
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
-
-(def a10-grouped
-  (-> a10-with-fields
-      (tc/order-by ["MonthNum" "Year"])
+      (time-api/add-time-columns "Month" {:year "Year"
+                                          :month "MonthNum"})
       (tc/group-by ["MonthNum"])
-      :data))
-
-;; Calculate shared y-axis range across all months (with 5% padding)
-(def a10-y-range
-  (let [all-costs (a10-with-fields "Cost")
-        y-min (dfn/reduce-min all-costs)
-        y-max (dfn/reduce-max all-costs)
-        padding (* 0.05 (- y-max y-min))]
-    [(- y-min padding) (+ y-max padding)]))
-
-(def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
-(def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"
-                                                  :y-range a10-y-range))
+      :data
+      (->> (map-indexed
+            (fn [idx group-ds]
+              (let [axis-suffix (if (zero? idx) "" (str (inc idx)))]
+                {:x (vec (group-ds "Year"))
+                 :y (vec (group-ds "Cost"))
+                 :xaxis (str "x" axis-suffix)
+                 :yaxis (str "y" axis-suffix)}))))))
 
 (kind/plotly
- {:data a10-subseries-traces
-  :layout a10-subseries-layout})
+ {:data a10-subseries
+  :layout {:grid {:rows 1
+                  :columns 12
+                  :pattern "independent"
+                  :subplots [(mapv (fn [group] (str "x" (:yaxis group)))
+                                   a10-subseries)]}}})
 
 ;; ## 2.6 — Scatterplots
 ;;
