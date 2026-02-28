@@ -317,8 +317,8 @@ olympic-running
 (defn make-subseries-layout
   "Generate layout with axis domains for n subplots in a row."
   [n title]
-  (let [width (/ 0.95 n)
-        gap 0.01]
+  (let [width (/ 0.92 n)
+        gap 0.005]
     (reduce
      (fn [layout idx]
        (let [axis-num (inc idx)
@@ -326,17 +326,21 @@ olympic-running
              y-key (if (= axis-num 1) :yaxis (keyword (str "yaxis" axis-num)))
              x-anchor (if (= axis-num 1) "y" (str "y" axis-num))
              y-anchor (if (= axis-num 1) "x" (str "x" axis-num))
-             start (+ (* idx (+ width gap)) 0.02)
+             start (+ (* idx (+ width gap)) 0.04)
              end (+ start width)]
          (-> layout
              (assoc x-key {:domain [start end]
                            :anchor x-anchor
                            :tickangle 45
-                           :tickfont {:size 8}})
-             (assoc y-key {:anchor y-anchor}))))
+                           :tickfont {:size 7}
+                           :dtick 5})
+             (assoc y-key {:domain [0.15 0.95]
+                           :anchor y-anchor
+                           :tickfont {:size 8}}))))
      {:title title
       :showlegend false
-      :height 300}
+      :height 350
+      :width 1200}
      (range n))))
 
 ;; Build the subseries plot
