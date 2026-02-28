@@ -5,7 +5,7 @@
 
 (defn rolling
   "Rolling window API (work in progress). Not yet implemented."
-  ([ds time-col window-spec columns-map]
+  ([_ds time-col window-spec columns-map]
    (throw (ex-info "tablecloth.time.api/rolling is not implemented yet"
                    {:type ::not-implemented
                     :time-col time-col

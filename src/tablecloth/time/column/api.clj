@@ -9,8 +9,7 @@
             [tablecloth.column.api :as tcc]
             [tablecloth.time.utils.datatypes :as datatypes]
             [tablecloth.time.utils.temporal :as temporal]
-            [tablecloth.time.utils.units :as units]
-            [tablecloth.api :as tc])
+            [tablecloth.time.utils.units :as units])
   (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
             Duration LocalTime]))
 

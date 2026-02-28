@@ -1,5 +1,1 @@
-{:linters
- ;; add modifications to linting rules here
- ;; see example below
- #_{:unresolved-var {:level :info}
-  :unresolved-symbol {:level :info}}}
+{:linters {}}
