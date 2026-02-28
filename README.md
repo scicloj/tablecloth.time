@@ -8,14 +8,68 @@
 ## Description
 
 This library offers tools for manipulating and processing time-series
-data. It compliments and extends the easy-to-use API provided by
+data. It complements and extends the API provided by
 [`tablecloth`](https://github.com/scicloj/tablecloth) for working with
 the highly performant columnar datasets of
 [`tech.ml.dataset`](https://github.com/techascent/tech.ml.dataset).
 
+**Status:** Under active development. The API may change.
+
+## Design Philosophy
+
+This library is experimental and has evolved since its inception. The current approach favors **composability over high-level abstraction**.
+
+In practice, this means we do not store metadata on the dataset indicating which column contains temporal data. Rather than providing functions like `adjust-frequency` that implicitly operate on a designated time index, we provide primitives like `add-time-columns` that make it easy to derive temporal fields explicitly. Users then compose these with standard tablecloth operations (`group-by`, `aggregate`, etc.).
+
+Previous versions implemented index-aware functions built on a now-removed indexing mechanism in `tech.ml.dataset`. A future version of this library may reintroduce an optional mechanism for designating a temporal index, but for now we prioritize explicit column arguments and composable primitives.
+
 ## Usage
 
-TBD
+```clojure
+(require '[tablecloth.api :as tc]
+         '[tablecloth.time.api :as time-api]
+         '[tablecloth.time.column.api :as time-col])
+
+;; Add temporal fields to a dataset
+(-> my-dataset
+    (time-api/add-time-columns :timestamp {:year "Year" 
+                                           :month "Month"
+                                           :day-of-week "DayOfWeek"}))
+
+;; Slice a time range
+(-> my-dataset
+    (tc/order-by :timestamp)
+    (time-api/slice :timestamp #time/date "2024-01-01" #time/date "2024-03-31"))
+
+;; Add lag columns for time series analysis
+(-> my-dataset
+    (time-api/add-lags :price [1 2 3 4]))
+
+;; Column-level operations
+(time-col/year (my-dataset :timestamp))        ; extract year
+(time-col/floor-to-month (my-dataset :timestamp))  ; truncate to month
+```
+
+### Resampling Example
+
+Resample half-hourly electricity data to daily averages — no magic, just composable primitives:
+
+```clojure
+;; Load half-hourly Victorian electricity data
+(def vic-elec (tc/dataset "data/fpp3/vic_elec.csv" {:key-fn keyword}))
+
+;; Resample to daily averages using standard tablecloth operations
+(-> vic-elec
+    (tc/group-by [:Date])
+    (tc/mean :Demand))
+```
+
+The philosophy: `add-time-columns` extracts what you need, then standard tablecloth does the rest. Explicit columns throughout — no implicit index, no magic.
+
+![Victorian electricity demand (daily average)](doc/images/daily-demand-example.png)
+
+See `notebooks/chapter_02_time_series_graphics.clj` for more examples based on
+[Forecasting: Principles and Practice](https://otexts.com/fpp3/).
 
 ## Development
 
