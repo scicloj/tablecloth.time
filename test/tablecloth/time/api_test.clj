@@ -22,8 +22,8 @@
                                  (LocalDate/of 2024 6 1)]
                           :value [1 2]})
           result (time-api/add-time-columns ds :date {:year :Year
-                                                       :month :MonthNum
-                                                       :quarter :Q})]
+                                                      :month :MonthNum
+                                                      :quarter :Q})]
       (is (= [2024 2024] (vec (result :Year))))
       (is (= [3 6] (vec (result :MonthNum))))
       (is (= [1 2] (vec (result :Q)))))))
@@ -32,8 +32,8 @@
   (testing "all supported fields extract correctly"
     (let [ds (tc/dataset {:ts [(LocalDateTime/of 2024 6 15 14 30 45)]})
           result (time-api/add-time-columns ds :ts
-                   [:year :month :day :hour :minute :second
-                    :day-of-week :day-of-year :week-of-year :quarter])]
+                                            [:year :month :day :hour :minute :second
+                                             :day-of-week :day-of-year :week-of-year :quarter])]
       (is (= [2024] (vec (result :year))))
       (is (= [6] (vec (result :month))))
       (is (= [15] (vec (result :day))))
