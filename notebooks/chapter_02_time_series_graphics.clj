@@ -314,11 +314,26 @@ olympic-running
              :name (str "Month " axis-num)
              :showlegend false})))))
 
+(def month-names ["Jan" "Feb" "Mar" "Apr" "May" "Jun"
+                  "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
+
 (defn make-subseries-layout
   "Generate layout with axis domains for n subplots in a row."
   [n title]
   (let [width (/ 0.92 n)
-        gap 0.005]
+        gap 0.005
+        month-annotations
+        (mapv (fn [idx]
+                (let [start (+ (* idx (+ width gap)) 0.04)
+                      center (+ start (/ width 2))]
+                  {:x center
+                   :y 1.02
+                   :xref "paper"
+                   :yref "paper"
+                   :text (get month-names idx (str "M" (inc idx)))
+                   :showarrow false
+                   :font {:size 10}}))
+              (range n))]
     (reduce
      (fn [layout idx]
        (let [axis-num (inc idx)
@@ -327,7 +342,9 @@ olympic-running
              x-anchor (if (= axis-num 1) "y" (str "y" axis-num))
              y-anchor (if (= axis-num 1) "x" (str "x" axis-num))
              start (+ (* idx (+ width gap)) 0.04)
-             end (+ start width)]
+             end (+ start width)
+             ;; Only show y-axis title on first subplot
+             y-title (when (= idx 0) "$ (millions)")]
          (-> layout
              (assoc x-key {:domain [start end]
                            :anchor x-anchor
@@ -336,11 +353,18 @@ olympic-running
                            :dtick 5})
              (assoc y-key {:domain [0.15 0.95]
                            :anchor y-anchor
-                           :tickfont {:size 8}}))))
+                           :tickfont {:size 8}
+                           :title y-title}))))
      {:title title
       :showlegend false
       :height 350
-      :width 1200}
+      :width 1200
+      :annotations (conj month-annotations
+                         {:x 0.5 :y -0.08
+                          :xref "paper" :yref "paper"
+                          :text "Month"
+                          :showarrow false
+                          :font {:size 12}})}
      (range n))))
 
 ;; Build the subseries plot
