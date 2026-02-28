@@ -295,61 +295,30 @@ olympic-running
 
 (defn make-subseries-traces
   "Generate Plotly traces for a subseries plot.
-   Each group becomes a data trace + mean line, assigned to its own axis."
+   Each group becomes a trace assigned to its own axis."
   [grouped-data x-col y-col]
   (->> grouped-data
        (map-indexed
         (fn [idx group-ds]
           (let [axis-num (inc idx)  ; 1-indexed for Plotly
                 xaxis (if (= axis-num 1) "x" (str "x" axis-num))
-                yaxis (if (= axis-num 1) "y" (str "y" axis-num))
-                xs (vec (group-ds x-col))
-                ys (vec (group-ds y-col))
-                mean-y (tcc/mean (group-ds y-col))]
-            [{:x xs
-              :y ys
-              :type "scatter"
-              :mode "lines+markers"
-              :marker {:size 4}
-              :line {:width 1}
-              :xaxis xaxis
-              :yaxis yaxis
-              :name (str "Month " axis-num)
-              :showlegend false}
-             {:x [(first xs) (last xs)]
-              :y [mean-y mean-y]
-              :type "scatter"
-              :mode "lines"
-              :line {:color "blue" :width 2}
-              :xaxis xaxis
-              :yaxis yaxis
-              :showlegend false}])))
-       (apply concat)  ; flatten the pairs
-       vec))
-
-(def month-names ["Jan" "Feb" "Mar" "Apr" "May" "Jun"
-                  "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
+                yaxis (if (= axis-num 1) "y" (str "y" axis-num))]
+            {:x (vec (group-ds x-col))
+             :y (vec (group-ds y-col))
+             :type "scatter"
+             :mode "lines+markers"
+             :marker {:size 4}
+             :line {:width 1}
+             :xaxis xaxis
+             :yaxis yaxis
+             :name (str "Month " axis-num)
+             :showlegend false})))))
 
 (defn make-subseries-layout
-  "Generate layout with axis domains for n subplots in a row.
-   Options:
-   - :y-range [min max] - shared y-axis range across all subplots
-   - :y-title - y-axis label (shown on first subplot only)"
-  [n title & {:keys [y-range y-title] :or {y-title "$ (millions)"}}]
-  (let [width (/ 0.92 n)
-        gap 0.005
-        month-annotations
-        (mapv (fn [idx]
-                (let [start (+ (* idx (+ width gap)) 0.04)
-                      center (+ start (/ width 2))]
-                  {:x center
-                   :y 1.02
-                   :xref "paper"
-                   :yref "paper"
-                   :text (get month-names idx (str "M" (inc idx)))
-                   :showarrow false
-                   :font {:size 10}}))
-              (range n))]
+  "Generate layout with axis domains for n subplots in a row."
+  [n title]
+  (let [width (/ 0.95 n)
+        gap 0.01]
     (reduce
      (fn [layout idx]
        (let [axis-num (inc idx)
@@ -357,56 +326,36 @@ olympic-running
              y-key (if (= axis-num 1) :yaxis (keyword (str "yaxis" axis-num)))
              x-anchor (if (= axis-num 1) "y" (str "y" axis-num))
              y-anchor (if (= axis-num 1) "x" (str "x" axis-num))
-             start (+ (* idx (+ width gap)) 0.04)
-             end (+ start width)
-             first-subplot? (= idx 0)
-             y-axis-config (cond-> {:domain [0.15 0.95]
-                                    :anchor y-anchor
-                                    :tickfont {:size 8}}
-                             first-subplot? (assoc :title y-title)
-                             (not first-subplot?) (assoc :showticklabels false)
-                             y-range (assoc :range y-range))]
+             start (+ (* idx (+ width gap)) 0.02)
+             end (+ start width)]
          (-> layout
              (assoc x-key {:domain [start end]
                            :anchor x-anchor
                            :tickangle 45
-                           :tickfont {:size 7}
-                           :dtick 5})
-             (assoc y-key y-axis-config))))
+                           :tickfont {:size 8}})
+             (assoc y-key {:anchor y-anchor}))))
      {:title title
       :showlegend false
-      :height 350
-      :width 1200
-      :annotations (conj month-annotations
-                         {:x 0.5 :y -0.08
-                          :xref "paper" :yref "paper"
-                          :text "Month"
-                          :showarrow false
-                          :font {:size 12}})}
+      :height 300}
      (range n))))
 
 ;; Build the subseries plot
 (def a10-with-fields
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year"
-                                          :month "MonthNum"})
+      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+
+(def a10-grouped
+  (-> a10-with-fields
+      (tc/order-by ["MonthNum" "Year"])
       (tc/group-by ["MonthNum"])
-      :data
-      (->> (map-indexed
-            (fn [idx group-ds]
-              (let [axis-suffix (if (zero? idx) "" (str (inc idx)))]
-                {:x (vec (group-ds "Year"))
-                 :y (vec (group-ds "Cost"))
-                 :xaxis (str "x" axis-suffix)
-                 :yaxis (str "y" axis-suffix)}))))))
+      :data))
+
+(def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
+(def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"))
 
 (kind/plotly
- {:data a10-subseries
-  :layout {:grid {:rows 1
-                  :columns 12
-                  :pattern "independent"
-                  :subplots [(mapv (fn [group] (str "x" (:yaxis group)))
-                                   a10-subseries)]}}})
+ {:data a10-subseries-traces
+  :layout a10-subseries-layout})
 
 ;; ## 2.6 — Scatterplots
 ;;
