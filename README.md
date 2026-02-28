@@ -21,7 +21,19 @@ This library is experimental and has evolved since its inception. The current ap
 
 In practice, this means we do not store metadata on the dataset indicating which column contains temporal data. Rather than providing functions like `adjust-frequency` that implicitly operate on a designated time index, we provide primitives like `add-time-columns` that make it easy to derive temporal fields explicitly. Users then compose these with standard tablecloth operations (`group-by`, `aggregate`, etc.).
 
-Previous versions implemented index-aware functions built on a now-removed indexing mechanism in `tech.ml.dataset`. A future version of this library may reintroduce an optional mechanism for designating a temporal index, but for now we prioritize explicit column arguments and composable primitives.
+### A Note on Indexing
+
+Previous versions of tablecloth.time implemented index-aware functions built on an indexing mechanism in `tech.ml.dataset`. That indexing mechanism was removed as part of TMD v7's simplification effort ([discussion on Zulip](https://clojurians.zulipchat.com/#narrow/channel/236259-tech.2Eml.2Edataset.2Edev/topic/index.20structures.20in.20Columns.20-.20scope)).
+
+Key points:
+
+1. **This doesn't preclude future indexing.** A future version of tablecloth.time or tech.ml.dataset may reintroduce an optional mechanism for designating a temporal index.
+
+2. **The SciCloj community is experimenting with index-free approaches.** The current thinking is that explicit column arguments + binary search performs well enough for most time-series workloads, without the complexity that indexing adds. As Chris Nuernberger (dtype-next author) noted: "Just sorting the dataset and using binary search will outperform most/all tree structures in this scenario."
+
+3. **Pandas-style indexing is complex.** Harold observed that "there is about as much code in Pandas doing indexing stuff as there is _all of the code in TMD_." The removal was a deliberate choice to keep the core library focused.
+
+For now, we prioritize explicit column arguments and composable primitives. See `doc/zulip-indexing-discussion-summary.md` for the full context.
 
 ## Usage
 
