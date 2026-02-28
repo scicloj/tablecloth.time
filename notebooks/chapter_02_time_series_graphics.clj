@@ -149,7 +149,7 @@ olympic-running
 (let [closes (vec (google-2015 "Close"))
       diffs (mapv - (rest closes) (butlast closes))]
   (-> (tc/dataset {"Date" (rest (vec (google-2015 "Date")))
-                    "Change" diffs})
+                   "Change" diffs})
       (plotly/layer-line {:=x "Date"
                           :=y "Change"
                           :=title "Google daily change in closing stock price (2015)"})))
@@ -196,21 +196,21 @@ olympic-running
 ;; calendar date of the timestamp. We derive all groupings from the Time column.
 (def vic-elec-with-fields
   (-> vic-elec
-      (time-api/add-time-columns "Time" 
-        {;; Basic fields
-         :day-of-week "DayOfWeek"
-         :day-of-year "DayOfYear"
-         :week-of-year "WeekOfYear"
-         :year "Year"
+      (time-api/add-time-columns "Time"
+                                 {;; Basic fields
+                                  :day-of-week "DayOfWeek"
+                                  :day-of-year "DayOfYear"
+                                  :week-of-year "WeekOfYear"
+                                  :year "Year"
          ;; Computed fields for seasonal plots
-         :hour-fractional "HourOfDay"
-         :daily-phase "DailyPhase"
-         :weekly-phase "WeeklyPhase"
-         :week-of-year-index "WeekIndex"
-         :date-string "TimeDate"
-         :year-string "YearStr"
-         :week-string "WeekLabel"
-         :year-week-string "YearWeek"})))
+                                  :hour-fractional "HourOfDay"
+                                  :daily-phase "DailyPhase"
+                                  :weekly-phase "WeeklyPhase"
+                                  :week-of-year-index "WeekIndex"
+                                  :date-string "TimeDate"
+                                  :year-string "YearStr"
+                                  :week-string "WeekLabel"
+                                  :year-week-string "YearWeek"})))
 
 ;; ### Helper: seasonal-plot-spec
 ;; Generate a Plotly spec for seasonal plots using tableplot as the base.
@@ -226,14 +226,14 @@ olympic-running
    Options:
    - :line-width (default 0.3)
    - :title, :x-title, :y-title for axis labels"
-  [ds phase-col value-col group-col color-fn 
+  [ds phase-col value-col group-col color-fn
    & {:keys [line-width title x-title y-title]
       :or {line-width 0.3}}]
   (let [;; Use tableplot to generate base spec with traces
         viz (-> ds
                 (tc/order-by phase-col)
-                (plotly/layer-line {:=x phase-col 
-                                    :=y value-col 
+                (plotly/layer-line {:=x phase-col
+                                    :=y value-col
                                     :=color group-col
                                     :=title title
                                     :=x-title x-title
@@ -241,7 +241,7 @@ olympic-running
         ;; Extract final Plotly spec using tableplot's official API
         spec (plotly/plot viz)]
     ;; Post-process traces: hide legend, set colors
-    (update spec :data 
+    (update spec :data
             #(mapv (fn [trace]
                      (-> trace
                          (assoc :showlegend false)
@@ -254,24 +254,24 @@ olympic-running
 (let [year-color #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
                        (subs % 0 4) "gray")]
   (kind/plotly
-    (seasonal-plot-spec vic-elec-with-fields
-                        "DailyPhase" "Demand" "TimeDate"
-                        year-color
-                        :title "Electricity demand: Victoria (daily pattern)"
-                        :x-title "Phase of day (0=midnight, 0.5=noon)"
-                        :y-title "MWh")))
+   (seasonal-plot-spec vic-elec-with-fields
+                       "DailyPhase" "Demand" "TimeDate"
+                       year-color
+                       :title "Electricity demand: Victoria (daily pattern)"
+                       :x-title "Phase of day (0=midnight, 0.5=noon)"
+                       :y-title "MWh")))
 
 ;; Weekly pattern: phase = hours_since_monday / 168, each week overlaid.
 ;; Using seasonal-plot-spec helper with tableplot as base.
 (let [year-color #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
                        (subs % 0 4) "gray")]
   (kind/plotly
-    (seasonal-plot-spec vic-elec-with-fields
-                        "WeeklyPhase" "Demand" "YearWeek"
-                        year-color
-                        :title "Electricity demand: Victoria (weekly pattern)"
-                        :x-title "Phase of week (0=Mon, 0.5=Thu noon, 1=Sun midnight)"
-                        :y-title "MWh")))
+   (seasonal-plot-spec vic-elec-with-fields
+                       "WeeklyPhase" "Demand" "YearWeek"
+                       year-color
+                       :title "Electricity demand: Victoria (weekly pattern)"
+                       :x-title "Phase of week (0=Mon, 0.5=Thu noon, 1=Sun midnight)"
+                       :y-title "MWh")))
 
 ;; Yearly pattern: x = day of year, each year is a line.
 ;; All 3 years fit — only 3 traces.
@@ -291,17 +291,25 @@ olympic-running
 ;; Group by month, plot each month's values over years
 (def a10-subseries
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+      (time-api/add-time-columns "Month" {:year "Year"
+                                          :month "MonthNum"})
+      (tc/group-by ["MonthNum"])
+      :data
+      (->> (map-indexed
+            (fn [idx group-ds]
+              (let [axis-suffix (if (zero? idx) "" (str (inc idx)))]
+                {:x (vec (group-ds "Year"))
+                 :y (vec (group-ds "Cost"))
+                 :xaxis (str "x" axis-suffix)
+                 :yaxis (str "y" axis-suffix)}))))))
 
-;; Faceted by month — each panel shows that month across all years.
-;; Convert MonthNum to string so tableplot treats it as categorical.
-(-> a10-subseries
-    (tc/add-column "MonthLabel" #(mapv str (% "MonthNum")))
-    (plotly/layer-line {:=x "Year"
-                        :=y "Cost"
-                        :=color "MonthLabel"
-                        :=title "Seasonal subseries plot: Antidiabetic drug sales"
-                        :=y-title "$ (millions)"}))
+(kind/plotly
+ {:data a10-subseries
+  :layout {:grid {:rows 1
+                  :columns 12
+                  :pattern "independent"
+                  :subplots [(mapv (fn [group] (str "x" (:yaxis group)))
+                                   a10-subseries)]}}})
 
 ;; ## 2.6 — Scatterplots
 ;;
@@ -385,11 +393,11 @@ visitors-by-state
         lags (range 1 (inc max-lag))
         acf-vals (mapv (fn [k]
                          (let [numer (loop [t k, sum 0.0]
-                                      (if (>= t n)
-                                        sum
-                                        (recur (inc t)
-                                               (+ sum (* (- (aget values t) mean)
-                                                        (- (aget values (- t k)) mean))))))]
+                                       (if (>= t n)
+                                         sum
+                                         (recur (inc t)
+                                                (+ sum (* (- (aget values t) mean)
+                                                          (- (aget values (- t k)) mean))))))]
                            (/ numer denom)))
                        lags)]
     (tc/dataset {"lag" (vec lags)
@@ -499,7 +507,7 @@ beer-acf
      (dotimes [_ n]
        (seasonal-plot-spec vic-elec-with-fields "DailyPhase" "Demand" "TimeDate" color-fn))
      (/ (- (System/nanoTime) start) 1e6 n))
-   
+
    :manual-traces
    (let [start (System/nanoTime)]
      (dotimes [_ n]
