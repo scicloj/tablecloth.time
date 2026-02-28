@@ -15,7 +15,6 @@
             [tech.v3.dataset :as ds]
             [scicloj.tableplot.v1.plotly :as plotly]
             [scicloj.kindly.v4.kind :as kind]
-            [clojure.data.json :as json]
             [tablecloth.time.api :as time-api]
             [tablecloth.time.column.api :as time-col])
   (:import [java.time LocalDate]))
