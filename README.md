@@ -111,6 +111,22 @@ and any standard clojure tests:
 lein midje
 ```
 
+#### Releasing to Clojars
+
+Publishing is currently manual.
+
+1. Update the version in `project.clj` (release versions should not include `-SNAPSHOT`).
+2. Run local checks:
+```bash
+lein lint
+lein midje
+```
+3. Deploy:
+```bash
+lein deploy clojars
+```
+4. After deploy, bump `project.clj` to the next `-SNAPSHOT` version for ongoing development.
+
 ## Contributing
 
 Development for this project happens in the SciCloj [fundamentals
