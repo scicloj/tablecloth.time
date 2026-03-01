@@ -423,6 +423,7 @@ olympic-running
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
+    (plotly/base {:=width 600})
     (plotly/layer-line {:=x "Time"
                         :=y "Demand"
                         :=title "Half-hour electricity demand: Victoria"}))
