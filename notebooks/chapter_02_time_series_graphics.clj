@@ -429,6 +429,13 @@ olympic-running
                         :=title "Half-hour electricity demand: Victoria"}))
 
 (-> vic-elec-2014
+    (tct/slice "Time" "2014-01-01" "2014-12-31")
+    (plotly/base {:=width 600})
+    (plotly/layer-line {:=x "Time"
+                        :=y "Temperature"
+                        :=title "Half-hourly temperatures: Melboure, Australia"}))
+
+(-> vic-elec-2014
     (plotly/layer-point {:=x "Temperature"
                          :=y "Demand"
                          :=title "Electricity demand vs temperature (Victoria, 2014)"
