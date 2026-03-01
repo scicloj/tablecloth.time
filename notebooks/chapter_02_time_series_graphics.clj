@@ -422,6 +422,12 @@ olympic-running
       (tc/select-rows #(= (.getYear (get % "Time")) 2014))))
 
 (-> vic-elec-2014
+    (tct/slice "Time" "2014-01-01" "2014-12-31")
+    (plotly/layer-line {:=x "Time"
+                        :=y "Demand"
+                        :=title "Half-hour electricity demand: Victoria"}))
+
+(-> vic-elec-2014
     (plotly/layer-point {:=x "Temperature"
                          :=y "Demand"
                          :=title "Electricity demand vs temperature (Victoria, 2014)"
