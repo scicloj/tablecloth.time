@@ -15,8 +15,8 @@
             [tech.v3.dataset :as ds]
             [scicloj.tableplot.v1.plotly :as plotly]
             [scicloj.kindly.v4.kind :as kind]
-            [tablecloth.time.api :as time-api]
-            [tablecloth.time.column.api :as time-col])
+            [tablecloth.time.api :as tct]
+            [tablecloth.time.column.api :as tct-col])
   (:import [java.time LocalDate]))
 
 ;; ## 2.1 — Loading data (tsibble equivalents)
@@ -168,7 +168,7 @@ olympic-running
 
 (def a10-seasonal
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+      (tct/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
 ;; Year is int64 — tableplot treats numeric columns as continuous color scales.
 ;; Convert to string so it's treated as categorical (one line per year).
@@ -196,21 +196,21 @@ olympic-running
 ;; calendar date of the timestamp. We derive all groupings from the Time column.
 (def vic-elec-with-fields
   (-> vic-elec
-      (time-api/add-time-columns "Time"
-                                 {;; Basic fields
-                                  :day-of-week "DayOfWeek"
-                                  :day-of-year "DayOfYear"
-                                  :week-of-year "WeekOfYear"
-                                  :year "Year"
+      (tct/add-time-columns "Time"
+                            {;; Basic fields
+                             :day-of-week "DayOfWeek"
+                             :day-of-year "DayOfYear"
+                             :week-of-year "WeekOfYear"
+                             :year "Year"
          ;; Computed fields for seasonal plots
-                                  :hour-fractional "HourOfDay"
-                                  :daily-phase "DailyPhase"
-                                  :weekly-phase "WeeklyPhase"
-                                  :week-of-year-index "WeekIndex"
-                                  :date-string "TimeDate"
-                                  :year-string "YearStr"
-                                  :week-string "WeekLabel"
-                                  :year-week-string "YearWeek"})))
+                             :hour-fractional "HourOfDay"
+                             :daily-phase "DailyPhase"
+                             :weekly-phase "WeeklyPhase"
+                             :week-of-year-index "WeekIndex"
+                             :date-string "TimeDate"
+                             :year-string "YearStr"
+                             :week-string "WeekLabel"
+                             :year-week-string "YearWeek"})))
 
 ;; ### Helper: seasonal-plot-spec
 ;; Generate a Plotly spec for seasonal plots using tableplot as the base.
@@ -388,7 +388,7 @@ olympic-running
 ;; Build the subseries plot
 (def a10-with-fields
   (-> a10
-      (time-api/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+      (tct/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
 
 (def a10-grouped
   (-> a10-with-fields
@@ -406,7 +406,7 @@ olympic-running
 
 (def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
 (def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"
-                                                  :y-range a10-y-range))
+                                                 :y-range a10-y-range))
 
 (kind/plotly
  {:data a10-subseries-traces
@@ -463,7 +463,7 @@ visitors-by-state
 ;; Using tablecloth.time.api/add-lags with auto-drop of missing values:
 ;; Note: add-lags creates keyword columns like :Beer_lag4
 (-> recent-beer
-    (time-api/add-lags "Beer" [4])
+    (tct/add-lags "Beer" [4])
     (plotly/layer-point {:=x "Beer_lag4"
                          :=y "Beer"
                          :=title "Lag 4 plot: Australian beer production"
