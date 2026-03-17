@@ -2,6 +2,7 @@
 
 _Source: Clojurians Zulip #tech.ml.dataset.dev > "index structures in Columns - scope" thread_  
 _Date: Late 2024 (December)_
+_Raw transcript: See `zulip-indexing-discussion-raw.md`_
 
 ## Context
 
