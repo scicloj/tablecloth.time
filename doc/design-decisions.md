@@ -1,5 +1,19 @@
 # Design Decisions
 
+## "A Vectorized Relational Database" (Conceptual Framing)
+
+From a Zulip exchange (Oct 2021), Awb99 jokingly described tech.ml.dataset as "a vectorized relational database" — but it captures something essential:
+
+- **Vectorized** — columnar, efficient operations over columns
+- **Relational** — filter, join, group, aggregate
+- **Not a database** — no persistence, no query optimizer, no indexes
+
+It's almost an anti-database: all the relational algebra, none of the infrastructure for durability and incremental updates. This is exactly why tree-based indexes don't make sense for TMD — you're not maintaining state across transactions, you're rebuilding from scratch each time.
+
+This framing helps explain the design choice: in a traditional database, indexes exist to speed up queries on data that persists and changes incrementally. In TMD, datasets are rebuilt wholesale, so the cost of constructing a tree negates its benefit. Binary search on sorted data is simpler and equally fast.
+
+---
+
 ## Metadata vs Composable Helpers (Feb 2026)
 
 ### Context
