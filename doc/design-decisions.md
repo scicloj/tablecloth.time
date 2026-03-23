@@ -86,3 +86,32 @@ Extended `add-time-columns` with computed fields:
 ### Related Discussions
 - SciCloj Zulip: "caching with Pocket" thread (Feb 2026) — parallel discussion about computation DAGs vs data metadata
 - tableplot gaps doc: `doc/tableplot-gaps.md`
+
+## Future Consideration: Time-Aware Lag
+
+Currently `add-lag` and `add-lead` are purely row-based — they shift by N positions regardless of timestamps. This requires users to:
+1. Know their data's frequency
+2. Calculate row offsets manually (e.g., 48 rows = 24h at half-hourly)
+3. Assume no gaps in the data
+
+**Pandas comparison:**
+```python
+df['col'].shift(1)           # row-based (like ours)
+df['col'].shift(freq='1D')   # time-aware — aligns by timestamp
+```
+
+**Potential API:**
+```clojure
+;; Current (row-based)
+(add-lag ds :Demand 48 :Demand_yesterday)
+
+;; Possible time-aware version
+(add-lag ds :Demand {:hours 24} :Demand_yesterday {:time-col :Time})
+```
+
+Time-aware lag would:
+- Use the time column to compute correct offset
+- Handle irregular data and gaps correctly
+- Be more intuitive for users ("24 hours ago" vs "48 rows")
+
+This could be added as an optional mode while keeping row-based as default for performance/simplicity.
