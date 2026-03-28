@@ -170,6 +170,12 @@
     - If x is a number (millis), returns a number.
     - Units: :milliseconds :seconds :minutes :hours :days :weeks, and :months/:quarters/:years (calendar-aware).
     - LocalDate/LocalDateTime use the system default zone by default; pass opts with :zone to override."
+  ([interval unit]
+   (fn
+     ([col] (down-to-nearest col interval unit {}))
+     ([col opts] (down-to-nearest col interval unit opts))))
+  ([col interval unit]
+   (down-to-nearest col interval unit {}))
   ([col interval unit opts]
    (let [col (coerce-column col)
          original-type (datatypes/get-datatype col)
