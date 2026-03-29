@@ -18,6 +18,13 @@
             [tablecloth.time.api :as tct])
   (:import [java.time LocalDate]))
 
+;; Custom CSS for responsive Plotly charts on mobile
+(kind/hiccup
+ [:style "
+  .plotly-graph-div { width: 100% !important; }
+  .js-plotly-plot { width: 100% !important; }
+  "])
+
 ;; ## 2.1 — Loading data (tsibble equivalents)
 ;;
 ;; In R, fpp3 provides datasets as tsibble objects with declared index
