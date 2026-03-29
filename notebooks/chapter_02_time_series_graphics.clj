@@ -67,11 +67,15 @@ ansett
 aus-production
 
 ;; ### vic_elec — Victorian half-hourly electricity demand
-;; Time column is "2011-12-31 13:00:00" — not auto-parsed by tablecloth.
-;; Use tc/convert-types with a format pattern to parse it.
+;; Time column is "2011-12-31 13:00:00" — stored as UTC in the CSV.
+;; Parse to LocalDateTime, then convert to Melbourne local time.
+;; This matches how fpp3/tsibble handles it in R.
 (def vic-elec
   (-> (load-fpp3 "vic_elec")
-      (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])))
+      (tc/convert-types :Time [:local-date-time "yyyy-MM-dd HH:mm:ss"])
+      (tc/update-columns :Time #(-> %
+                                     (tct-col/replace-time-zone "UTC")
+                                     (tct-col/convert-time-zone "Australia/Melbourne")))))
 vic-elec
 
 ;; ### olympic_running — Olympic running times
