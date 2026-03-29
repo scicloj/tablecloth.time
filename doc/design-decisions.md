@@ -115,3 +115,73 @@ Time-aware lag would:
 - Be more intuitive for users ("24 hours ago" vs "48 rows")
 
 This could be added as an optional mode while keeping row-based as default for performance/simplicity.
+
+---
+
+## OPEN: Timezone Handling — Epoch-as-Truth vs Local-Values-as-Truth (Mar 2026)
+
+**Status: Needs resolution soon — blocking correct seasonal plot implementation.**
+
+### The Problem
+Working through fpp3 Chapter 2 with vic_elec data, we discovered our seasonal plots were wrong. The CSV contains UTC timestamps (`2011-12-31 13:00:00`) but represents Melbourne local events. Our `add-time-columns` extracts hour=13 (UTC) when it should extract hour=0 (Melbourne midnight).
+
+### Current Architecture: Epoch-as-Truth
+`convert-time` uses epoch milliseconds as the universal pivot:
+```
+source type → epoch millis (using zone for interpretation) → target type
+```
+The `:zone` option controls how to interpret/render during conversion, but epoch millis is the underlying "truth."
+
+### Alternative: Local-Values-as-Truth (Polars model)
+Polars has two distinct operations:
+- `replace_time_zone(zone)` — stamp zone onto naive datetime, local values unchanged
+- `convert_time_zone(zone)` — convert zoned datetime to another zone, same instant
+
+This treats local values as meaningful in themselves, with zone as attached metadata.
+
+### The Tension
+If you have `LocalDateTime "13:00"`:
+
+**Path A (replace-time-zone):**
+```clojure
+(replace-time-zone col "Australia/Melbourne")
+;; → ZonedDateTime 13:00+11:00 Melbourne
+;; "13:00 IS Melbourne local time"
+```
+
+**Path B (epoch pivot):**
+```clojure
+(convert-time col :zoned-date-time {:zone "Australia/Melbourne"})
+;; → Depends on assumed source zone
+;; "13:00 in ???-zone → epoch → Melbourne"
+```
+
+Two different mental models. Both valid. Which should tablecloth.time embrace?
+
+### Java.time Parallel
+Java.time supports both:
+- `localDateTime.atZone(zone)` — stamp zone (local-values-as-truth)
+- `zonedDateTime.withZoneSameInstant(zone)` — convert zone (epoch-as-truth for the conversion)
+
+The types themselves carry the semantics: `LocalDateTime` = naive, `ZonedDateTime` = zone-aware.
+
+### Questions to Resolve
+1. Should we add `replace-time-zone` and `convert-time-zone` as first-class operations?
+2. If so, how do they interact with `convert-time`?
+3. Does this create confusing multiple paths to the same result?
+4. Is epoch-as-pivot still the right model, with these as convenience wrappers?
+
+### Immediate Workaround
+For vic_elec, can use Java interop:
+```clojure
+(tc/update-columns ds "Time"
+  (fn [col]
+    (tcc/column
+      (map #(-> % (.atZone (ZoneId/of "UTC"))
+                  (.withZoneSameInstant (ZoneId/of "Australia/Melbourne")))
+           col))))
+```
+
+### Related
+- Polars docs: `dt.replace_time_zone`, `dt.convert_time_zone`
+- This also connects to the index question — tsibble's index carries timezone implicitly
