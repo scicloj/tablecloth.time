@@ -18,10 +18,6 @@
             [tablecloth.time.api :as tct])
   (:import [java.time LocalDate]))
 
-;; Custom CSS for responsive Plotly charts on mobile
-^:kindly/hide-code
-(kind/html "<style>.plotly-graph-div, .js-plotly-plot { width: 100% !important; max-width: 100vw !important; }</style>")
-
 ;; ## 2.1 — Loading data (tsibble equivalents)
 ;;
 ;; In R, fpp3 provides datasets as tsibble objects with declared index
@@ -257,17 +253,13 @@ olympic-running
         ;; Extract final Plotly spec using tableplot's official API
         spec (plotly/plot viz)]
     ;; Post-process traces: hide legend, set colors
-    (-> spec
-        (update :data
-                #(mapv (fn [trace]
-                         (-> trace
-                             (assoc :showlegend false)
-                             (assoc-in [:line :color] (color-fn (:name trace)))
-                             (assoc-in [:line :width] line-width)))
-                       %))
-        ;; Add responsive config and autosize layout
-        (assoc :config {:responsive true})
-        (assoc-in [:layout :autosize] true))))
+    (update spec :data
+            #(mapv (fn [trace]
+                     (-> trace
+                         (assoc :showlegend false)
+                         (assoc-in [:line :color] (color-fn (:name trace)))
+                         (assoc-in [:line :width] line-width)))
+                   %))))
 
 ;; Daily pattern: phase = hour/24, each day overlaid.
 ;; Using seasonal-plot-spec helper with tableplot as base.
@@ -396,7 +388,7 @@ olympic-running
      {:title title
       :showlegend false
       :height 350
-      :autosize true
+      :width 1200
       :annotations (conj month-annotations
                          {:x 0.5 :y -0.08
                           :xref "paper" :yref "paper"
@@ -443,14 +435,14 @@ olympic-running
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
-    (plotly/base {:config {:responsive true}})
+    (plotly/base {:=width 600})
     (plotly/layer-line {:=x "Time"
                         :=y "Demand"
                         :=title "Half-hour electricity demand: Victoria"}))
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
-    (plotly/base {:config {:responsive true}})
+    (plotly/base {:=width 600})
     (plotly/layer-line {:=x "Time"
                         :=y "Temperature"
                         :=title "Half-hourly temperatures: Melboure, Australia"}))
