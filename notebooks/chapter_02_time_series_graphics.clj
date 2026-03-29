@@ -19,11 +19,8 @@
   (:import [java.time LocalDate]))
 
 ;; Custom CSS for responsive Plotly charts on mobile
-(kind/hiccup
- [:style "
-  .plotly-graph-div { width: 100% !important; }
-  .js-plotly-plot { width: 100% !important; }
-  "])
+^:kindly/hide-code
+(kind/html "<style>.plotly-graph-div, .js-plotly-plot { width: 100% !important; max-width: 100vw !important; }</style>")
 
 ;; ## 2.1 — Loading data (tsibble equivalents)
 ;;
