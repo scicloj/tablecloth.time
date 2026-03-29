@@ -11,7 +11,7 @@
             [tablecloth.time.utils.temporal :as temporal]
             [tablecloth.time.utils.units :as units])
   (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
-            Duration LocalTime]))
+            Duration LocalTime ZoneId]))
 
 (casting/add-object-datatype! :instant Instant true)
 (casting/add-object-datatype! :zoned-date-time ZonedDateTime true)
@@ -82,6 +82,37 @@
               :tgt-type      tgt-type
               :tgt-category  tgt-cat})))]
      (tcc/column data))))
+
+(defn replace-time-zone
+  "Stamp a timezone onto a naive LocalDateTime column, preserving local values.
+   
+   The local date/time values are unchanged — this just attaches zone metadata.
+   Use this when you know what timezone naive timestamps represent.
+   
+   (replace-time-zone col \"UTC\")
+   ;; LocalDateTime 13:00 → ZonedDateTime 13:00Z[UTC]
+   
+   See also: `convert-time-zone` for converting between zones."
+  [col zone]
+  (let [col (coerce-column col)
+        zone-id (temporal/coerce-zone-id zone)]
+    (tcc/column
+     (dtype/emap #(.atZone ^LocalDateTime % zone-id) :zoned-date-time col))))
+
+(defn convert-time-zone
+  "Convert a ZonedDateTime column to another timezone, preserving the instant.
+   
+   The underlying instant is unchanged — only the local representation shifts.
+   
+   (convert-time-zone col \"Australia/Melbourne\")
+   ;; ZonedDateTime 13:00Z[UTC] → ZonedDateTime 00:00+11:00[Australia/Melbourne]
+   
+   See also: `replace-time-zone` for stamping zone onto naive datetimes."
+  [col zone]
+  (let [col (coerce-column col)
+        zone-id (temporal/coerce-zone-id zone)]
+    (tcc/column
+     (dtype/emap #(.withZoneSameInstant ^ZonedDateTime % zone-id) :zoned-date-time col))))
 
 (defn- local-date->epoch-month [col-ld]
   (let [col-year (dtdt-ops/long-temporal-field :years col-ld)
