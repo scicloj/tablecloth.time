@@ -15,8 +15,7 @@
             [tech.v3.dataset :as ds]
             [scicloj.tableplot.v1.plotly :as plotly]
             [scicloj.kindly.v4.kind :as kind]
-            [tablecloth.time.api :as tct]
-            [tablecloth.time.column.api :as tct-col])
+            [tablecloth.time.api :as tct])
   (:import [java.time LocalDate]))
 
 ;; ## 2.1 — Loading data (tsibble equivalents)
@@ -73,9 +72,8 @@ aus-production
 (def vic-elec
   (-> (load-fpp3 "vic_elec")
       (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])
-      (tc/update-columns "Time" #(-> %
-                                      (tct-col/replace-time-zone "UTC")
-                                      (tct-col/convert-time-zone "Australia/Melbourne")))))
+      (tct/replace-time-zone "Time" "UTC")
+      (tct/convert-time-zone "Time" "Australia/Melbourne")))
 vic-elec
 
 ;; ### olympic_running — Olympic running times
