@@ -66,9 +66,19 @@ ansett
 aus-production
 
 ;; ### vic_elec — Victorian half-hourly electricity demand
-;; Time column is "2011-12-31 13:00:00" — stored as UTC in the CSV.
-;; Parse to LocalDateTime, then convert to Melbourne local time.
-;; This matches how fpp3/tsibble handles it in R.
+;;
+;; **Timezone handling:** The CSV stores timestamps in UTC (e.g., "2011-12-31 13:00:00"),
+;; but they represent Melbourne local events. We need to convert to Melbourne time
+;; so that seasonal patterns (daily/weekly) align with local clock time.
+;;
+;; The conversion is two steps:
+;; 1. `replace-time-zone "UTC"` — stamps UTC onto the naive LocalDateTime
+;;    (13:00 becomes 13:00 UTC, no value change)
+;; 2. `convert-time-zone "Australia/Melbourne"` — shifts to Melbourne local time
+;;    (13:00 UTC → 00:00 Melbourne next day, since Melbourne is UTC+11 in summer)
+;;
+;; After this, `Time` is a ZonedDateTime in Melbourne timezone, and hour extraction
+;; gives local hours (0 = midnight Melbourne, not 13 = UTC).
 (def vic-elec
   (-> (load-fpp3 "vic_elec")
       (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])
