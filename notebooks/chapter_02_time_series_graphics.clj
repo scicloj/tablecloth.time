@@ -257,13 +257,17 @@ olympic-running
         ;; Extract final Plotly spec using tableplot's official API
         spec (plotly/plot viz)]
     ;; Post-process traces: hide legend, set colors
-    (update spec :data
-            #(mapv (fn [trace]
-                     (-> trace
-                         (assoc :showlegend false)
-                         (assoc-in [:line :color] (color-fn (:name trace)))
-                         (assoc-in [:line :width] line-width)))
-                   %))))
+    (-> spec
+        (update :data
+                #(mapv (fn [trace]
+                         (-> trace
+                             (assoc :showlegend false)
+                             (assoc-in [:line :color] (color-fn (:name trace)))
+                             (assoc-in [:line :width] line-width)))
+                       %))
+        ;; Add responsive config and autosize layout
+        (assoc :config {:responsive true})
+        (assoc-in [:layout :autosize] true))))
 
 ;; Daily pattern: phase = hour/24, each day overlaid.
 ;; Using seasonal-plot-spec helper with tableplot as base.
@@ -392,7 +396,7 @@ olympic-running
      {:title title
       :showlegend false
       :height 350
-      :width 1200
+      :autosize true
       :annotations (conj month-annotations
                          {:x 0.5 :y -0.08
                           :xref "paper" :yref "paper"
@@ -439,14 +443,14 @@ olympic-running
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
-    (plotly/base {:=width 600})
+    (plotly/base {:config {:responsive true}})
     (plotly/layer-line {:=x "Time"
                         :=y "Demand"
                         :=title "Half-hour electricity demand: Victoria"}))
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
-    (plotly/base {:=width 600})
+    (plotly/base {:config {:responsive true}})
     (plotly/layer-line {:=x "Time"
                         :=y "Temperature"
                         :=title "Half-hourly temperatures: Melboure, Australia"}))
