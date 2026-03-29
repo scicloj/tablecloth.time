@@ -72,10 +72,10 @@ aus-production
 ;; This matches how fpp3/tsibble handles it in R.
 (def vic-elec
   (-> (load-fpp3 "vic_elec")
-      (tc/convert-types :Time [:local-date-time "yyyy-MM-dd HH:mm:ss"])
-      (tc/update-columns :Time #(-> %
-                                     (tct-col/replace-time-zone "UTC")
-                                     (tct-col/convert-time-zone "Australia/Melbourne")))))
+      (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])
+      (tc/update-columns "Time" #(-> %
+                                      (tct-col/replace-time-zone "UTC")
+                                      (tct-col/convert-time-zone "Australia/Melbourne")))))
 vic-elec
 
 ;; ### olympic_running — Olympic running times
