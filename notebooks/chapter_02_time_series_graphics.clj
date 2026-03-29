@@ -135,7 +135,8 @@ olympic-running
 ;; ### Australian quarterly beer production (seasonal + no trend)
 (def recent-beer
   (-> aus-production
-      (tc/select-rows #(>= (.getYear (get % "Quarter")) 2000))
+      (tct/add-time-columns "Quarter" {:year "Year"})
+      (tc/select-rows #(>= (get % "Year") 2000))
       (tc/select-columns ["Quarter" "Beer"])))
 
 (-> recent-beer
@@ -148,8 +149,9 @@ olympic-running
 
 (def google-2015
   (-> gafa
+      (tct/add-time-columns "Date" {:year "Year"})
       (tc/select-rows #(and (= "GOOG" (get % "Symbol"))
-                            (= (.getYear (get % "Date")) 2015)))))
+                            (= (get % "Year") 2015)))))
 
 ;; Daily closing price
 (-> google-2015
@@ -431,7 +433,8 @@ olympic-running
 
 (def vic-elec-2014
   (-> vic-elec
-      (tc/select-rows #(= (.getYear (get % "Time")) 2014))))
+      (tct/add-time-columns "Time" {:year "Year"})
+      (tc/select-rows #(= (get % "Year") 2014))))
 
 (-> vic-elec-2014
     (tct/slice "Time" "2014-01-01" "2014-12-31")
