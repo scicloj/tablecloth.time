@@ -267,6 +267,35 @@
        ds-with-leads))))
 
 ;; -----------------------------------------------------------------------------
+;; Timezone operations
+;; -----------------------------------------------------------------------------
+
+(defn replace-time-zone
+  "Stamp a timezone onto a naive datetime column, preserving local values.
+   
+   The local date/time values are unchanged — this just attaches zone metadata.
+   Use when you know what timezone naive timestamps represent.
+   
+   (replace-time-zone ds \"Time\" \"UTC\")
+   ;; LocalDateTime 13:00 → ZonedDateTime 13:00Z[UTC]
+   
+   See also: `convert-time-zone` for converting between zones."
+  [ds time-col zone]
+  (tc/update-columns ds time-col #(time-col/replace-time-zone % zone)))
+
+(defn convert-time-zone
+  "Convert a datetime column to another timezone, preserving the instant.
+   
+   The underlying instant is unchanged — only the local representation shifts.
+   
+   (convert-time-zone ds \"Time\" \"Australia/Melbourne\")
+   ;; ZonedDateTime 13:00Z[UTC] → ZonedDateTime 00:00+11:00[Melbourne]
+   
+   See also: `replace-time-zone` for stamping zone onto naive datetimes."
+  [ds time-col zone]
+  (tc/update-columns ds time-col #(time-col/convert-time-zone % zone)))
+
+;; -----------------------------------------------------------------------------
 ;; Time slicing
 ;; -----------------------------------------------------------------------------
 
