@@ -262,17 +262,14 @@ olympic-running
                    %))))
 
 ;; Daily pattern: phase = hour/24, each day overlaid.
-;; Filter to January 2014 to match fpp3 example (otherwise 1096 overlapping lines is too dense).
 ;; Using seasonal-plot-spec helper with tableplot as base.
-(let [jan-2014 (-> vic-elec-with-fields
-                   (tc/select-rows #(and (= 2014 (.getYear (.toLocalDate (get % "Time"))))
-                                         (= 1 (.getMonthValue (.toLocalDate (get % "Time")))))))
-      day-color (fn [date-str] "#1b9e77")]  ; single color for Jan 2014
+(let [year-color #(get {"2011" "#7570b3" "2012" "#1b9e77" "2013" "#d95f02" "2014" "#7570b3"}
+                       (subs % 0 4) "gray")]
   (kind/plotly
-   (seasonal-plot-spec jan-2014
+   (seasonal-plot-spec vic-elec-with-fields
                        "DailyPhase" "Demand" "TimeDate"
-                       day-color
-                       :title "Electricity demand: Victoria (daily pattern) — January 2014"
+                       year-color
+                       :title "Electricity demand: Victoria (daily pattern)"
                        :x-title "Phase of day (0=midnight, 0.5=noon)"
                        :y-title "MWh")))
 
