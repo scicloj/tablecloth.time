@@ -222,7 +222,7 @@
                           ;; epoch-milliseconds
                           (fun/- millis-col (fun/rem millis-col divisor))
                           :epoch-milliseconds)]
-         (convert-time rounded-col original-type (:zone zone)))
+         (convert-time rounded-col original-type opts))
        (units/calendar-unit? unit)
        (let [col (convert-time col :local-date)
              rounded-col (case unit
