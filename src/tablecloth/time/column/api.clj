@@ -199,7 +199,7 @@
   "Floor a `col` of time values to the nearest lower multiple of (interval × unit).
 
     Arities:
-    - (down-to-nearest interval unit) => returns a function f; (f col) or (f x col)
+    - (down-to-nearest interval unit) => returns a function f; (f col) or (f col opts)
     - (down-to-nearest col interval unit)
     - (down-to-nearest col interval unit opts)
 
