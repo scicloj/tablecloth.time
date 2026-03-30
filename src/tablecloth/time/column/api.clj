@@ -11,7 +11,7 @@
             [tablecloth.time.utils.temporal :as temporal]
             [tablecloth.time.utils.units :as units])
   (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
-            Duration LocalTime ZoneId]))
+            Duration LocalTime]))
 
 (casting/add-object-datatype! :instant Instant true)
 (casting/add-object-datatype! :zoned-date-time ZonedDateTime true)
