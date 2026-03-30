@@ -5,8 +5,9 @@
             [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year
                                                 year month day hour minute get-second
                                                 day-of-week day-of-year week-of-year quarter
-                                                epoch-day epoch-week week-of-year-index lag lead]])
-  (:import [java.time Duration Instant LocalDate LocalDateTime ZonedDateTime]))
+                                                epoch-day epoch-week week-of-year-index lag lead
+                                                replace-time-zone convert-time-zone]])
+  (:import [java.time Duration Instant LocalDate LocalDateTime ZonedDateTime ZoneId]))
 
 (deftest convert-time-temporal->epoch-default-utc
   (testing "LocalDate -> :epoch-milliseconds defaults to UTC"
@@ -963,3 +964,58 @@
   (testing "lead returns column"
     (let [col (tcc/column [1 2 3])]
       (is (tcc/column? (lead col 1))))))
+
+(deftest replace-time-zone-test
+  (testing "stamps timezone onto LocalDateTime, preserving local values"
+    (let [col (tcc/column [(LocalDateTime/of 2024 1 15 13 30 0)])
+          result (replace-time-zone col "Australia/Melbourne")
+          zdt (first (vec result))]
+      (is (instance? ZonedDateTime zdt))
+      ;; Local values unchanged
+      (is (= 13 (.getHour zdt)))
+      (is (= 30 (.getMinute zdt)))
+      (is (= 15 (.getDayOfMonth zdt)))
+      ;; Zone attached
+      (is (= (ZoneId/of "Australia/Melbourne") (.getZone zdt)))))
+
+  (testing "works with UTC"
+    (let [col (tcc/column [(LocalDateTime/of 2024 6 1 0 0 0)])
+          result (replace-time-zone col "UTC")
+          zdt (first (vec result))]
+      (is (= (ZoneId/of "UTC") (.getZone zdt)))
+      (is (= 0 (.getHour zdt)))))
+
+  (testing "throws on non-LocalDateTime input"
+    (let [col (tcc/column [(Instant/parse "2024-01-15T00:00:00Z")])]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"replace-time-zone expects a :local-date-time column"
+                            (replace-time-zone col "UTC"))))))
+
+(deftest convert-time-zone-test
+  (testing "converts ZonedDateTime to another zone, preserving instant"
+    (let [utc-zdt (ZonedDateTime/of 2024 1 15 0 0 0 0 (ZoneId/of "UTC"))
+          col (tcc/column [utc-zdt])
+          result (convert-time-zone col "Australia/Melbourne")
+          melb-zdt (first (vec result))]
+      (is (instance? ZonedDateTime melb-zdt))
+      ;; Same instant
+      (is (= (.toInstant utc-zdt) (.toInstant melb-zdt)))
+      ;; Different local hour (Melbourne is UTC+10 or +11)
+      (is (not= (.getHour utc-zdt) (.getHour melb-zdt)))
+      ;; Zone changed
+      (is (= (ZoneId/of "Australia/Melbourne") (.getZone melb-zdt)))))
+
+  (testing "UTC midnight -> Melbourne is next day morning"
+    (let [utc-zdt (ZonedDateTime/of 2024 6 15 0 0 0 0 (ZoneId/of "UTC"))
+          col (tcc/column [utc-zdt])
+          result (convert-time-zone col "Australia/Melbourne")
+          melb-zdt (first (vec result))]
+      ;; June = AEST (UTC+10), so 00:00 UTC = 10:00 Melbourne
+      (is (= 10 (.getHour melb-zdt)))
+      (is (= 15 (.getDayOfMonth melb-zdt)))))
+
+  (testing "throws on non-ZonedDateTime input"
+    (let [col (tcc/column [(LocalDateTime/of 2024 1 15 13 0 0)])]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"convert-time-zone expects a :zoned-date-time column"
+                            (convert-time-zone col "UTC"))))))
