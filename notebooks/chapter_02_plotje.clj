@@ -10,7 +10,8 @@
 (ns chapter-02-plotje
   (:require [tablecloth.api :as tc]
             [tech.v3.datatype.functional :as dfn]
-            [scicloj.plotje.api :as pj]))
+            [scicloj.plotje.api :as pj]
+            [tablecloth.time.api :as tct]))
 
 ;; ## 2.1 — Loading data
 
@@ -46,6 +47,10 @@ a10
 ;; ### ansett — Ansett airlines weekly passenger data
 (def ansett (load-fpp3 "ansett"))
 ansett
+
+;; ### aus_production — Australian quarterly production
+(def aus-production (load-fpp3 "aus_production"))
+aus-production
 
 ;; ## 2.2 — Time plots
 
@@ -85,7 +90,29 @@ a10-plot
 ;; Clear increasing trend with strong seasonality that grows proportionally.
 ;; The January spike each year is from stockpiling before year-end subsidies.
 
+;; ## 2.3 — Time series patterns
+;;
+;; Three fundamental components:
+;; - **Trend**: long-term increase/decrease
+;; - **Seasonal**: fixed, known period (calendar-linked)
+;; - **Cyclic**: rises/falls of variable, non-fixed frequency
+
+;; ### Australian quarterly beer production (seasonal + no trend)
+(def recent-beer
+  (-> aus-production
+      (tct/add-time-columns :Quarter {:year :Year})
+      (tc/select-rows #(>= (:Year %) 2000))
+      (tc/select-columns [:Quarter :Beer])))
+
+(def recent-beer-plot
+  (-> recent-beer
+      (pj/lay-line :Quarter :Beer)
+      (pj/options {:title "Australian quarterly beer production"})))
+
+recent-beer-plot
+
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
   {"a10" a10-plot
-   "melsyd-economy" melsyd-economy-plot})
+   "melsyd-economy" melsyd-economy-plot
+   "recent-beer" recent-beer-plot})
