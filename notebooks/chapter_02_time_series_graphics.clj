@@ -28,7 +28,7 @@
 (defn load-fpp3
   "Load one of the fpp3 datasets from CSV."
   [name]
-  (tc/dataset (str "data/fpp3/" name ".csv")))
+  (tc/dataset (str "data/fpp3/" name ".csv") {:key-fn keyword}))
 
 ;; ### PBS — Australian pharmaceutical benefit scheme
 ;; R: PBS (67,596 × 9, monthly, keyed by Concession/Type/ATC1/ATC2)
@@ -49,11 +49,11 @@ PBS
 
 (def a10
   (-> PBS
-      (tc/select-rows #(= "A10" (get % "ATC2")))
-      (tc/select-columns ["Month" "Concession" "Type" "Cost"])
-      (tc/group-by ["Month"])
-      (tc/aggregate {"TotalC" #(dfn/sum (% "Cost"))})
-      (tc/add-column "Cost" #(dfn// (% "TotalC") 1e6))))
+      (tc/select-rows #(= "A10" (:ATC2 %)))
+      (tc/select-columns [:Month :Concession :Type :Cost])
+      (tc/group-by [:Month])
+      (tc/aggregate {:TotalC #(dfn/sum (% :Cost))})
+      (tc/add-column :Cost #(dfn// (% :TotalC) 1e6))))
 
 a10
 
@@ -81,9 +81,9 @@ aus-production
 ;; gives local hours (0 = midnight Melbourne, not 13 = UTC).
 (def vic-elec
   (-> (load-fpp3 "vic_elec")
-      (tc/convert-types "Time" [:local-date-time "yyyy-MM-dd HH:mm:ss"])
-      (tct/replace-time-zone "Time" "UTC")
-      (tct/convert-time-zone "Time" "Australia/Melbourne")))
+      (tc/convert-types :Time [:local-date-time "yyyy-MM-dd HH:mm:ss"])
+      (tct/replace-time-zone :Time "UTC")
+      (tct/convert-time-zone :Time "Australia/Melbourne")))
 vic-elec
 
 ;; ### olympic_running — Olympic running times
@@ -98,13 +98,13 @@ olympic-running
 ;; ### Ansett airlines: Melbourne-Sydney economy class
 (def melsyd-economy
   (-> ansett
-      (tc/select-rows #(and (= "MEL-SYD" (get % "Airports"))
-                            (= "Economy" (get % "Class"))))
-      (tc/add-column "Passengers (000s)" #(dfn// (% "Passengers") 1000))))
+      (tc/select-rows #(and (= "MEL-SYD" (:Airports %))
+                            (= "Economy" (:Class %))))
+      (tc/add-column :Passengers-000s #(dfn// (% :Passengers) 1000))))
 
 (-> melsyd-economy
-    (plotly/layer-line {:=x "Week"
-                        :=y "Passengers (000s)"
+    (plotly/layer-line {:=x :Week
+                        :=y :Passengers-000s
                         :=title "Ansett airlines economy class: Melbourne-Sydney"}))
 
 ;; Notable features visible in the plot:
@@ -115,8 +115,8 @@ olympic-running
 
 ;; ### Antidiabetic drug sales (a10)
 (-> a10
-    (plotly/layer-line {:=x "Month"
-                        :=y "Cost"
+    (plotly/layer-line {:=x :Month
+                        :=y :Cost
                         :=title "Australian antidiabetic drug sales"
                         :=y-title "$ (millions)"}))
 
@@ -135,13 +135,13 @@ olympic-running
 ;; ### Australian quarterly beer production (seasonal + no trend)
 (def recent-beer
   (-> aus-production
-      (tct/add-time-columns "Quarter" {:year "Year"})
-      (tc/select-rows #(>= (get % "Year") 2000))
-      (tc/select-columns ["Quarter" "Beer"])))
+      (tct/add-time-columns :Quarter {:year :Year})
+      (tc/select-rows #(>= (:Year %) 2000))
+      (tc/select-columns [:Quarter :Beer])))
 
 (-> recent-beer
-    (plotly/layer-line {:=x "Quarter"
-                        :=y "Beer"
+    (plotly/layer-line {:=x :Quarter
+                        :=y :Beer
                         :=title "Australian quarterly beer production"}))
 
 ;; ### Google stock — daily changes (no pattern, random walk)
@@ -149,23 +149,23 @@ olympic-running
 
 (def google-2015
   (-> gafa
-      (tct/add-time-columns "Date" {:year "Year"})
-      (tc/select-rows #(and (= "GOOG" (get % "Symbol"))
-                            (= (get % "Year") 2015)))))
+      (tct/add-time-columns :Date {:year :Year})
+      (tc/select-rows #(and (= "GOOG" (:Symbol %))
+                            (= (:Year %) 2015)))))
 
 ;; Daily closing price
 (-> google-2015
-    (plotly/layer-line {:=x "Date"
-                        :=y "Close"
+    (plotly/layer-line {:=x :Date
+                        :=y :Close
                         :=title "Google daily closing stock price (2015)"}))
 
 ;; Daily *change* in closing price
-(let [closes (vec (google-2015 "Close"))
+(let [closes (vec (google-2015 :Close))
       diffs (mapv - (rest closes) (butlast closes))]
-  (-> (tc/dataset {"Date" (rest (vec (google-2015 "Date")))
-                   "Change" diffs})
-      (plotly/layer-line {:=x "Date"
-                          :=y "Change"
+  (-> (tc/dataset {:Date (rest (vec (google-2015 :Date)))
+                   :Change diffs})
+      (plotly/layer-line {:=x :Date
+                          :=y :Change
                           :=title "Google daily change in closing stock price (2015)"})))
 
 ;; ## 2.4 — Seasonal plots
@@ -182,15 +182,15 @@ olympic-running
 
 (def a10-seasonal
   (-> a10
-      (tct/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+      (tct/add-time-columns :Month {:year :Year :month :MonthNum})))
 
 ;; Year is int64 — tableplot treats numeric columns as continuous color scales.
 ;; Convert to string so it's treated as categorical (one line per year).
 (-> a10-seasonal
-    (tc/add-column "YearStr" #(mapv str (% "Year")))
-    (plotly/layer-line {:=x "MonthNum"
-                        :=y "Cost"
-                        :=color "YearStr"
+    (tc/add-column :YearStr #(mapv str (% :Year)))
+    (plotly/layer-line {:=x :MonthNum
+                        :=y :Cost
+                        :=color :YearStr
                         :=title "Seasonal plot: Antidiabetic drug sales"
                         :=x-title "Month"
                         :=y-title "$ (millions)"}))
@@ -210,7 +210,7 @@ olympic-running
 ;; calendar date of the timestamp. We derive all groupings from the Time column.
 (def vic-elec-with-fields
   (-> vic-elec
-      (tct/add-time-columns "Time"
+      (tct/add-time-columns :Time
                             {;; Basic fields
                              :day-of-week "DayOfWeek"
                              :day-of-year "DayOfYear"
@@ -291,8 +291,8 @@ olympic-running
 ;; All 3 years fit — only 3 traces.
 (-> vic-elec-with-fields
     (plotly/layer-line {:=x "DayOfYear"
-                        :=y "Demand"
-                        :=color "YearStr"
+                        :=y :Demand
+                        :=color :YearStr
                         :=title "Electricity demand: Victoria (yearly pattern)"
                         :=x-title "Day of year"
                         :=y-title "MWh"}))
@@ -402,29 +402,193 @@ olympic-running
 ;; Build the subseries plot
 (def a10-with-fields
   (-> a10
-      (tct/add-time-columns "Month" {:year "Year" :month "MonthNum"})))
+      (tct/add-time-columns :Month {:year :Year :month :MonthNum})))
 
 (def a10-grouped
   (-> a10-with-fields
-      (tc/order-by ["MonthNum" "Year"])
-      (tc/group-by ["MonthNum"])
+      (tc/order-by [:MonthNum :Year])
+      (tc/group-by [:MonthNum])
       :data))
 
 ;; Calculate shared y-axis range across all months (with 5% padding)
 (def a10-y-range
-  (let [all-costs (a10-with-fields "Cost")
+  (let [all-costs (a10-with-fields :Cost)
         y-min (dfn/reduce-min all-costs)
         y-max (dfn/reduce-max all-costs)
         padding (* 0.05 (- y-max y-min))]
     [(- y-min padding) (+ y-max padding)]))
 
-(def a10-subseries-traces (make-subseries-traces a10-grouped "Year" "Cost"))
+(def a10-subseries-traces (make-subseries-traces a10-grouped :Year :Cost))
 (def a10-subseries-layout (make-subseries-layout 12 "Subseries: Australian antidiabetic drug sales"
                                                  :y-range a10-y-range))
 
 (kind/plotly
  {:data a10-subseries-traces
   :layout a10-subseries-layout})
+
+
+
+;; ## Example: Australian Tourism (Figure 2.9)
+;; 
+;; Quarterly overnight trips by State, filtered to Holiday purpose.
+;; Uses tc/sum as aggregator directly on grouped dataset.
+
+(def tourism (load-fpp3 "tourism"))
+
+(-> tourism
+    (tc/select-rows #(= (:Purpose %) "Holiday"))
+    (tc/group-by [:Quarter :State])
+    (tc/sum [:Trips])
+    (tc/rename-columns {:summary :Trips})
+    (tc/order-by :Quarter)
+    (plotly/layer-line {:=x :Quarter
+                          :=y "summary"
+                          :=color :State
+                          :=title "Australian domestic holidays"
+                          :=y-title "Overnight trips ('000)"}))
+
+;; ## Figure 2.10 — Vertical Faceted Plot (Trips by State, colored by Region)
+;;
+;; Plotly doesn't have declarative faceting, so we build it manually:
+;; - Vertical stack of subplots (one per State)
+;; - Multiple lines per subplot (one per Region, colored)
+;; - Shared x-axis, independent y-axes
+;; - Facet labels on the right
+
+(defn make-vertical-facet-traces
+  "Generate Plotly traces for a vertically-faceted line plot.
+   
+   Arguments:
+   - ds: dataset with columns for x, y, facet, and color
+   - facet-col: column to facet by (e.g. \"State\") - creates one subplot per value
+   - x-col: x-axis column (e.g. \"Quarter\")
+   - y-col: y-axis column (e.g. \"Trips\")
+   - color-col: column to color lines by (e.g. \"Region\")
+   
+   Returns vector of Plotly trace maps, each assigned to appropriate axes."
+  [ds facet-col x-col y-col color-col]
+  (let [facet-values (sort (distinct (ds facet-col)))
+        color-values (sort (distinct (ds color-col)))
+        ;; Simple color palette
+        colors ["#1f77b4" "#ff7f0e" "#2ca02c" "#d62728" "#9467bd"
+                "#8c564b" "#e377c2" "#7f7f7f" "#bcbd22" "#17becf"
+                "#aec7e8" "#ffbb78" "#98df8a" "#ff9896" "#c5b0d5"
+                "#c49c94" "#f7b6d2" "#c7c7c7" "#dbdb8d" "#9edae5"]
+        color-map (zipmap color-values (cycle colors))]
+    (->> (for [[facet-idx facet-val] (map-indexed vector facet-values)
+               color-val color-values]
+           (let [axis-num (inc facet-idx)
+                 yaxis (if (= axis-num 1) "y" (str "y" axis-num))
+                 subset (-> ds
+                            (tc/select-rows #(and (= (get % facet-col) facet-val)
+                                                  (= (get % color-col) color-val)))
+                            (tc/order-by x-col))
+                 xs (vec (subset x-col))
+                 ys (vec (subset y-col))]
+             (when (seq xs)
+               {:x xs
+                :y ys
+                :type "scatter"
+                :mode "lines"
+                :line {:width 1 :color (color-map color-val)}
+                :yaxis yaxis
+                :name color-val
+                :legendgroup color-val
+                :showlegend (= facet-idx 0)})))  ; only show legend for first facet
+         (remove nil?)
+         vec)))
+
+(defn make-vertical-facet-layout
+  "Generate layout for vertically-stacked subplots.
+   
+   Arguments:
+   - facet-names: seq of facet values (e.g. [\"ACT\" \"NSW\" ...])
+   - title: plot title
+   
+   Options:
+   - :height - total plot height (default 800)
+   - :width - plot width (default 900)
+   - :x-title - x-axis label
+   - :y-title - y-axis label (shown on middle subplot)"
+  [facet-names title & {:keys [height width x-title y-title]
+                        :or {height 800 width 900}}]
+  (let [n (count facet-names)
+        subplot-height (/ 0.85 n)
+        gap 0.02
+        ;; Facet label annotations (on the right)
+        facet-annotations
+        (mapv (fn [idx facet-name]
+                (let [top (- 0.95 (* idx (+ subplot-height gap)))
+                      center (- top (/ subplot-height 2))]
+                  {:x 1.02
+                   :y center
+                   :xref "paper"
+                   :yref "paper"
+                   :text facet-name
+                   :showarrow false
+                   :font {:size 10}
+                   :textangle 0}))
+              (range n)
+              facet-names)]
+    (reduce
+     (fn [layout idx]
+       (let [axis-num (inc idx)
+             y-key (if (= axis-num 1) :yaxis (keyword (str "yaxis" axis-num)))
+             top (- 0.95 (* idx (+ subplot-height gap)))
+             bottom (- top subplot-height)
+             middle-subplot? (= idx (quot n 2))]
+         (assoc layout y-key
+                (cond-> {:domain [bottom top]
+                         :anchor "x"
+                         :tickfont {:size 8}}
+                  middle-subplot? (assoc :title (or y-title ""))
+                  (not middle-subplot?) (assoc :title "")))))
+     {:title title
+      :showlegend true
+      :legend {:x 1.08 :y 0.5 :font {:size 8}}
+      :height height
+      :width width
+      :margin {:r 150}  ; room for facet labels and legend
+      :xaxis {:domain [0.05 0.95]
+              :title (or x-title "")
+              :tickfont {:size 9}}
+      :annotations facet-annotations}
+     (range n))))
+
+;; Build Figure 2.10: Holiday trips faceted by State, colored by Region
+(def tourism-holiday
+  (-> tourism
+      (tct/add-time-columns :Quarter {:year :Year
+                                      :quarter :QuarterNum})
+      (tc/select-rows #(= (:Purpose %) "Holiday"))
+      (tc/order-by :Year)
+      ))
+
+(tc/head tourism-holiday)
+
+   ;; - facet-col: column to facet by (e.g. \"State\") - creates one subplot per value
+   ;; - x-col: x-axis column (e.g. \"Quarter\")
+   ;; - y-col: y-axis column (e.g. \"Trips\")
+   ;; - color-col: column to color lines by (e.g. \"Region\")
+(def fig-2-10-traces
+  (make-vertical-facet-traces
+   tourism-holiday
+   :State
+   :QuarterNum
+   :Trips
+   :Year))
+
+(def fig-2-10-layout
+  (make-vertical-facet-layout
+   (sort (distinct (tourism-holiday :State)))
+   "Australian domestic tourism: Holiday trips"
+   :x-title "Quarter"
+   :y-title "Trips ('000)"
+   :height 900))
+
+(kind/plotly
+ {:data fig-2-10-traces
+  :layout fig-2-10-layout})
 
 ;; ## 2.6 — Scatterplots
 ;;
@@ -433,26 +597,26 @@ olympic-running
 
 (def vic-elec-2014
   (-> vic-elec
-      (tct/add-time-columns "Time" {:year "Year"})
-      (tc/select-rows #(= (get % "Year") 2014))))
+      (tct/add-time-columns :Time {:year :Year})
+      (tc/select-rows #(= (:Year %) 2014))))
 
 (-> vic-elec-2014
-    (tct/slice "Time" "2014-01-01" "2014-12-31")
+    (tct/slice :Time "2014-01-01" "2014-12-31")
     (plotly/base {:=width 600})
-    (plotly/layer-line {:=x "Time"
-                        :=y "Demand"
+    (plotly/layer-line {:=x :Time
+                        :=y :Demand
                         :=title "Half-hour electricity demand: Victoria"}))
 
 (-> vic-elec-2014
-    (tct/slice "Time" "2014-01-01" "2014-12-31")
+    (tct/slice :Time "2014-01-01" "2014-12-31")
     (plotly/base {:=width 600})
-    (plotly/layer-line {:=x "Time"
-                        :=y "Temperature"
+    (plotly/layer-line {:=x :Time
+                        :=y :Temperature
                         :=title "Half-hourly temperatures: Melboure, Australia"}))
 
 (-> vic-elec-2014
-    (plotly/layer-point {:=x "Temperature"
-                         :=y "Demand"
+    (plotly/layer-point {:=x :Temperature
+                         :=y :Demand
                          :=title "Electricity demand vs temperature (Victoria, 2014)"
                          :=x-title "Temperature (°C)"
                          :=y-title "Demand (MWh)"}))
@@ -466,10 +630,10 @@ olympic-running
 
 (def visitors-by-state
   (-> tourism
-      (tc/group-by ["Quarter" "State"])
-      (tc/aggregate {"Trips" #(dfn/sum (% "Trips"))})
+      (tc/group-by [:Quarter :State])
+      (tc/aggregate {:Trips #(dfn/sum (% :Trips))})
       ;; Pivot wider: one column per state
-      (tc/pivot->wider "State" "Trips")))
+      (tc/pivot->wider :State :Trips)))
 
 visitors-by-state
 
@@ -478,8 +642,8 @@ visitors-by-state
 ;; Here's one pair as an example — NSW vs Victoria:
 
 (-> visitors-by-state
-    (plotly/layer-point {:=x "New South Wales"
-                         :=y "Victoria"
+    (plotly/layer-point {:=x :New-South-Wales
+                         :=y :Victoria
                          :=title "Tourism: NSW vs Victoria (quarterly trips)"}))
 
 ;; ## 2.7 — Lag plots
@@ -492,9 +656,9 @@ visitors-by-state
 ;; Using tablecloth.time.api/add-lags with auto-drop of missing values:
 ;; Note: add-lags creates keyword columns like :Beer_lag4
 (-> recent-beer
-    (tct/add-lags "Beer" [4])
-    (plotly/layer-point {:=x "Beer_lag4"
-                         :=y "Beer"
+    (tct/add-lags :Beer [4])
+    (plotly/layer-point {:=x :Beer_lag4
+                         :=y :Beer
                          :=title "Lag 4 plot: Australian beer production"
                          :=x-title "Beer (t-4)"
                          :=y-title "Beer (t)"}))
@@ -504,94 +668,12 @@ visitors-by-state
 
 ;; ## 2.8 — Autocorrelation (ACF)
 ;;
-;; r_k = Σ(y_t - ȳ)(y_{t-k} - ȳ) / Σ(y_t - ȳ)²
-;;
-;; This is a core function we need in tablecloth.time.
-;; For now, let's compute it manually.
-
-(defn acf
-  "Compute autocorrelation coefficients for lags 1..max-lag.
-  Returns a dataset with :lag and :acf columns."
-  [values max-lag]
-  (let [values (double-array (remove nil? values))
-        n (alength values)
-        mean (/ (areduce values i sum 0.0 (+ sum (aget values i))) n)
-        ;; denominator: Σ(y_t - ȳ)²
-        denom (areduce values i sum 0.0
-                       (let [d (- (aget values i) mean)]
-                         (+ sum (* d d))))
-        lags (range 1 (inc max-lag))
-        acf-vals (mapv (fn [k]
-                         (let [numer (loop [t k, sum 0.0]
-                                       (if (>= t n)
-                                         sum
-                                         (recur (inc t)
-                                                (+ sum (* (- (aget values t) mean)
-                                                          (- (aget values (- t k)) mean))))))]
-                           (/ numer denom)))
-                       lags)]
-    (tc/dataset {"lag" (vec lags)
-                 "acf" acf-vals})))
-
-;; ### ACF of beer production
-(def beer-acf (acf (recent-beer "Beer") 9))
-beer-acf
-
-;; Should match R output:
-;; lag 1: -0.053, lag 2: -0.758, lag 4: 0.802, lag 8: 0.707
-
-(let [T (count (remove nil? (vec (recent-beer "Beer"))))
-      bound (/ 1.96 (Math/sqrt T))]
-  (-> beer-acf
-      (tc/add-column "upper" (repeat (tc/row-count beer-acf) bound))
-      (tc/add-column "lower" (repeat (tc/row-count beer-acf) (- bound)))
-      (plotly/layer-bar {:=x "lag"
-                         :=y "acf"
-                         :=title "ACF: Australian beer production"
-                         :=y-title "Autocorrelation"})))
-
-;; - r₄ is highest (seasonal: peaks 4 quarters apart)
-;; - r₂ is most negative (peaks vs troughs, 2 quarters apart)
-;; - Dashed lines at ±1.96/√T mark significance bounds
-
-;; ### ACF of antidiabetic drug sales (trend + seasonality)
-(def a10-acf (acf (a10 "Cost") 48))
-
-(-> a10-acf
-    (plotly/layer-bar {:=x "lag"
-                       :=y "acf"
-                       :=title "ACF: Australian antidiabetic drug sales"}))
-
-;; Slow decay (trend) + scalloped shape (seasonality at lag 12, 24, 36...)
+;; Temporarily removed while migrating the notebook to keywordized CSV headers.
+;; We can restore this section once the broader key-fn cleanup settles.
 
 ;; ## 2.9 — White noise
 ;;
-;; A white noise series has no autocorrelation.
-;; All ACF spikes should fall within ±1.96/√T.
-
-(def white-noise
-  (tc/dataset {"t" (range 1 51)
-               "wn" (repeatedly 50 #(let [u1 (rand) u2 (rand)]
-                                      (* (Math/sqrt (* -2 (Math/log u1)))
-                                         (Math/cos (* 2 Math/PI u2)))))}))
-
-(-> white-noise
-    (plotly/layer-line {:=x "t"
-                        :=y "wn"
-                        :=title "White noise"}))
-
-(def wn-acf (acf (white-noise "wn") 15))
-
-(let [bound (/ 1.96 (Math/sqrt 50))]
-  (-> wn-acf
-      (tc/add-column "upper" (repeat (tc/row-count wn-acf) bound))
-      (tc/add-column "lower" (repeat (tc/row-count wn-acf) (- bound)))
-      (plotly/layer-bar {:=x "lag"
-                         :=y "acf"
-                         :=title "ACF: White noise"})))
-
-;; All spikes should be within ±0.28 (= 1.96/√50)
-;; → Confirms: no signal to model.
+;; White noise + ACF example temporarily removed along with the ACF section above.
 
 ;; ## Appendix: Benchmarking seasonal plot approaches
 ;;
