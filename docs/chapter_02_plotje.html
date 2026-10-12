@@ -1071,10 +1071,303 @@
         :dominant-baseline &quot;hanging&quot;,
         :text-anchor &quot;end&quot;}
        &quot;500&quot;]]]]]]]
+</code></pre></div></div><div style="margin:15px;"><div><h3 id="google-stock-—-daily-changes-(no-pattern,-random-walk)">Google stock — daily changes (no pattern, random walk)</h3></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def gafa (load-fpp3 &quot;gafa_stock&quot;))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def google-2015
+  (-&gt; gafa
+      (tct/add-time-columns :Date {:year :Year})
+      (tc/select-rows #(and (= &quot;GOOG&quot; (:Symbol %))
+                            (= (:Year %) 2015)))))</code></pre></div></div><div style="margin:15px;"><div><p>Daily closing price</p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def google-2015-close-plot
+  (-&gt; google-2015
+      (pj/lay-line :Date :Close)
+      (pj/options {:title &quot;Google daily closing stock price (2015)&quot;})))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">google-2015-close-plot</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure printed-clojure">[:svg
+ {:xmlns &quot;http://www.w3.org/2000/svg&quot;,
+  :width 600,
+  :height 400,
+  :viewBox &quot;0 0 600 400&quot;,
+  :role &quot;img&quot;,
+  :class &quot;plotje-plot&quot;,
+  :font-family
+  &quot;system-ui, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, sans-serif&quot;,
+  :aria-label &quot;Google daily closing stock price (2015)&quot;}
+ [:g
+  [:g
+   {:transform &quot;translate(321.25,14.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 15,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Google daily closing stock price (2015)&quot;]]]
+  [:g
+   {:transform &quot;translate(12.00,197.50)&quot;}
+   [:g
+    {:transform &quot;rotate(-90.00)&quot;}
+    [:g
+     [:text
+      {:fill &quot;rgb(51,51,51)&quot;,
+       :fill-opacity 1.0,
+       :font-size 13,
+       :dominant-baseline &quot;hanging&quot;,
+       :text-anchor &quot;middle&quot;}
+      &quot;Close&quot;]]]]
+  [:g
+   {:transform &quot;translate(321.25,382.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 13,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Date&quot;]]]
+  [:g
+   {:transform &quot;translate(52.50,43.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 537.5,
+       :height 309.0}]]]]
+  [:g
+   {:transform &quot;translate(42.50,33.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;112.51,10.00 112.51,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;194.62,10.00 194.62,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;276.73,10.00 276.73,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;360.19,10.00 360.19,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;442.30,10.00 442.30,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,295.02 547.50,295.02&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,246.03 547.50,246.03&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,197.05 547.50,197.05&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,148.07 547.50,148.07&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,99.09 547.50,99.09&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,50.10 547.50,50.10&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-18wnjtc&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;537.50&quot;, :height &quot;309.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-18wnjtc)&quot;}
+      [:g
+       [:g
+        [:g
+         [:polyline
+          {:fill &quot;none&quot;,
+           :stroke &quot;rgb(51,51,51)&quot;,
+           :stroke-opacity 1.0,
+           :stroke-width 2.5,
+           :points
+           &quot;34.43,273.52 38.47,284.18 39.82,295.79 41.16,296.62 42.51,295.09 43.85,301.43 47.89,304.95 49.24,301.42 50.59,296.85 51.93,295.95 53.28,289.82 58.66,290.97 60.01,280.12 61.35,264.19 62.70,258.77 66.74,263.39 68.08,279.55 69.43,287.95 70.78,287.31 72.12,264.06 76.16,269.95 77.51,269.21 78.85,275.52 80.20,270.83 81.55,267.49 85.58,270.58 86.93,261.71 88.28,262.65 89.62,255.87 90.97,249.95 96.35,255.96 97.70,259.02 99.04,255.93 100.39,259.75 104.43,266.61 105.78,262.53 107.12,254.95 108.47,243.64 109.81,240.80 113.85,228.19 115.20,225.95 116.54,226.21 117.89,224.30 119.24,231.75 123.27,230.62 124.62,244.10 125.97,247.83 127.31,243.61 128.66,251.59 132.70,244.59 134.04,248.16 135.39,239.73 136.74,241.20 138.08,238.89 142.12,240.40 143.47,229.31 144.81,240.42 146.16,243.94 147.50,250.60 151.54,247.00 152.89,250.93 154.24,256.23 155.58,263.08 160.97,261.88 162.31,261.63 163.66,257.16 165.00,257.96 166.35,258.72 170.39,259.53 171.73,268.09 173.08,266.00 174.43,264.77 175.77,274.26 179.81,263.23 181.16,264.60 182.50,259.34 183.85,251.90 185.20,234.31 189.23,240.77 190.58,242.43 191.93,246.93 193.27,258.44 194.62,257.89 198.66,255.07 200.00,264.84 201.35,271.29 202.70,264.94 204.04,257.57 208.08,260.04 209.43,266.57 210.77,266.00 212.12,257.40 213.46,261.85 217.50,263.37 218.85,258.42 220.19,256.54 221.54,253.37 222.89,255.72 228.27,263.35 229.62,256.04 230.96,256.05 232.31,263.56 236.35,261.72 237.69,256.63 239.04,255.53 240.39,259.06 241.73,262.36 245.77,268.73 247.12,268.87 248.46,259.07 249.81,261.11 251.15,263.34 255.19,268.37 256.54,267.44 257.89,266.35 259.23,259.03 260.58,259.07 264.62,257.60 265.96,255.36 267.31,257.95 268.65,260.50 270.00,263.97 274.04,273.93 275.38,274.92 276.73,273.62 278.08,272.09 283.46,272.62 284.81,270.50 286.15,278.53 287.50,274.76 288.85,265.50 292.88,249.41 294.23,235.16 295.58,236.02 296.92,216.79 298.27,125.61 302.31,135.31 303.65,136.02 305.00,136.21 306.35,153.67 307.69,173.97 311.73,170.35 313.08,169.62 314.42,165.77 315.77,165.12 317.11,171.96 321.15,166.48 322.50,168.40 323.84,154.16 325.19,155.24 326.54,162.47 330.58,164.01 331.92,137.51 333.27,138.70 334.61,141.75 335.96,141.09 340.00,137.42 341.34,142.06 342.69,137.39 344.04,151.17 345.38,184.82 349.42,207.23 350.77,214.63 352.11,169.01 353.46,160.21 354.80,167.29 358.84,179.17 360.19,199.22 361.54,183.00 362.88,190.93 364.23,196.37 369.61,182.69 370.96,184.59 372.30,176.14 373.65,171.81 377.69,174.28 379.03,162.63 380.38,161.80 381.73,155.02 383.07,168.40 387.11,162.33 388.46,174.82 389.80,175.15 391.15,171.78 392.50,185.32 396.53,202.06 397.88,201.98 399.23,188.80 400.57,185.99 401.92,170.69 405.96,156.42 407.30,152.54 408.65,155.55 410.00,158.69 411.34,154.33 415.38,151.33 416.73,145.82 418.07,146.93 419.42,136.57 420.76,136.12 424.80,132.30 426.15,147.79 427.49,155.31 428.84,146.32 430.19,97.13 434.23,86.57 435.57,90.77 436.92,86.40 438.26,82.51 439.61,88.50 443.65,78.41 444.99,77.38 446.34,71.55 447.69,68.47 449.03,66.01 453.07,74.70 454.42,71.34 455.76,64.41 457.11,68.49 458.46,82.43 462.49,70.72 463.84,74.30 465.19,59.90 466.53,61.46 467.88,43.64 471.92,44.25 473.26,51.79 474.61,51.92 477.30,49.85 481.34,57.35 482.69,33.41 484.03,37.98 485.38,47.62 486.72,33.64 490.76,37.12 492.11,37.99 493.45,48.53 494.80,50.63 496.15,61.01 500.18,52.29 501.53,56.57 502.88,42.18 504.22,50.66 505.57,60.58 509.61,52.29 510.95,50.10 512.30,49.80 513.65,51.67 519.03,37.85 520.38,24.05 521.72,29.53 523.07,41.40&quot;}]]]]]]
+    [:g
+     {:transform &quot;translate(112.51,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Mar 2015&quot;]]]
+    [:g
+     {:transform &quot;translate(194.62,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;May 2015&quot;]]]
+    [:g
+     {:transform &quot;translate(276.73,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Jul 2015&quot;]]]
+    [:g
+     {:transform &quot;translate(360.19,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Sep 2015&quot;]]]
+    [:g
+     {:transform &quot;translate(442.30,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Nov 2015&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,289.52)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,240.53)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;550&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,191.55)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;600&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,142.57)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;650&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,93.59)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;700&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,44.60)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;750&quot;]]]]]]]
 </code></pre></div></div><div style="margin:15px;"><div><p>Figures exported by <code>plotje-review</code>, keyed by output file name.</p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def figures
   {&quot;a10&quot; a10-plot
    &quot;melsyd-economy&quot; melsyd-economy-plot
-   &quot;recent-beer&quot; recent-beer-plot})</code></pre></div></div><div style="margin:15px;"><div style="background-color:grey;height:2px;width:100%;"></div></div><div style="margin:15px;"><div><pre><small><small>source: notebooks/chapter_02_plotje.clj</small></small></pre></div></div></div></div></div></div></div><script type="text/javascript">/*!
+   &quot;recent-beer&quot; recent-beer-plot
+   &quot;google-2015-close&quot; google-2015-close-plot})</code></pre></div></div><div style="margin:15px;"><div style="background-color:grey;height:2px;width:100%;"></div></div><div style="margin:15px;"><div><pre><small><small>source: notebooks/chapter_02_plotje.clj</small></small></pre></div></div></div></div></div></div></div><script type="text/javascript">/*!
   Highlight.js v11.9.0 (git: b7ec4bfafc)
   (c) 2006-2023 undefined and other contributors
   License: BSD-3-Clause

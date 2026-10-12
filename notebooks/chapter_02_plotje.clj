@@ -111,8 +111,26 @@ a10-plot
 
 recent-beer-plot
 
+;; ### Google stock — daily changes (no pattern, random walk)
+(def gafa (load-fpp3 "gafa_stock"))
+
+(def google-2015
+  (-> gafa
+      (tct/add-time-columns :Date {:year :Year})
+      (tc/select-rows #(and (= "GOOG" (:Symbol %))
+                            (= (:Year %) 2015)))))
+
+;; Daily closing price
+(def google-2015-close-plot
+  (-> google-2015
+      (pj/lay-line :Date :Close)
+      (pj/options {:title "Google daily closing stock price (2015)"})))
+
+google-2015-close-plot
+
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
   {"a10" a10-plot
    "melsyd-economy" melsyd-economy-plot
-   "recent-beer" recent-beer-plot})
+   "recent-beer" recent-beer-plot
+   "google-2015-close" google-2015-close-plot})
