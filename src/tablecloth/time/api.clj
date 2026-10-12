@@ -171,26 +171,39 @@
 (defn add-lag
   "Add a lagged version of a column to a dataset.
 
-  Creates a new column with values shifted forward by k positions,
-  filling the first k positions with nil (tracked as missing values).
+  Row i of target-col holds source-col[i-k]. Row-based: sort first; gaps in
+  time are not accounted for. The first k rows are missing unless `:fill` is
+  given. See `tablecloth.time.column.api/lag` for edge cases.
+
+  Options:
+    :fill — value for the first k rows; source missing values stay missing
 
   Example:
     (add-lag ds :Beer 4 :Beer_lag4)
-    ;; Adds column :Beer_lag4 where row i contains Beer[i-4], nil for i<4"
-  [ds source-col k target-col]
-  (tc/add-column ds target-col (time-col/lag (ds source-col) k)))
+    ;; Adds column :Beer_lag4 where row i contains Beer[i-4], nil for i<4
+    (add-lag ds :Beer 4 :Beer_lag4 {:fill 0})
+    ;; Same, with 0 for i<4"
+  ([ds source-col k target-col]
+   (add-lag ds source-col k target-col {}))
+  ([ds source-col k target-col opts]
+   (tc/add-column ds target-col (time-col/lag (ds source-col) k opts))))
 
 (defn add-lead
   "Add a lead (forward-shifted) version of a column to a dataset.
 
-  Creates a new column with values shifted backward by k positions,
-  filling the last k positions with nil (tracked as missing values).
+  Row i of target-col holds source-col[i+k]. The last k rows are missing
+  unless `:fill` is given. See `tablecloth.time.column.api/lead`.
+
+  Options:
+    :fill — value for the last k rows; source missing values stay missing
 
   Example:
     (add-lead ds :Beer 4 :Beer_lead4)
     ;; Adds column :Beer_lead4 where row i contains Beer[i+4], nil for last 4 rows"
-  [ds source-col k target-col]
-  (tc/add-column ds target-col (time-col/lead (ds source-col) k)))
+  ([ds source-col k target-col]
+   (add-lead ds source-col k target-col {}))
+  ([ds source-col k target-col opts]
+   (tc/add-column ds target-col (time-col/lead (ds source-col) k opts))))
 
 (defn add-lags
   "Add multiple lagged versions of a column to a dataset.
@@ -199,6 +212,9 @@
 
   Options:
     :drop-missing — drop rows with nil values in any of the new lag columns (default true)
+    :fill         — value for boundary rows, as in `add-lag`. Filled rows are not
+                    missing, so :drop-missing then drops only rows whose lagged
+                    value was missing in the source
 
   Examples:
     ;; Map form with custom names
@@ -208,7 +224,10 @@
     (add-lags ds :Beer [1 2 3 4])
 
     ;; Keep nils (don't drop rows)
-    (add-lags ds :Beer [1 2 3 4] {:drop-missing false})"
+    (add-lags ds :Beer [1 2 3 4] {:drop-missing false})
+
+    ;; Zero boundaries, keep all rows
+    (add-lags ds :Beer [1 2] {:fill 0})"
   ([ds source-col lags]
    (add-lags ds source-col lags {}))
   ([ds source-col lags opts]
@@ -221,7 +240,7 @@
                    (vector? lags) (into {} (map #(vector % (make-col-name %)) lags))
                    :else (throw (ex-info "lags must be a map or vector" {:lags lags})))
          ds-with-lags (reduce-kv (fn [d k target-col]
-                                   (add-lag d source-col k target-col))
+                                   (add-lag d source-col k target-col opts))
                                  ds
                                  lag-map)
          target-cols (vals lag-map)]
@@ -236,6 +255,7 @@
 
   Options:
     :drop-missing — drop rows with nil values in any of the new lead columns (default true)
+    :fill         — value for boundary rows, as in `add-lead`; see `add-lags`
 
   Examples:
     ;; Map form with custom names
@@ -258,7 +278,7 @@
                     (vector? leads) (into {} (map #(vector % (make-col-name %)) leads))
                     :else (throw (ex-info "leads must be a map or vector" {:leads leads})))
          ds-with-leads (reduce-kv (fn [d k target-col]
-                                    (add-lead d source-col k target-col))
+                                    (add-lead d source-col k target-col opts))
                                   ds
                                   lead-map)
          target-cols (vals lead-map)]
