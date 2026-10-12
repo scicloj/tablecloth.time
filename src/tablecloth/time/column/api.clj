@@ -399,18 +399,18 @@
         packed? repack))))
 
 (defn lag
-  "Shift values forward by k rows, so row i holds the value from row i-k.
+  "Shift values forward by k positions, so position i holds the value from i-k.
 
-  Row-based: shifts by position, not by timestamp. Sort the data first; gaps
+  Positional: shifts by index, not by timestamp. Sort the data first; gaps
   in the time axis are not accounted for.
 
-  The first k positions have no source row. By default they are missing
+  The first k positions have no source value. By default they are missing
   (tracked by tech.ml.dataset's missing-value system). Pass `{:fill v}` to put
   v there instead. Missing values inherited from the source stay missing.
 
   The result keeps the source column's datatype and length.
     k = 0           returns the column unchanged
-    k >= row count  every position is a boundary (all missing, or all fill)
+    k >= length     every position is a boundary (all missing, or all fill)
     k < 0           throws; use `lead` to shift the other way
 
   Options:
@@ -424,7 +424,7 @@
   ([col k opts] (shift col k true opts)))
 
 (defn lead
-  "Shift values backward by k rows, so row i holds the value from row i+k.
+  "Shift values backward by k positions, so position i holds the value from i+k.
 
   The mirror of `lag`: the last k positions are the boundary. Same options
   and edge-case behavior.
