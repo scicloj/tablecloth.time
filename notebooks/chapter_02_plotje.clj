@@ -43,7 +43,33 @@ PBS
 
 a10
 
+;; ### ansett — Ansett airlines weekly passenger data
+(def ansett (load-fpp3 "ansett"))
+ansett
+
 ;; ## 2.2 — Time plots
+
+;; ### Ansett airlines: Melbourne-Sydney economy class
+;; R: `autoplot(melsyd_economy, Passengers)`
+
+(def melsyd-economy
+  (-> ansett
+      (tc/select-rows #(and (= "MEL-SYD" (:Airports %))
+                            (= "Economy" (:Class %))))
+      (tc/add-column :Passengers-000s #(dfn// (% :Passengers) 1000))))
+
+(def melsyd-economy-plot
+  (-> melsyd-economy
+      (pj/lay-line :Week :Passengers-000s)
+      (pj/options {:title "Ansett airlines economy class: Melbourne-Sydney"})))
+
+melsyd-economy-plot
+
+;; Notable features visible in the plot:
+;; - 1989: No passengers (industrial dispute)
+;; - 1992: Reduced load (economy seats replaced by business class trial)
+;; - Late 1991: Large increase in passenger load
+;; - Start of each year: Holiday-effect dips
 
 ;; ### Antidiabetic drug sales (a10)
 ;; R: `autoplot(a10, Cost)`
@@ -61,4 +87,5 @@ a10-plot
 
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
-  {"a10" a10-plot})
+  {"a10" a10-plot
+   "melsyd-economy" melsyd-economy-plot})

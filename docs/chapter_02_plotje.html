@@ -64,7 +64,318 @@
       (tc/select-columns [:Month :Concession :Type :Cost])
       (tc/group-by [:Month])
       (tc/aggregate {:TotalC #(dfn/sum (% :Cost))})
-      (tc/add-column :Cost #(dfn// (% :TotalC) 1e6))))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">a10</code></pre></div></div><div style="margin:15px;"><div class="clay-dataset"><p>_unnamed [204 3]:</p><table class="table"><thead><tr><th>:Month</th><th style="text-align:right;">:TotalC</th><th style="text-align:right;">:Cost</th></tr></thead><tbody><tr><td>1991-07-01</td><td style="text-align:right;">3.52659100E+06</td><td style="text-align:right;">3.52659100</td></tr><tr><td>1991-08-01</td><td style="text-align:right;">3.18089100E+06</td><td style="text-align:right;">3.18089100</td></tr><tr><td>1991-09-01</td><td style="text-align:right;">3.25222100E+06</td><td style="text-align:right;">3.25222100</td></tr><tr><td>1991-10-01</td><td style="text-align:right;">3.61100300E+06</td><td style="text-align:right;">3.61100300</td></tr><tr><td>1991-11-01</td><td style="text-align:right;">3.56586900E+06</td><td style="text-align:right;">3.56586900</td></tr><tr><td>1991-12-01</td><td style="text-align:right;">4.30637100E+06</td><td style="text-align:right;">4.30637100</td></tr><tr><td>1992-01-01</td><td style="text-align:right;">5.08833500E+06</td><td style="text-align:right;">5.08833500</td></tr><tr><td>1992-02-01</td><td style="text-align:right;">2.81452000E+06</td><td style="text-align:right;">2.81452000</td></tr><tr><td>1992-03-01</td><td style="text-align:right;">2.98581100E+06</td><td style="text-align:right;">2.98581100</td></tr><tr><td>1992-04-01</td><td style="text-align:right;">3.20478000E+06</td><td style="text-align:right;">3.20478000</td></tr><tr><td>...</td><td style="text-align:right;">...</td><td style="text-align:right;">...</td></tr><tr><td>2007-08-01</td><td style="text-align:right;">2.39302035E+07</td><td style="text-align:right;">23.93020353</td></tr><tr><td>2007-09-01</td><td style="text-align:right;">2.29303569E+07</td><td style="text-align:right;">22.93035694</td></tr><tr><td>2007-10-01</td><td style="text-align:right;">2.32633399E+07</td><td style="text-align:right;">23.26333992</td></tr><tr><td>2007-11-01</td><td style="text-align:right;">2.52500302E+07</td><td style="text-align:right;">25.25003022</td></tr><tr><td>2007-12-01</td><td style="text-align:right;">2.58060900E+07</td><td style="text-align:right;">25.80609000</td></tr><tr><td>2008-01-01</td><td style="text-align:right;">2.96653560E+07</td><td style="text-align:right;">29.66535600</td></tr><tr><td>2008-02-01</td><td style="text-align:right;">2.16542850E+07</td><td style="text-align:right;">21.65428500</td></tr><tr><td>2008-03-01</td><td style="text-align:right;">1.82649450E+07</td><td style="text-align:right;">18.26494500</td></tr><tr><td>2008-04-01</td><td style="text-align:right;">2.31076770E+07</td><td style="text-align:right;">23.10767700</td></tr><tr><td>2008-05-01</td><td style="text-align:right;">2.29125100E+07</td><td style="text-align:right;">22.91251000</td></tr><tr><td>2008-06-01</td><td style="text-align:right;">1.94317400E+07</td><td style="text-align:right;">19.43174000</td></tr></tbody></table></div></div><div style="margin:15px;"><div><h2 id="2.2-—-time-plots">2.2 — Time plots</h2><h3 id="antidiabetic-drug-sales-(a10)">Antidiabetic drug sales (a10)</h3><p>R: <code>autoplot(a10, Cost)</code></p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def a10-plot
+      (tc/add-column :Cost #(dfn// (% :TotalC) 1e6))))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">a10</code></pre></div></div><div style="margin:15px;"><div class="clay-dataset"><p>_unnamed [204 3]:</p><table class="table"><thead><tr><th>:Month</th><th style="text-align:right;">:TotalC</th><th style="text-align:right;">:Cost</th></tr></thead><tbody><tr><td>1991-07-01</td><td style="text-align:right;">3.52659100E+06</td><td style="text-align:right;">3.52659100</td></tr><tr><td>1991-08-01</td><td style="text-align:right;">3.18089100E+06</td><td style="text-align:right;">3.18089100</td></tr><tr><td>1991-09-01</td><td style="text-align:right;">3.25222100E+06</td><td style="text-align:right;">3.25222100</td></tr><tr><td>1991-10-01</td><td style="text-align:right;">3.61100300E+06</td><td style="text-align:right;">3.61100300</td></tr><tr><td>1991-11-01</td><td style="text-align:right;">3.56586900E+06</td><td style="text-align:right;">3.56586900</td></tr><tr><td>1991-12-01</td><td style="text-align:right;">4.30637100E+06</td><td style="text-align:right;">4.30637100</td></tr><tr><td>1992-01-01</td><td style="text-align:right;">5.08833500E+06</td><td style="text-align:right;">5.08833500</td></tr><tr><td>1992-02-01</td><td style="text-align:right;">2.81452000E+06</td><td style="text-align:right;">2.81452000</td></tr><tr><td>1992-03-01</td><td style="text-align:right;">2.98581100E+06</td><td style="text-align:right;">2.98581100</td></tr><tr><td>1992-04-01</td><td style="text-align:right;">3.20478000E+06</td><td style="text-align:right;">3.20478000</td></tr><tr><td>...</td><td style="text-align:right;">...</td><td style="text-align:right;">...</td></tr><tr><td>2007-08-01</td><td style="text-align:right;">2.39302035E+07</td><td style="text-align:right;">23.93020353</td></tr><tr><td>2007-09-01</td><td style="text-align:right;">2.29303569E+07</td><td style="text-align:right;">22.93035694</td></tr><tr><td>2007-10-01</td><td style="text-align:right;">2.32633399E+07</td><td style="text-align:right;">23.26333992</td></tr><tr><td>2007-11-01</td><td style="text-align:right;">2.52500302E+07</td><td style="text-align:right;">25.25003022</td></tr><tr><td>2007-12-01</td><td style="text-align:right;">2.58060900E+07</td><td style="text-align:right;">25.80609000</td></tr><tr><td>2008-01-01</td><td style="text-align:right;">2.96653560E+07</td><td style="text-align:right;">29.66535600</td></tr><tr><td>2008-02-01</td><td style="text-align:right;">2.16542850E+07</td><td style="text-align:right;">21.65428500</td></tr><tr><td>2008-03-01</td><td style="text-align:right;">1.82649450E+07</td><td style="text-align:right;">18.26494500</td></tr><tr><td>2008-04-01</td><td style="text-align:right;">2.31076770E+07</td><td style="text-align:right;">23.10767700</td></tr><tr><td>2008-05-01</td><td style="text-align:right;">2.29125100E+07</td><td style="text-align:right;">22.91251000</td></tr><tr><td>2008-06-01</td><td style="text-align:right;">1.94317400E+07</td><td style="text-align:right;">19.43174000</td></tr></tbody></table></div></div><div style="margin:15px;"><div><h3 id="ansett-—-ansett-airlines-weekly-passenger-data">ansett — Ansett airlines weekly passenger data</h3></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def ansett (load-fpp3 &quot;ansett&quot;))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">ansett</code></pre></div></div><div style="margin:15px;"><div class="clay-dataset"><p>data/fpp3/ansett.csv [7407 4]:</p><table class="table"><thead><tr><th>:Week</th><th>:Airports</th><th>:Class</th><th style="text-align:right;">:Passengers</th></tr></thead><tbody><tr><td>1989-07-10</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">193.0</td></tr><tr><td>1989-07-17</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">254.0</td></tr><tr><td>1989-07-24</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">185.0</td></tr><tr><td>1989-07-31</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">254.0</td></tr><tr><td>1989-08-07</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">191.0</td></tr><tr><td>1989-08-14</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">136.0</td></tr><tr><td>1989-08-21</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">0.0</td></tr><tr><td>1989-08-28</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">0.0</td></tr><tr><td>1989-09-04</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">0.0</td></tr><tr><td>1989-09-11</td><td>ADL-PER</td><td>Business</td><td style="text-align:right;">0.0</td></tr><tr><td>...</td><td>...</td><td>...</td><td style="text-align:right;">...</td></tr><tr><td>1992-09-07</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">176.0</td></tr><tr><td>1992-09-14</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">191.0</td></tr><tr><td>1992-09-21</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">204.0</td></tr><tr><td>1992-09-28</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">183.0</td></tr><tr><td>1992-10-05</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">220.0</td></tr><tr><td>1992-10-12</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">234.0</td></tr><tr><td>1992-10-19</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">203.0</td></tr><tr><td>1992-10-26</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">137.0</td></tr><tr><td>1992-11-02</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">161.0</td></tr><tr><td>1992-11-09</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">155.0</td></tr><tr><td>1992-11-16</td><td>SYD-PER</td><td>First</td><td style="text-align:right;">188.0</td></tr></tbody></table></div></div><div style="margin:15px;"><div><h2 id="2.2-—-time-plots">2.2 — Time plots</h2><h3 id="ansett-airlines:-melbourne-sydney-economy-class">Ansett airlines: Melbourne-Sydney economy class</h3><p>R: <code>autoplot(melsyd_economy, Passengers)</code></p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def melsyd-economy
+  (-&gt; ansett
+      (tc/select-rows #(and (= &quot;MEL-SYD&quot; (:Airports %))
+                            (= &quot;Economy&quot; (:Class %))))
+      (tc/add-column :Passengers-000s #(dfn// (% :Passengers) 1000))))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def melsyd-economy-plot
+  (-&gt; melsyd-economy
+      (pj/lay-line :Week :Passengers-000s)
+      (pj/options {:title &quot;Ansett airlines economy class: Melbourne-Sydney&quot;})))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">melsyd-economy-plot</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure printed-clojure">[:svg
+ {:xmlns &quot;http://www.w3.org/2000/svg&quot;,
+  :width 600,
+  :height 400,
+  :viewBox &quot;0 0 600 400&quot;,
+  :role &quot;img&quot;,
+  :class &quot;plotje-plot&quot;,
+  :font-family
+  &quot;system-ui, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, sans-serif&quot;,
+  :aria-label &quot;Ansett airlines economy class: Melbourne-Sydney&quot;}
+ [:g
+  [:g
+   {:transform &quot;translate(319.00,14.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 15,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Ansett airlines economy class: Melbourne-Sydney&quot;]]]
+  [:g
+   {:transform &quot;translate(12.00,197.50)&quot;}
+   [:g
+    {:transform &quot;rotate(-90.00)&quot;}
+    [:g
+     [:text
+      {:fill &quot;rgb(51,51,51)&quot;,
+       :fill-opacity 1.0,
+       :font-size 13,
+       :dominant-baseline &quot;hanging&quot;,
+       :text-anchor &quot;middle&quot;}
+      &quot;Passengers 000s&quot;]]]]
+  [:g
+   {:transform &quot;translate(319.00,382.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 13,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Week&quot;]]]
+  [:g
+   {:transform &quot;translate(48.00,43.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 542.0,
+       :height 309.0}]]]]
+  [:g
+   {:transform &quot;translate(38.00,33.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;82.81,10.00 82.81,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;174.17,10.00 174.17,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;265.27,10.00 265.27,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;356.38,10.00 356.38,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;447.49,10.00 447.49,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,304.95 552.00,304.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,261.70 552.00,261.70&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,218.44 552.00,218.44&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,175.18 552.00,175.18&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,131.92 552.00,131.92&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,88.66 552.00,88.66&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,45.40 552.00,45.40&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-1g8gv0t&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;542.00&quot;, :height &quot;309.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-1g8gv0t)&quot;}
+      [:g
+       [:g
+        [:g
+         [:polyline
+          {:fill &quot;none&quot;,
+           :stroke &quot;rgb(51,51,51)&quot;,
+           :stroke-opacity 1.0,
+           :stroke-width 2.5,
+           :points
+           &quot;34.64,130.47 36.38,130.52 38.13,131.98 39.88,123.39 41.63,127.62 43.37,125.26 45.12,122.30 46.87,126.08 48.61,113.82 50.36,125.24 52.11,117.71 53.86,115.38 57.35,99.24 59.10,108.92 60.85,101.51 62.59,119.94 64.34,94.33 66.09,122.08 67.83,105.36 69.58,100.22 71.33,104.07 73.08,104.30 74.82,101.85 76.57,111.35 78.32,161.28 80.07,183.94 81.81,164.35 83.56,145.42 85.31,129.65 87.05,135.94 88.80,110.57 90.55,92.47 92.30,92.20 94.04,92.89 95.79,92.78 97.54,104.93 99.28,105.04 101.03,103.44 102.78,118.37 104.53,144.33 106.27,94.19 108.02,106.11 109.77,122.73 111.52,116.64 113.26,112.15 115.01,107.11 116.76,103.57 118.50,123.92 120.25,117.07 122.00,124.06 123.75,119.72 125.49,120.14 127.24,111.05 128.99,120.76 130.74,112.48 132.48,110.76 134.23,121.02 135.98,107.94 137.72,99.71 139.47,99.41 141.22,101.79 142.97,100.31 144.71,79.54 146.46,82.64 148.21,73.78 149.96,174.89 151.70,111.67 153.45,138.00 155.20,99.38 156.94,113.32 158.69,112.57 160.44,104.60 162.19,93.96 163.93,98.66 165.68,100.07 167.43,93.36 169.18,132.79 170.92,186.75 172.67,169.14 174.42,147.59 176.16,136.69 177.91,124.21 179.66,112.16 181.41,103.82 183.15,93.50 184.90,110.12 186.65,107.54 188.40,101.88 190.14,96.30 191.89,93.55 193.64,126.82 195.38,102.27 197.13,123.93 198.88,106.32 200.63,139.25 202.37,114.52 204.12,129.94 205.87,120.39 207.62,127.59 209.36,139.79 211.11,117.28 212.86,130.56 214.60,112.61 216.35,124.01 218.10,119.34 219.85,120.28 221.59,138.32 223.34,142.46 225.09,154.02 226.83,135.14 228.58,151.89 230.33,243.99 232.08,304.95 233.82,304.95 235.57,304.95 237.32,304.95 239.07,304.95 240.81,304.95 242.56,304.95 244.31,204.86 246.05,201.37 247.80,208.72 249.55,205.64 251.30,158.14 253.04,166.55 254.79,161.72 256.54,149.58 258.29,141.71 260.03,171.72 261.78,213.73 263.53,194.60 265.27,140.40 267.02,131.25 268.77,113.54 270.52,132.61 272.26,156.01 274.01,152.15 275.76,133.41 277.51,142.70 279.25,128.54 281.00,145.91 282.75,137.31 284.49,130.77 286.24,138.75 287.99,125.55 289.74,142.12 291.48,123.68 293.23,127.03 294.98,129.23 296.73,150.44 298.47,137.24 300.22,149.55 301.97,135.65 303.71,150.14 305.46,148.23 307.21,139.10 308.96,143.05 310.70,127.42 312.45,128.93 314.20,131.79 315.95,148.99 317.69,134.54 319.44,132.81 321.19,138.73 322.93,133.88 324.68,130.81 326.43,121.70 328.18,115.19 329.92,131.49 331.67,102.86 333.42,122.23 335.17,114.87 336.91,119.71 338.66,109.69 340.41,124.57 342.15,126.22 343.90,121.60 345.65,118.92 347.40,113.30 349.14,115.44 350.89,126.43 352.64,170.55 354.38,160.55 356.13,139.27 357.88,122.16 359.63,122.09 361.37,134.57 363.12,118.28 364.87,119.38 366.62,112.04 368.36,122.78 370.11,140.45 371.86,136.15 373.60,130.52 375.35,121.90 377.10,140.06 378.85,114.86 380.59,107.03 382.34,112.97 384.09,110.00 385.84,126.02 387.58,116.45 389.33,120.68 391.08,126.18 392.82,115.06 394.57,123.19 396.32,128.08 398.07,119.65 399.81,103.60 401.56,82.06 403.31,79.62 405.06,98.77 406.80,108.19 408.55,106.29 410.30,86.47 412.04,86.59 413.79,68.01 415.54,72.88 417.29,68.81 419.03,54.61 420.78,31.19 422.53,24.05 424.28,65.53 426.02,55.00 427.77,75.98 429.52,60.14 431.26,51.68 433.01,39.46 434.76,47.25 436.51,35.41 438.25,58.73 440.00,69.67 441.75,77.64 443.50,86.89 445.24,93.55 446.99,68.56 448.74,68.73 450.48,42.51 452.23,72.80 453.98,81.64 455.73,69.29 457.47,55.88 459.22,69.08 460.97,69.48 462.72,76.46 464.46,78.98 466.21,143.67 467.96,162.04 469.70,155.48 471.45,117.54 473.20,127.82 474.95,146.31 476.69,157.72 478.44,148.26 480.19,145.67 481.93,127.24 483.68,119.74 485.43,118.55 487.18,116.93 488.92,78.51 490.67,67.62 492.42,59.57 494.17,46.90 495.91,46.52 497.66,75.39 499.41,76.25 501.15,78.82 502.90,68.20 504.65,63.48 506.40,77.32 508.14,66.70 509.89,50.20 511.64,59.88 513.39,43.64 515.13,64.10 516.88,64.78 518.63,68.57 520.37,55.46 522.12,75.26 523.87,68.94 525.62,68.71 527.36,60.12&quot;}]]]]]]
+    [:g
+     {:transform &quot;translate(82.81,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1988&quot;]]]
+    [:g
+     {:transform &quot;translate(174.17,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1989&quot;]]]
+    [:g
+     {:transform &quot;translate(265.27,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1990&quot;]]]
+    [:g
+     {:transform &quot;translate(356.38,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1991&quot;]]]
+    [:g
+     {:transform &quot;translate(447.49,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1992&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,299.45)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;0&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,256.20)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;5&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,212.94)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;10&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,169.68)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;15&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,126.42)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;20&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,83.16)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;25&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,39.90)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;30&quot;]]]]]]]
+</code></pre></div></div><div style="margin:15px;"><div><p>Notable features visible in the plot:</p><ul><li>1989: No passengers (industrial dispute)</li><li>1992: Reduced load (economy seats replaced by business class trial)</li><li>Late 1991: Large increase in passenger load</li><li>Start of each year: Holiday-effect dips</li></ul><h3 id="antidiabetic-drug-sales-(a10)">Antidiabetic drug sales (a10)</h3><p>R: <code>autoplot(a10, Cost)</code></p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def a10-plot
   (-&gt; a10
       (pj/lay-line :Month :Cost)
       (pj/options {:title &quot;Australian antidiabetic drug sales&quot;
@@ -430,7 +741,8 @@
         :text-anchor &quot;end&quot;}
        &quot;30&quot;]]]]]]]
 </code></pre></div></div><div style="margin:15px;"><div><p>Clear increasing trend with strong seasonality that grows proportionally. The January spike each year is from stockpiling before year-end subsidies.</p><p>Figures exported by <code>plotje-review</code>, keyed by output file name.</p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def figures
-  {&quot;a10&quot; a10-plot})</code></pre></div></div><div style="margin:15px;"><div style="background-color:grey;height:2px;width:100%;"></div></div><div style="margin:15px;"><div><pre><small><small>source: notebooks/chapter_02_plotje.clj</small></small></pre></div></div></div></div></div></div></div><script type="text/javascript">/*!
+  {&quot;a10&quot; a10-plot
+   &quot;melsyd-economy&quot; melsyd-economy-plot})</code></pre></div></div><div style="margin:15px;"><div style="background-color:grey;height:2px;width:100%;"></div></div><div style="margin:15px;"><div><pre><small><small>source: notebooks/chapter_02_plotje.clj</small></small></pre></div></div></div></div></div></div></div><script type="text/javascript">/*!
   Highlight.js v11.9.0 (git: b7ec4bfafc)
   (c) 2006-2023 undefined and other contributors
   License: BSD-3-Clause
