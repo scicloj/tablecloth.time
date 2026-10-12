@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [tech.v3.datatype :as dtype]
             [tablecloth.api :as tc]
+            [tablecloth.column.api :as tcc]
             [tablecloth.time.api :as time-api])
   (:import [java.time LocalDate LocalDateTime]))
 
@@ -106,3 +107,48 @@
       ;; Auto-named columns
       (is (= [3.0 4.0] (vec (result :a_lead2))))
       (is (= [5.0 6.0] (vec (result :a_lead4)))))))
+
+(deftest add-lag-lead-fill-test
+  (let [ds (tc/dataset {:a [1.0 2.0 nil 4.0 5.0]})]
+    (testing "add-lag fills only the boundary"
+      (let [col ((time-api/add-lag ds :a 2 :a_lag2 {:fill 0}) :a_lag2)]
+        (is (= [0.0 0.0 1.0 2.0 nil] (vec col)))
+        (is (= [4] (vec (tcc/missing col))))))
+    (testing "add-lead fills only the boundary"
+      (let [col ((time-api/add-lead ds :a 2 :a_lead2 {:fill 0}) :a_lead2)]
+        (is (= [nil 4.0 5.0 0.0 0.0] (vec col)))
+        (is (= [0] (vec (tcc/missing col))))))
+    (testing "k beyond the row count yields an all-missing column"
+      (is (= (repeat 5 nil) (vec ((time-api/add-lag ds :a 7 :l) :l)))))))
+
+(deftest add-lags-leads-fill-test
+  (let [ds (tc/dataset {:a [1.0 2.0 nil 4.0 5.0 6.0]})]
+    (testing "fill with :drop-missing false keeps every row"
+      (let [result (time-api/add-lags ds :a [1 2] {:fill 0 :drop-missing false})]
+        (is (= 6 (tc/row-count result)))
+        (is (= [0.0 1.0 2.0 nil 4.0 5.0] (vec (result :a_lag1))))
+        (is (= [0.0 0.0 1.0 2.0 nil 4.0] (vec (result :a_lag2))))))
+    (testing "fill with default :drop-missing drops only rows whose lag hit a source missing"
+      (let [result (time-api/add-lags ds :a {1 :prev 2 :prev2} {:fill 0})]
+        (is (= [1.0 2.0 nil 6.0] (vec (result :a))))
+        (is (= [0.0 1.0 2.0 5.0] (vec (result :prev))))
+        (is (= [0.0 0.0 1.0 4.0] (vec (result :prev2))))))
+    (testing "without fill, default :drop-missing drops boundary and source missing"
+      (is (= [nil 6.0] (vec ((time-api/add-lags ds :a [1 2]) :a)))))
+    (testing "add-leads threads fill and auto-names"
+      (let [result (time-api/add-leads ds :a [1] {:fill -1 :drop-missing false})]
+        (is (= [2.0 nil 4.0 5.0 6.0 -1.0] (vec (result :a_lead1))))))
+    (testing "add-leads with custom names and default drop"
+      (let [result (time-api/add-leads ds :a {1 :next} {:fill 0})]
+        (is (= [1.0 nil 4.0 5.0 6.0] (vec (result :a))))
+        (is (= [2.0 4.0 5.0 6.0 0.0] (vec (result :next))))))
+    (testing "string source names generate string column names"
+      (let [result (time-api/add-lags (tc/dataset {"x" [1 2 3]}) "x" [1] {:fill 0})]
+        (is (= [0 1 2] (vec (result "x_lag1"))))))))
+
+(deftest add-lag-temporal-test
+  (testing "temporal source keeps its datatype and boundary missingness"
+    (let [ds (tc/dataset {:d [(LocalDate/of 2024 1 1) (LocalDate/of 2024 1 2)]})
+          col ((time-api/add-lag ds :d 1 :d_lag1) :d_lag1)]
+      (is (= [nil (LocalDate/of 2024 1 1)] (vec col)))
+      (is (= (dtype/elemwise-datatype (ds :d)) (dtype/elemwise-datatype col))))))

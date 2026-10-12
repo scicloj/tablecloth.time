@@ -1,17 +1,20 @@
 (ns tablecloth.time.column.api
   (:require [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.base :as dtype-base]
             [tech.v3.datatype.functional :as fun]
             [tech.v3.datatype.casting :as casting]
             [tech.v3.datatype.datetime :as dtdt]
             [tech.v3.datatype.datetime.base :as dtdt-base]
             [tech.v3.datatype.datetime.operations :as dtdt-ops]
+            [tech.v3.datatype.packing :as packing]
+            [tech.v3.dataset.column :as ds-col]
+            [tech.v3.dataset.protocols :as ds-proto]
             [tablecloth.column.api :as tcc]
             [tablecloth.time.utils.datatypes :as datatypes]
             [tablecloth.time.utils.temporal :as temporal]
             [tablecloth.time.utils.units :as units])
   (:import [java.time Instant ZonedDateTime LocalDate LocalDateTime
-            Duration LocalTime]))
+            Duration LocalTime]
+           [tech.v3.datatype Buffer]))
 
 (casting/add-object-datatype! :instant Instant true)
 (casting/add-object-datatype! :zoned-date-time ZonedDateTime true)
@@ -337,37 +340,98 @@
 ;; Lag and Lead operations
 ;; -----------------------------------------------------------------------------
 
-(defn lag
-  "Shift values forward by k positions, filling the first k positions with nil.
+(defn- check-shift! [k]
+  (when-not (and (integer? k) (not (neg? k)))
+    (throw (ex-info (str "Shift k must be a non-negative integer, got: " (pr-str k))
+                    {:k k}))))
 
-  Returns a new column of the same type with nil at the start and the
-  original values shifted forward. The nil values are properly tracked
-  by tech.ml.dataset's missing value system.
+(defn- fill-compatible? [datatype fill]
+  (cond
+    (casting/integer-type? datatype) (integer? fill)
+    (casting/numeric-type? datatype) (number? fill)
+    (= :object datatype) true
+    :else (= datatype (dtype/datatype fill))))
 
-  Example:
-    (lag [A B C D E] 2)  ;; => [nil nil A B C]
-    (lag col 4)          ;; => [nil nil nil nil ...first n-4 values...]"
-  [col k]
+(defn- check-fill! [col fill]
+  (let [datatype (packing/unpack-datatype (dtype/elemwise-datatype col))]
+    (when-not (fill-compatible? datatype fill)
+      (throw (ex-info (str "Fill value " (pr-str fill) " is not compatible with column datatype "
+                           datatype)
+                      {:fill fill :datatype datatype})))))
+
+(defn- fill-range!
+  "Write fill into [start, start+n). Column writes clear the missing bit;
+  booleans go through writeLong because writeObject treats false as missing."
+  [col start n fill]
+  (let [^Buffer buf (dtype/->buffer col)
+        datatype (dtype/elemwise-datatype col)
+        write! (cond
+                 (= :boolean datatype) #(.writeLong buf % (if fill 1 0))
+                 (casting/integer-type? datatype) #(.writeLong buf % (long fill))
+                 (casting/numeric-type? datatype) #(.writeDouble buf % (double fill))
+                 :else #(.writeObject buf % fill))]
+    (dotimes [i n]
+      (write! (+ (long start) i)))
+    col))
+
+(defn- repack
+  "TMD's prepend/extend unpack packed datetimes; restore the source datatype."
+  [col]
+  (ds-col/new-column (ds-col/column-name col)
+                     (dtype/clone (packing/pack (ds-proto/column-buffer col)))
+                     (meta col)
+                     (ds-col/missing col)))
+
+(defn- shift
+  [col k lag? {:keys [fill]}]
+  (check-shift! k)
   (let [col (coerce-column col)
         n (dtype/ecount col)
-        values (dtype-base/select col (range 0 (- n k)))]
-    ;; Build new column: k nils + values
-    ;; tcc/column handles nil properly in numeric columns via TMD's missing value support
-    (tcc/column (concat (repeat k nil) values))))
+        _ (when (and (some? fill) (pos? n)) (check-fill! col fill))
+        m (min (long k) n)
+        packed? (packing/packed-datatype? (dtype/elemwise-datatype col))]
+    (if (zero? m)
+      col
+      (cond-> (if lag?
+                (ds-col/prepend-column-with-empty (ds-col/select col (range 0 (- n m))) m)
+                (ds-col/extend-column-with-empty (ds-col/select col (range m n)) m))
+        (some? fill) (fill-range! (if lag? 0 (- n m)) m fill)
+        packed? repack))))
+
+(defn lag
+  "Shift values forward by k positions, so position i holds the value from i-k.
+
+  Positional: shifts by index, not by timestamp. Sort the data first; gaps
+  in the time axis are not accounted for.
+
+  The first k positions have no source value. By default they are missing
+  (tracked by tech.ml.dataset's missing-value system). Pass `{:fill v}` to put
+  v there instead. Missing values inherited from the source stay missing.
+
+  The result keeps the source column's datatype and length.
+    k = 0           returns the column unchanged
+    k >= length     every position is a boundary (all missing, or all fill)
+    k < 0           throws; use `lead` to shift the other way
+
+  Options:
+    :fill — value for boundary positions; must match the column datatype
+            (any number for float columns, an integer for integer columns)
+
+  Example:
+    (lag [A B C D E] 2)            ;; => [nil nil A B C]
+    (lag [1 2 nil 4 5] 2 {:fill 0}) ;; => [0 0 1 2 nil]"
+  ([col k] (lag col k {}))
+  ([col k opts] (shift col k true opts)))
 
 (defn lead
-  "Shift values backward by k positions, filling the last k positions with nil.
+  "Shift values backward by k positions, so position i holds the value from i+k.
 
-  Returns a new column of the same type with nil at the end and the
-  original values shifted backward.
+  The mirror of `lag`: the last k positions are the boundary. Same options
+  and edge-case behavior.
 
   Example:
-    (lead [A B C D E] 2)  ;; => [C D E nil nil]
-    (lead col 4)          ;; => [...values from index 4 onward... nil nil nil nil]"
-  [col k]
-  (let [col (coerce-column col)
-        n (dtype/ecount col)
-        values (dtype-base/select col (range k n))]
-    ;; Build new column: values + k nils
-    (tcc/column (concat values (repeat k nil)))))
+    (lead [A B C D E] 2)            ;; => [C D E nil nil]
+    (lead [1 2 nil 4 5] 2 {:fill 0}) ;; => [nil 4 5 0 0]"
+  ([col k] (lead col k {}))
+  ([col k opts] (shift col k false opts)))
 
