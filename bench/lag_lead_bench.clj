@@ -45,8 +45,8 @@
   (let [rng (java.util.Random. 42)]
     (tc/dataset
      {:x (case datatype
-           :float64 (double-array n (fn [_] (.nextDouble rng)))
-           :int64 (long-array n (fn [_] (.nextLong rng)))
+           :float64 (double-array (repeatedly n #(.nextDouble rng)))
+           :int64 (long-array (repeatedly n #(.nextLong rng)))
            :string (mapv #(str "s" (mod % 997)) (range n))
            :local-date (mapv #(.plusDays (LocalDate/of 2000 1 1) (long (mod % 9000)))
                              (range n)))})))
