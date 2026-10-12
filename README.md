@@ -86,6 +86,34 @@ The philosophy: `add-time-columns` extracts temporal components you need, then s
 See `notebooks/chapter_02_time_series_graphics.clj` for more examples based on
 [Forecasting: Principles and Practice](https://otexts.com/fpp3/).
 
+### Lag and Lead
+
+`add-lag` / `add-lead` (and the column-level `lag` / `lead`) shift by **row
+position**, not by timestamp: sort first, and note that gaps in the time axis
+are not accounted for.
+
+Rows with no source value (the first k for a lag, the last k for a lead) are
+missing by default. `:fill` puts a value there instead; values that were
+already missing in the source stay missing.
+
+```clojure
+(def ds (tc/dataset {:x [1.0 2.0 nil 4.0 5.0]}))
+
+(tct/add-lag ds :x 2 :x_lag2)            ; :x_lag2 => [nil nil 1.0 2.0 nil]
+(tct/add-lag ds :x 2 :x_lag2 {:fill 0})  ; :x_lag2 => [0.0 0.0 1.0 2.0 nil]
+(tct/add-lead ds :x 1 :x_lead1 {:fill 0}) ; :x_lead1 => [2.0 nil 4.0 5.0 0.0]
+
+;; :fill also applies to every column of add-lags / add-leads. Filled rows are
+;; not missing, so :drop-missing (default true) then drops only rows whose
+;; shifted value was missing in the source.
+(tct/add-lags ds :x [1 2] {:fill 0 :drop-missing false})
+```
+
+`k = 0` returns the column unchanged; `k` at or beyond the row count gives an
+all-boundary column of the same length and type; negative `k` throws.
+
+To benchmark lag implementations: `clj -M:dev bench/lag_lead_bench.clj`.
+
 ## Development
 
 We use a "hybrid" Leinigen/tools.deps setup. You can use either `lein`
