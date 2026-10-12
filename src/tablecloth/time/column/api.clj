@@ -1,6 +1,5 @@
 (ns tablecloth.time.column.api
   (:require [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.base :as dtype-base]
             [tech.v3.datatype.functional :as fun]
             [tech.v3.datatype.casting :as casting]
             [tech.v3.datatype.datetime :as dtdt]
