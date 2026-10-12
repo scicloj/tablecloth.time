@@ -361,12 +361,18 @@
                       {:fill fill :datatype datatype})))))
 
 (defn- fill-range!
-  "Write fill into [start, start+n). Column writes clear the missing bit."
+  "Write fill into [start, start+n). Column writes clear the missing bit;
+  booleans go through writeLong because writeObject treats false as missing."
   [col start n fill]
   (let [^Buffer buf (dtype/->buffer col)
-        v (casting/cast fill (dtype/elemwise-datatype col))]
+        datatype (dtype/elemwise-datatype col)
+        write! (cond
+                 (= :boolean datatype) #(.writeLong buf % (if fill 1 0))
+                 (casting/integer-type? datatype) #(.writeLong buf % (long fill))
+                 (casting/numeric-type? datatype) #(.writeDouble buf % (double fill))
+                 :else #(.writeObject buf % fill))]
     (dotimes [i n]
-      (.writeObject buf (+ (long start) i) v))
+      (write! (+ (long start) i)))
     col))
 
 (defn- repack
@@ -381,8 +387,8 @@
   [col k lag? {:keys [fill]}]
   (check-shift! k)
   (let [col (coerce-column col)
-        _ (some->> fill (check-fill! col))
         n (dtype/ecount col)
+        _ (when (and (some? fill) (pos? n)) (check-fill! col fill))
         m (min (long k) n)
         packed? (packing/packed-datatype? (dtype/elemwise-datatype col))]
     (if (zero? m)

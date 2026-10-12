@@ -1,6 +1,7 @@
 (ns tablecloth.time.column.api-test
   (:require [clojure.test :refer [deftest testing is]]
             [tablecloth.column.api :as tcc]
+            [tech.v3.datatype :as dtype]
             [tablecloth.time.parse :refer [parse]]
             [tablecloth.time.column.api :refer [convert-time down-to-nearest floor-to-month floor-to-quarter floor-to-year
                                                 year month day hour minute get-second
@@ -964,6 +965,78 @@
   (testing "lead returns column"
     (let [col (tcc/column [1 2 3])]
       (is (tcc/column? (lead col 1))))))
+
+;; Source values per datatype, with a genuine missing value at index 2,
+;; and a compatible fill value.
+(def ^:private shift-cases
+  {:float64 [[1.0 2.0 nil 4.0 5.0] 0]
+   :int64 [[1 2 nil 4 5] 0]
+   :string [["a" "b" nil "d" "e"] "z"]
+   :boolean [[true false nil true false] false]
+   :local-date [(mapv #(some->> % (LocalDate/of 2024 1)) [1 2 nil 4 5]) (LocalDate/of 2000 1 1)]
+   :instant [(mapv #(some-> % Instant/ofEpochSecond) [1 2 nil 4 5]) Instant/EPOCH]})
+
+(defn- shifted [f col k opts]
+  (let [result (f (tcc/column col) k opts)]
+    {:values (vec result)
+     :missing (vec (tcc/missing result))
+     :datatype (dtype/elemwise-datatype result)}))
+
+(deftest lag-lead-boundaries-by-datatype-test
+  (doseq [[label [[a b _ d _ :as vs] fill]] shift-cases
+          :let [datatype (dtype/elemwise-datatype (tcc/column vs))]]
+    (testing (str label " lag default leaves boundary and source missing")
+      (is (= {:values [nil nil a b nil] :missing [0 1 4] :datatype datatype}
+             (shifted lag vs 2 {}))))
+    (testing (str label " lag fill touches only the boundary")
+      (is (= {:values [fill fill a b nil] :missing [4] :datatype datatype}
+             (shifted lag vs 2 {:fill fill}))))
+    (testing (str label " lead default")
+      (is (= {:values [nil d (last vs) nil nil] :missing [0 3 4] :datatype datatype}
+             (shifted lead vs 2 {}))))
+    (testing (str label " lead fill touches only the boundary")
+      (is (= {:values [nil d (last vs) fill fill] :missing [0] :datatype datatype}
+             (shifted lead vs 2 {:fill fill}))))))
+
+(deftest lag-lead-k-edge-cases-test
+  (let [vs [1.0 2.0 nil 4.0 5.0]]
+    (testing "k=0 returns the values and missing set unchanged"
+      (is (= {:values vs :missing [2] :datatype :float64} (shifted lag vs 0 {:fill 0})))
+      (is (= {:values vs :missing [2] :datatype :float64} (shifted lead vs 0 {:fill 0}))))
+    (testing "k = row count makes every row a boundary, keeping length and datatype"
+      (is (= {:values (repeat 5 nil) :missing [0 1 2 3 4] :datatype :float64}
+             (shifted lag vs 5 {})))
+      (is (= {:values (repeat 5 0.0) :missing [] :datatype :float64}
+             (shifted lead vs 5 {:fill 0}))))
+    (testing "k > row count behaves like k = row count"
+      (is (= (shifted lag vs 5 {}) (shifted lag vs 9 {})))
+      (is (= (shifted lead vs 5 {:fill 0}) (shifted lead vs 9 {:fill 0}))))
+    (testing "negative or non-integer k throws"
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"non-negative integer" (lag vs -1)))
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"non-negative integer" (lead vs -1)))
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo #"non-negative integer" (lag vs 1.5))))))
+
+(deftest lag-lead-fill-test
+  (testing "integer fill is accepted on a float column"
+    (is (= [0.0 1.0] (vec (lag (tcc/column [1.0 2.0]) 1 {:fill 0})))))
+  (testing "fill must match the column datatype"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not compatible"
+                          (lag (tcc/column [1 2]) 1 {:fill 0.5})))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not compatible"
+                          (lag (tcc/column ["a" "b"]) 1 {:fill 0})))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo #"not compatible"
+                          (lead (tcc/column [1.0 2.0]) 1 {:fill "x"}))))
+  (testing ":fill nil is the default missing boundary"
+    (is (= [nil 1.0] (vec (lag (tcc/column [1.0 2.0]) 1 {:fill nil})))))
+  (testing "source column is not modified"
+    (let [col (tcc/column [1.0 2.0 3.0])]
+      (lag col 2 {:fill 9.0})
+      (lead col 2 {:fill 9.0})
+      (is (= [1.0 2.0 3.0] (vec col)))
+      (is (empty? (tcc/missing col)))))
+  (testing "narrow numeric types are preserved"
+    (is (= :int32 (dtype/elemwise-datatype (lag (tcc/column (int-array [1 2 3])) 1 {:fill 0}))))
+    (is (= :float32 (dtype/elemwise-datatype (lead (tcc/column (float-array [1 2 3])) 1))))))
 
 (deftest replace-time-zone-test
   (testing "stamps timezone onto LocalDateTime, preserving local values"
