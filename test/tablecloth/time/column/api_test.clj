@@ -969,7 +969,7 @@
 ;; Source values per datatype, with a genuine missing value at index 2,
 ;; and a compatible fill value.
 (def ^:private shift-cases
-  {:float64 [[1.0 2.0 nil 4.0 5.0] 0]
+  {:float64 [[1.0 2.0 nil 4.0 5.0] 0.0]
    :int64 [[1 2 nil 4 5] 0]
    :string [["a" "b" nil "d" "e"] "z"]
    :boolean [[true false nil true false] false]
