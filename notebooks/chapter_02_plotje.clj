@@ -10,7 +10,8 @@
 (ns chapter-02-plotje
   (:require [tablecloth.api :as tc]
             [tech.v3.datatype.functional :as dfn]
-            [scicloj.plotje.api :as pj]))
+            [scicloj.plotje.api :as pj]
+            [tablecloth.time.api :as tct]))
 
 ;; ## 2.1 — Loading data
 
@@ -43,7 +44,37 @@ PBS
 
 a10
 
+;; ### ansett — Ansett airlines weekly passenger data
+(def ansett (load-fpp3 "ansett"))
+ansett
+
+;; ### aus_production — Australian quarterly production
+(def aus-production (load-fpp3 "aus_production"))
+aus-production
+
 ;; ## 2.2 — Time plots
+
+;; ### Ansett airlines: Melbourne-Sydney economy class
+;; R: `autoplot(melsyd_economy, Passengers)`
+
+(def melsyd-economy
+  (-> ansett
+      (tc/select-rows #(and (= "MEL-SYD" (:Airports %))
+                            (= "Economy" (:Class %))))
+      (tc/add-column :Passengers-000s #(dfn// (% :Passengers) 1000))))
+
+(def melsyd-economy-plot
+  (-> melsyd-economy
+      (pj/lay-line :Week :Passengers-000s)
+      (pj/options {:title "Ansett airlines economy class: Melbourne-Sydney"})))
+
+melsyd-economy-plot
+
+;; Notable features visible in the plot:
+;; - 1989: No passengers (industrial dispute)
+;; - 1992: Reduced load (economy seats replaced by business class trial)
+;; - Late 1991: Large increase in passenger load
+;; - Start of each year: Holiday-effect dips
 
 ;; ### Antidiabetic drug sales (a10)
 ;; R: `autoplot(a10, Cost)`
@@ -59,6 +90,63 @@ a10-plot
 ;; Clear increasing trend with strong seasonality that grows proportionally.
 ;; The January spike each year is from stockpiling before year-end subsidies.
 
+;; ## 2.3 — Time series patterns
+;;
+;; Three fundamental components:
+;; - **Trend**: long-term increase/decrease
+;; - **Seasonal**: fixed, known period (calendar-linked)
+;; - **Cyclic**: rises/falls of variable, non-fixed frequency
+
+;; ### Australian quarterly beer production (seasonal + no trend)
+(def recent-beer
+  (-> aus-production
+      (tct/add-time-columns :Quarter {:year :Year})
+      (tc/select-rows #(>= (:Year %) 2000))
+      (tc/select-columns [:Quarter :Beer])))
+
+(def recent-beer-plot
+  (-> recent-beer
+      (pj/lay-line :Quarter :Beer)
+      (pj/options {:title "Australian quarterly beer production"})))
+
+recent-beer-plot
+
+;; ### Google stock — daily changes (no pattern, random walk)
+(def gafa (load-fpp3 "gafa_stock"))
+
+(def google-2015
+  (-> gafa
+      (tct/add-time-columns :Date {:year :Year})
+      (tc/select-rows #(and (= "GOOG" (:Symbol %))
+                            (= (:Year %) 2015)))))
+
+;; Daily closing price
+(def google-2015-close-plot
+  (-> google-2015
+      (pj/lay-line :Date :Close)
+      (pj/options {:title "Google daily closing stock price (2015)"})))
+
+google-2015-close-plot
+
+;; Daily *change* in closing price; the first day has no previous close.
+(def google-2015-change
+  (-> google-2015
+      (tct/add-lag :Close 1 :Close-lag1)
+      (tc/drop-missing [:Close-lag1])
+      (tc/add-column :Change #(dfn/- (% :Close) (% :Close-lag1)))
+      (tc/select-columns [:Date :Change])))
+
+(def google-2015-change-plot
+  (-> google-2015-change
+      (pj/lay-line :Date :Change)
+      (pj/options {:title "Google daily change in closing stock price (2015)"})))
+
+google-2015-change-plot
+
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
-  {"a10" a10-plot})
+  {"a10" a10-plot
+   "melsyd-economy" melsyd-economy-plot
+   "recent-beer" recent-beer-plot
+   "google-2015-close" google-2015-close-plot
+   "google-2015-change" google-2015-change-plot})
