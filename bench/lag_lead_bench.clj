@@ -75,11 +75,11 @@
 
 (defn- parity [datatype]
   (let [ds (make-ds datatype 50)
-        old ((:old impls) ds 3)
-        new ((:new impls) ds 3)]
-    (and (= (vec (old :l)) (vec (new :l)))
-         (= (vec (tcc/missing (old :l))) (vec (tcc/missing (new :l))))
-         (= (dtype/elemwise-datatype (old :l)) (dtype/elemwise-datatype (new :l))))))
+        before (((:old impls) ds 3) :l)
+        after (((:new impls) ds 3) :l)]
+    (and (= (vec before) (vec after))
+         (= (vec (tcc/missing before)) (vec (tcc/missing after)))
+         (= (dtype/elemwise-datatype before) (dtype/elemwise-datatype after)))))
 
 (defn -main []
   (println "JVM" (System/getProperty "java.version")
