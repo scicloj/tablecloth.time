@@ -128,9 +128,25 @@ recent-beer-plot
 
 google-2015-close-plot
 
+;; Daily *change* in closing price; the first day has no previous close.
+(def google-2015-change
+  (-> google-2015
+      (tct/add-lag :Close 1 :Close-lag1)
+      (tc/drop-missing [:Close-lag1])
+      (tc/add-column :Change #(dfn/- (% :Close) (% :Close-lag1)))
+      (tc/select-columns [:Date :Change])))
+
+(def google-2015-change-plot
+  (-> google-2015-change
+      (pj/lay-line :Date :Change)
+      (pj/options {:title "Google daily change in closing stock price (2015)"})))
+
+google-2015-change-plot
+
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
   {"a10" a10-plot
    "melsyd-economy" melsyd-economy-plot
    "recent-beer" recent-beer-plot
-   "google-2015-close" google-2015-close-plot})
+   "google-2015-close" google-2015-close-plot
+   "google-2015-change" google-2015-change-plot})
