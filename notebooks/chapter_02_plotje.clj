@@ -52,6 +52,20 @@ ansett
 (def aus-production (load-fpp3 "aus_production"))
 aus-production
 
+;; ### vic_elec — Victorian half-hourly electricity demand
+;; Timestamps are stored in UTC; convert them to Melbourne time so
+;; years and seasons follow the local clock.
+(def vic-elec
+  (-> (load-fpp3 "vic_elec")
+      (tc/convert-types :Time [:local-date-time "yyyy-MM-dd HH:mm:ss"])
+      (tct/replace-time-zone :Time "UTC")
+      (tct/convert-time-zone :Time "Australia/Melbourne")))
+vic-elec
+
+;; ### tourism — Australian quarterly overnight trips
+(def tourism (load-fpp3 "tourism"))
+tourism
+
 ;; ## 2.2 — Time plots
 
 ;; ### Ansett airlines: Melbourne-Sydney economy class
@@ -143,10 +157,120 @@ google-2015-close-plot
 
 google-2015-change-plot
 
+;; ## 2.6 — Scatterplots
+
+;; ### Electricity demand and temperature in Victoria, 2014
+(def vic-elec-2014
+  (-> vic-elec
+      (tct/add-time-columns :Time {:year :Year})
+      (tc/select-rows #(= 2014 (:Year %)))
+      (tc/add-column :Demand-GW #(dfn// (% :Demand) 1000))))
+
+;; R: `autoplot(Demand)`
+(def vic-elec-demand-plot
+  (-> vic-elec-2014
+      (pj/lay-line :Time :Demand-GW {:size 0.5})
+      (pj/options {:title "Half-hourly electricity demand: Victoria"
+                   :y-label "GW"})))
+
+vic-elec-demand-plot
+
+;; R: `autoplot(Temperature)`
+(def vic-elec-temperature-plot
+  (-> vic-elec-2014
+      (pj/lay-line :Time :Temperature {:size 0.5})
+      (pj/options {:title "Half-hourly temperatures: Melbourne, Australia"
+                   :y-label "Degrees Celsius"})))
+
+vic-elec-temperature-plot
+
+;; R: `ggplot(aes(x = Temperature, y = Demand)) + geom_point()`
+(def demand-vs-temperature-plot
+  (-> vic-elec-2014
+      (pj/lay-point :Temperature :Demand-GW {:size 1 :alpha 0.5})
+      (pj/options {:title "Electricity demand vs temperature: Victoria, 2014"
+                   :x-label "Temperature (degrees Celsius)"
+                   :y-label "Electricity demand (GW)"})))
+
+demand-vs-temperature-plot
+
+;; Demand is high for both cold (heating) and hot (air conditioning) days.
+;; A correlation coefficient misses this non-linear shape; plot first.
+
+;; ### Scatterplot matrix — Australian tourism by state
+;; R: `pivot_wider(values_from = Trips, names_from = State) |> GGally::ggpairs(columns = 2:9)`
+(def visitors-by-state
+  (-> tourism
+      (tc/group-by [:Quarter :State])
+      (tc/aggregate {:Trips #(dfn/sum (% :Trips))})
+      (tc/pivot->wider :State :Trips)))
+
+visitors-by-state
+
+(def states (sort (remove #{:Quarter} (tc/column-names visitors-by-state))))
+
+;; `pj/cross` pairs every state with every other; the diagonal shows each
+;; state's distribution.
+(def tourism-splom-plot
+  (-> visitors-by-state
+      (pj/pose (pj/cross states states) {:size 1.5})
+      (pj/options {:width 1250
+                   :height 1000})))
+
+tourism-splom-plot
+
+;; ## 2.7 — Lag plots
+;; R: `recent_production |> gg_lag(Beer, geom = "point")`
+;; Each panel plots beer production y_t against y_{t-k}, coloured by quarter.
+
+(def lags (range 1 10))
+
+(def beer-lags
+  (-> recent-beer
+      (tct/add-time-columns :Quarter {:quarter :Q})
+      (tc/add-column :Quarter-of-year #(map (partial str "Q") (% :Q)))))
+
+(defn lag-panel
+  [k]
+  (let [lagged (-> beer-lags
+                   (tct/add-lag :Beer k :Beer-lagged)
+                   (tc/drop-missing [:Beer-lagged])
+                   (tc/order-by [:Q]))
+        diagonal (tc/dataset {:from [(dfn/reduce-min (recent-beer :Beer))]
+                              :to [(dfn/reduce-max (recent-beer :Beer))]})]
+    (-> lagged
+        (pj/lay-point :Beer-lagged :Beer {:color :Quarter-of-year})
+        (pj/lay-segment :from :from {:data diagonal
+                                     :x-end :to
+                                     :y-end :to
+                                     :stroke-dash :dashed
+                                     :alpha 0.5
+                                     :overlay true})
+        (pj/options {:title (str "lag " k)
+                     :x-label "lag(Beer, k)"
+                     :color-label "Quarter"}))))
+
+(def beer-lag-plot
+  (pj/arrange (map lag-panel lags)
+              {:cols 3
+               :share-scales #{:x :y}
+               :width 900
+               :height 900}))
+
+beer-lag-plot
+
+;; Lags 4 and 8 sit on the diagonal: each quarter matches the same quarter
+;; a year earlier. Lags 2 and 6 are negative: Q4 peaks pair with Q2 troughs.
+
 ;; Figures exported by `plotje-review`, keyed by output file name.
 (def figures
   {"a10" a10-plot
    "melsyd-economy" melsyd-economy-plot
    "recent-beer" recent-beer-plot
    "google-2015-close" google-2015-close-plot
-   "google-2015-change" google-2015-change-plot})
+   "google-2015-change" google-2015-change-plot
+   "vic-elec-demand-2014" vic-elec-demand-plot
+   "vic-elec-temperature-2014" vic-elec-temperature-plot
+   "demand-vs-temperature" demand-vs-temperature-plot
+   "tourism-splom" tourism-splom-plot
+   "beer-lag" beer-lag-plot})
