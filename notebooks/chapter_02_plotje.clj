@@ -216,6 +216,7 @@ a10-seasonal-plot
                                    :hour-fractional :Hour
                                    :weekly-phase :WeeklyPhase})
       (tc/add-column :DayOfWeekFrac #(dfn/* (% :WeeklyPhase) 7))
+      (tc/add-column :DayOfYearFrac #(dfn/+ (dfn/- (% :DayOfYear) 1) (dfn// (% :Hour) 24)))
       (tc/add-column :WeekStart
                      #(map (fn [day dow]
                              (str (.minusDays (java.time.LocalDate/parse day) (dec dow))))
@@ -257,8 +258,8 @@ vic-elec-weekly-plot
 ;; Yearly: one line per year, ticked at the first day of each month.
 (def vic-elec-yearly-plot
   (-> vic-elec-seasonal
-      (pj/lay-line :DayOfYear :Demand {:color :Year :size 0.3})
-      (pj/scale :x {:breaks (map #(.getDayOfYear (java.time.LocalDate/of 2013 (int %) 1))
+      (pj/lay-line :DayOfYearFrac :Demand {:color :Year :size 0.3})
+      (pj/scale :x {:breaks (map #(dec (.getDayOfYear (java.time.LocalDate/of 2013 (int %) 1)))
                                  (range 1 13))
                     :tick-labels month-names})
       (pj/options {:title "Electricity demand: Victoria (yearly pattern)"
