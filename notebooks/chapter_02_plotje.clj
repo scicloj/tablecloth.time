@@ -157,6 +157,120 @@ google-2015-close-plot
 
 google-2015-change-plot
 
+;; ## 2.4 — Seasonal plots
+;;
+;; fpp3 colours each season by year on a continuous scale. Plotje cannot yet
+;; colour lines by a numeric column, so years are categories, each given a
+;; shade from dark (earliest) to light (latest) blue.
+
+(defn year-colors
+  "Map each year string to a shade of blue, darkest first."
+  [years]
+  (let [ys (sort (distinct years))
+        n (max 1 (dec (count ys)))
+        lerp (fn [a b t] (int (+ a (* t (- b a)))))]
+    (into {}
+          (map-indexed (fn [i y]
+                         (let [t (/ i n)]
+                           [y (format "#%02x%02x%02x"
+                                      (lerp 0x13 0x56 t)
+                                      (lerp 0x2b 0xb1 t)
+                                      (lerp 0x43 0xf7 t))]))
+                       ys))))
+
+(def month-names ["Jan" "Feb" "Mar" "Apr" "May" "Jun"
+                  "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
+
+;; ### Antidiabetic drug sales (a10)
+;; R: `gg_season(a10, Cost, labels = "both")`
+(def a10-seasonal
+  (-> a10
+      (tct/add-time-columns :Month {:year-string :Year :month :MonthNum})
+      (tc/order-by [:Year :MonthNum])))
+
+(def a10-seasonal-plot
+  (-> a10-seasonal
+      (pj/lay-line :MonthNum :Cost {:color :Year})
+      (pj/scale :x {:breaks (range 1 13) :tick-labels month-names})
+      (pj/options {:title "Seasonal plot: Antidiabetic drug sales"
+                   :x-label "Month"
+                   :y-label "$ (millions)"
+                   :color-label "Year"
+                   :color-values (year-colors (a10-seasonal :Year))})))
+
+a10-seasonal-plot
+
+;; - January spike (stockpiling)
+;; - Generally higher in the second half of the year
+;; - The whole pattern shifts upward year over year (trend)
+
+;; ### Multiple seasonal periods — vic_elec
+;; R: `gg_season(Demand, period = "day" | "week" | "year")`
+;; Each period gets its own x position and its own line grouping.
+(def vic-elec-seasonal
+  (-> vic-elec
+      (tct/add-time-columns :Time {:year-string :Year
+                                   :date-string :Day
+                                   :day-of-week :DayOfWeek
+                                   :day-of-year :DayOfYear
+                                   :hour-fractional :Hour
+                                   :weekly-phase :WeeklyPhase})
+      (tc/add-column :DayOfWeekFrac #(dfn/* (% :WeeklyPhase) 7))
+      (tc/add-column :DayOfYearFrac #(dfn/+ (dfn/- (% :DayOfYear) 1) (dfn// (% :Hour) 24)))
+      (tc/add-column :WeekStart
+                     #(map (fn [day dow]
+                             (str (.minusDays (java.time.LocalDate/parse day) (dec dow))))
+                           (% :Day) (% :DayOfWeek)))
+      (tc/order-by [:Time])))
+
+(def vic-elec-year-colors (year-colors (vic-elec-seasonal :Year)))
+
+;; Daily: one line per day.
+(def vic-elec-daily-plot
+  (-> vic-elec-seasonal
+      (pj/lay-line :Hour :Demand {:color :Year :group :Day :size 0.3 :alpha 0.5})
+      (pj/scale :x {:breaks (range 0 25 3)})
+      (pj/options {:title "Electricity demand: Victoria (daily pattern)"
+                   :x-label "Hour of day"
+                   :y-label "MWh"
+                   :color-label "Year"
+                   :color-values vic-elec-year-colors
+                   :width 800})))
+
+vic-elec-daily-plot
+
+;; Weekly: one line per Monday-to-Sunday week.
+(def vic-elec-weekly-plot
+  (-> vic-elec-seasonal
+      (pj/lay-line :DayOfWeekFrac :Demand {:color :Year :group :WeekStart
+                                           :size 0.3 :alpha 0.5})
+      (pj/scale :x {:breaks (range 7)
+                    :tick-labels ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]})
+      (pj/options {:title "Electricity demand: Victoria (weekly pattern)"
+                   :x-label "Day of week"
+                   :y-label "MWh"
+                   :color-label "Year"
+                   :color-values vic-elec-year-colors
+                   :width 800})))
+
+vic-elec-weekly-plot
+
+;; Yearly: one line per year, ticked at the first day of each month.
+(def vic-elec-yearly-plot
+  (-> vic-elec-seasonal
+      (pj/lay-line :DayOfYearFrac :Demand {:color :Year :size 0.3})
+      (pj/scale :x {:breaks (map #(dec (.getDayOfYear (java.time.LocalDate/of 2013 (int %) 1)))
+                                 (range 1 13))
+                    :tick-labels month-names})
+      (pj/options {:title "Electricity demand: Victoria (yearly pattern)"
+                   :x-label "Day of year"
+                   :y-label "MWh"
+                   :color-label "Year"
+                   :color-values vic-elec-year-colors
+                   :width 800})))
+
+vic-elec-yearly-plot
+
 ;; ## 2.6 — Scatterplots
 
 ;; ### Electricity demand and temperature in Victoria, 2014
@@ -269,6 +383,10 @@ beer-lag-plot
    "recent-beer" recent-beer-plot
    "google-2015-close" google-2015-close-plot
    "google-2015-change" google-2015-change-plot
+   "a10-seasonal" a10-seasonal-plot
+   "vic-elec-daily" vic-elec-daily-plot
+   "vic-elec-weekly" vic-elec-weekly-plot
+   "vic-elec-yearly" vic-elec-yearly-plot
    "vic-elec-demand-2014" vic-elec-demand-plot
    "vic-elec-temperature-2014" vic-elec-temperature-plot
    "demand-vs-temperature" demand-vs-temperature-plot
