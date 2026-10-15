@@ -271,6 +271,80 @@ vic-elec-weekly-plot
 
 vic-elec-yearly-plot
 
+;; ## 2.5 — Seasonal subseries plots
+;;
+;; R: `gg_subseries(a10, Cost)` — for each month, show values across years
+;; with the mean as a horizontal line.
+;;
+;; Each row carries its month's mean in `:MeanCost`, so the mean draws as a
+;; flat line in every panel. Facets follow the order rows first appear in,
+;; so rows are sorted by month before faceting.
+(def a10-subseries
+  (-> a10
+      (tct/add-time-columns :Month {:year :Year :month :MonthNum})
+      (tc/order-by [:MonthNum :Year])
+      (tc/group-by [:MonthNum])
+      (tc/add-column :MeanCost #(repeat (tc/row-count %) (dfn/mean (% :Cost))))
+      (tc/ungroup)
+      (tc/add-column :MonthName #(map (comp month-names dec) (% :MonthNum)))))
+
+(def a10-subseries-plot
+  (-> a10-subseries
+      pj/overlay
+      (pj/lay-line :Year :Cost)
+      (pj/lay-line :Year :MeanCost {:color "#1f77b4"})
+      (pj/facet :MonthName)
+      (pj/options {:title "Subseries: Australian antidiabetic drug sales"
+                   :y-label "$ (millions)"
+                   :width 1200
+                   :height 350})))
+
+a10-subseries-plot
+
+;; The means show January's stockpiling peak, a February drop, then a slow
+;; climb to December. Every month trends upward across the years.
+
+;; ### Australian tourism: holiday trips by state
+;; R: `tourism |> filter(Purpose == "Holiday") |> group_by(State) |> summarise(Trips = sum(Trips))`
+(def holidays
+  (-> tourism
+      (tc/select-rows #(= "Holiday" (:Purpose %)))
+      (tc/group-by [:Quarter :State])
+      (tc/aggregate {:Trips #(dfn/sum (% :Trips))})
+      (tct/add-time-columns :Quarter {:year-string :Year :quarter :QuarterNum})
+      (tc/order-by [:State :Quarter])))
+
+;; R: `autoplot(holidays, Trips)`
+(def holidays-plot
+  (-> holidays
+      (pj/lay-line :Quarter :Trips {:color :State})
+      (pj/options {:title "Australian domestic holidays"
+                   :y-label "Overnight trips ('000)"
+                   :width 800})))
+
+holidays-plot
+
+;; R: `gg_season(holidays, Trips)` — one panel per state, each with its own
+;; y scale, one line per year.
+(def holidays-seasonal-plot
+  (-> holidays
+      (pj/lay-line :QuarterNum :Trips {:color :Year})
+      (pj/facet :State :row)
+      (pj/scale :x {:breaks (range 1 5) :tick-labels ["Q1" "Q2" "Q3" "Q4"]})
+      (pj/options {:title "Australian domestic tourism: Holiday trips"
+                   :x-label "Quarter"
+                   :y-label "Overnight trips ('000)"
+                   :color-label "Year"
+                   :color-values (year-colors (holidays :Year))
+                   :scales :free-y
+                   :width 600
+                   :height 1100})))
+
+holidays-seasonal-plot
+
+;; Southern states (Victoria, Tasmania) peak in summer (Q1); northern ones
+;; (Queensland, Northern Territory) in winter and spring (Q3).
+
 ;; ## 2.6 — Scatterplots
 
 ;; ### Electricity demand and temperature in Victoria, 2014
@@ -387,6 +461,9 @@ beer-lag-plot
    "vic-elec-daily" vic-elec-daily-plot
    "vic-elec-weekly" vic-elec-weekly-plot
    "vic-elec-yearly" vic-elec-yearly-plot
+   "a10-subseries" a10-subseries-plot
+   "holidays" holidays-plot
+   "holidays-seasonal" holidays-seasonal-plot
    "vic-elec-demand-2014" vic-elec-demand-plot
    "vic-elec-temperature-2014" vic-elec-temperature-plot
    "demand-vs-temperature" demand-vs-temperature-plot
