@@ -16798,7 +16798,5466 @@
         :dominant-baseline &quot;hanging&quot;,
         :text-anchor &quot;end&quot;}
        &quot;9000&quot;]]]]]]]
-</code></pre></div></div><div style="margin:15px;"><div><h2 id="2.6-—-scatterplots">2.6 — Scatterplots</h2><h3 id="electricity-demand-and-temperature-in-victoria,-2014">Electricity demand and temperature in Victoria, 2014</h3></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def vic-elec-2014
+</code></pre></div></div><div style="margin:15px;"><div><h2 id="2.5-—-seasonal-subseries-plots">2.5 — Seasonal subseries plots</h2><p>R: <code>gg_subseries(a10, Cost)</code> — for each month, show values across years with the mean as a horizontal line.</p><p>Each row carries its month's mean in <code>:MeanCost</code>, so the mean draws as a flat line in every panel. Facets follow the order rows first appear in, so rows are sorted by month before faceting.</p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def a10-subseries
+  (-&gt; a10
+      (tct/add-time-columns :Month {:year :Year :month :MonthNum})
+      (tc/order-by [:MonthNum :Year])
+      (tc/group-by [:MonthNum])
+      (tc/add-column :MeanCost #(repeat (tc/row-count %) (dfn/mean (% :Cost))))
+      (tc/ungroup)
+      (tc/add-column :MonthName #(map (comp month-names dec) (% :MonthNum)))))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def a10-subseries-plot
+  (-&gt; a10-subseries
+      pj/overlay
+      (pj/lay-line :Year :Cost)
+      (pj/lay-line :Year :MeanCost {:color &quot;#1f77b4&quot;})
+      (pj/facet :MonthName)
+      (pj/options {:title &quot;Subseries: Australian antidiabetic drug sales&quot;
+                   :y-label &quot;$ (millions)&quot;
+                   :width 1200
+                   :height 350})))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">a10-subseries-plot</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure printed-clojure">[:svg
+ {:xmlns &quot;http://www.w3.org/2000/svg&quot;,
+  :width 1200,
+  :height 350,
+  :viewBox &quot;0 0 1200 350&quot;,
+  :role &quot;img&quot;,
+  :class &quot;plotje-plot&quot;,
+  :font-family
+  &quot;system-ui, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, sans-serif&quot;,
+  :aria-label &quot;Subseries: Australian antidiabetic drug sales&quot;}
+ [:g
+  [:g
+   {:transform &quot;translate(619.00,14.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 15,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Subseries: Australian antidiabetic drug sales&quot;]]]
+  [:g
+   {:transform &quot;translate(12.00,180.50)&quot;}
+   [:g
+    {:transform &quot;rotate(-90.00)&quot;}
+    [:g
+     [:text
+      {:fill &quot;rgb(51,51,51)&quot;,
+       :fill-opacity 1.0,
+       :font-size 13,
+       :dominant-baseline &quot;hanging&quot;,
+       :text-anchor &quot;middle&quot;}
+      &quot;$ (millions)&quot;]]]]
+  [:g
+   {:transform &quot;translate(619.00,332.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 13,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Year&quot;]]]
+  [:g
+   {:transform &quot;translate(48.00,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(144.83,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(241.67,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(338.50,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(435.33,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(532.17,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(629.00,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(725.83,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(822.67,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(919.50,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(1016.33,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(1113.17,59.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 76.83333333333333,
+       :height 243.0}]]]]
+  [:g
+   {:transform &quot;translate(38.00,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,226.07 21.57,216.83 25.70,212.32 29.83,212.17 33.96,198.94 38.09,197.30 42.22,195.01 46.35,181.67 50.48,163.92 54.61,147.29 58.74,132.20 62.87,127.77 67.01,117.93 71.14,94.70 75.27,72.02 79.40,33.91 83.53,20.29&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,150.02 21.57,150.02 25.70,150.02 29.83,150.02 33.96,150.02 38.09,150.02 42.22,150.02 46.35,150.02 50.48,150.02 54.61,150.02 58.74,150.02 62.87,150.02 67.01,150.02 71.14,150.02 75.27,150.02 79.40,150.02 83.53,150.02&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,221.31)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;5&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,179.45)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;10&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,137.58)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;15&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,95.72)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;20&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,53.85)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;25&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,11.99)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;30&quot;]]]]]
+  [:g
+   {:transform &quot;translate(134.83,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,245.11 21.57,239.78 25.70,236.52 29.83,233.38 33.96,226.23 38.09,224.49 42.22,219.12 46.35,214.91 50.48,206.24 54.61,201.28 58.74,192.87 62.87,186.62 67.01,168.72 71.14,166.91 75.27,163.71 79.40,128.31 83.53,87.37&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,196.56 21.57,196.56 25.70,196.56 29.83,196.56 33.96,196.56 38.09,196.56 42.22,196.56 46.35,196.56 50.48,196.56 54.61,196.56 58.74,196.56 62.87,196.56 67.01,196.56 71.14,196.56 75.27,196.56 79.40,196.56 83.53,196.56&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(231.67,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,243.68 21.57,237.09 25.70,231.89 29.83,227.24 33.96,224.62 38.09,220.83 42.22,213.97 46.35,201.17 50.48,196.74 54.61,182.33 58.74,184.93 62.87,178.11 67.01,159.85 71.14,156.46 75.27,139.17 79.40,102.95 83.53,115.75&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,189.22 21.57,189.22 25.70,189.22 29.83,189.22 33.96,189.22 38.09,189.22 42.22,189.22 46.35,189.22 50.48,189.22 54.61,189.22 58.74,189.22 62.87,189.22 67.01,189.22 71.14,189.22 75.27,189.22 79.40,189.22 83.53,189.22&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(328.50,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,241.85 21.57,237.41 25.70,234.56 29.83,228.30 33.96,221.81 38.09,216.64 42.22,212.78 46.35,207.57 50.48,197.73 54.61,187.01 58.74,178.34 62.87,179.47 67.01,160.81 71.14,147.61 75.27,149.50 79.40,131.13 83.53,75.20&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,188.69 21.57,188.69 25.70,188.69 29.83,188.69 33.96,188.69 38.09,188.69 42.22,188.69 46.35,188.69 50.48,188.69 54.61,188.69 58.74,188.69 62.87,188.69 67.01,188.69 71.14,188.69 75.27,188.69 79.40,188.69 83.53,188.69&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(425.33,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,242.49 21.57,235.98 25.70,230.66 29.83,225.18 33.96,217.52 38.09,214.99 42.22,209.53 46.35,202.22 50.48,190.08 54.61,177.83 58.74,167.31 62.87,163.91 67.01,151.93 71.14,144.80 75.27,119.78 79.40,92.84 83.53,76.83&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,180.23 21.57,180.23 25.70,180.23 29.83,180.23 33.96,180.23 38.09,180.23 42.22,180.23 46.35,180.23 50.48,180.23 54.61,180.23 58.74,180.23 62.87,180.23 67.01,180.23 71.14,180.23 75.27,180.23 79.40,180.23 83.53,180.23&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(522.17,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,241.29 21.57,234.77 25.70,229.78 29.83,225.38 33.96,221.04 38.09,212.85 42.22,206.86 46.35,200.31 50.48,188.63 54.61,185.27 58.74,176.96 62.87,166.85 67.01,151.54 71.14,137.18 75.27,132.27 79.40,95.52 83.53,105.98&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;17.44,183.09 21.57,183.09 25.70,183.09 29.83,183.09 33.96,183.09 38.09,183.09 42.22,183.09 46.35,183.09 50.48,183.09 54.61,183.09 58.74,183.09 62.87,183.09 67.01,183.09 71.14,183.09 75.27,183.09 79.40,183.09 83.53,183.09&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(619.00,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,239.15 17.44,237.38 21.57,232.54 25.70,228.88 29.83,224.66 33.96,214.36 38.09,209.64 42.22,203.26 46.35,195.69 50.48,177.96 54.61,172.86 58.74,161.13 62.87,159.85 67.01,140.24 71.14,136.14 75.27,126.50 79.40,85.85&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,185.07 17.44,185.07 21.57,185.07 25.70,185.07 29.83,185.07 33.96,185.07 38.09,185.07 42.22,185.07 46.35,185.07 50.48,185.07 54.61,185.07 58.74,185.07 62.87,185.07 67.01,185.07 71.14,185.07 75.27,185.07 79.40,185.07&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(715.83,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,242.05 17.44,238.88 21.57,230.48 25.70,223.88 29.83,219.65 33.96,215.92 38.09,212.54 42.22,206.45 46.35,192.73 50.48,179.56 54.61,171.06 58.74,166.56 62.87,163.87 67.01,139.98 71.14,121.69 75.27,112.84 79.40,68.31&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,182.73 17.44,182.73 21.57,182.73 25.70,182.73 29.83,182.73 33.96,182.73 38.09,182.73 42.22,182.73 46.35,182.73 50.48,182.73 54.61,182.73 58.74,182.73 62.87,182.73 67.01,182.73 71.14,182.73 75.27,182.73 79.40,182.73&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(812.67,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,241.45 17.44,237.05 21.57,230.09 25.70,225.10 29.83,222.70 33.96,214.53 38.09,207.97 42.22,199.39 46.35,191.84 50.48,185.72 54.61,179.53 58.74,161.05 62.87,157.58 67.01,133.52 71.14,117.12 75.27,129.49 79.40,76.68&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,182.99 17.44,182.99 21.57,182.99 25.70,182.99 29.83,182.99 33.96,182.99 38.09,182.99 42.22,182.99 46.35,182.99 50.48,182.99 54.61,182.99 58.74,182.99 62.87,182.99 67.01,182.99 71.14,182.99 75.27,182.99 79.40,182.99&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(909.50,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,238.44 17.44,235.82 21.57,229.59 25.70,224.29 29.83,217.48 33.96,211.50 38.09,203.20 42.22,199.51 46.35,191.21 50.48,170.63 54.61,162.74 58.74,155.29 62.87,145.31 67.01,128.97 71.14,122.18 75.27,89.24 79.40,73.89&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,176.43 17.44,176.43 21.57,176.43 25.70,176.43 29.83,176.43 33.96,176.43 38.09,176.43 42.22,176.43 46.35,176.43 50.48,176.43 54.61,176.43 58.74,176.43 62.87,176.43 67.01,176.43 71.14,176.43 75.27,176.43 79.40,176.43&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(1006.33,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,238.82 17.44,231.95 21.57,226.03 25.70,220.33 29.83,217.70 33.96,213.01 38.09,206.73 42.22,196.70 46.35,185.51 50.48,173.73 54.61,154.18 58.74,157.42 62.87,154.22 67.01,121.01 71.14,106.68 75.27,71.28 79.40,57.26&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,172.50 17.44,172.50 21.57,172.50 25.70,172.50 29.83,172.50 33.96,172.50 38.09,172.50 42.22,172.50 46.35,172.50 50.48,172.50 54.61,172.50 58.74,172.50 62.87,172.50 67.01,172.50 71.14,172.50 75.27,172.50 79.40,172.50&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(1103.17,49.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;50.48,10.00 50.48,253.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,226.81 86.83,226.81&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,184.95 86.83,184.95&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,143.08 86.83,143.08&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,101.22 86.83,101.22&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,59.35 86.83,59.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,17.49 86.83,17.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-fj4m56&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;76.83&quot;, :height &quot;243.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-fj4m56)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(51,51,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,232.62 17.44,220.03 21.57,208.56 25.70,216.73 29.83,206.58 33.96,196.61 38.09,184.14 42.22,180.27 46.35,172.11 50.48,167.54 54.61,160.12 58.74,141.95 62.87,130.49 67.01,110.68 71.14,100.96 75.27,73.30 79.40,52.60&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(31,119,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;13.30,162.08 17.44,162.08 21.57,162.08 25.70,162.08 29.83,162.08 33.96,162.08 38.09,162.08 42.22,162.08 46.35,162.08 50.48,162.08 54.61,162.08 58.74,162.08 62.87,162.08 67.01,162.08 71.14,162.08 75.27,162.08 79.40,162.08&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(50.48,265.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(86.42,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Jan&quot;]]]
+  [:g
+   {:transform &quot;translate(183.25,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Feb&quot;]]]
+  [:g
+   {:transform &quot;translate(280.08,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Mar&quot;]]]
+  [:g
+   {:transform &quot;translate(376.92,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Apr&quot;]]]
+  [:g
+   {:transform &quot;translate(473.75,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;May&quot;]]]
+  [:g
+   {:transform &quot;translate(570.58,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Jun&quot;]]]
+  [:g
+   {:transform &quot;translate(667.42,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Jul&quot;]]]
+  [:g
+   {:transform &quot;translate(764.25,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Aug&quot;]]]
+  [:g
+   {:transform &quot;translate(861.08,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Sep&quot;]]]
+  [:g
+   {:transform &quot;translate(957.92,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Oct&quot;]]]
+  [:g
+   {:transform &quot;translate(1054.75,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Nov&quot;]]]
+  [:g
+   {:transform &quot;translate(1151.58,35.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Dec&quot;]]]]]
+</code></pre></div></div><div style="margin:15px;"><div><p>The means show January's stockpiling peak, a February drop, then a slow climb to December. Every month trends upward across the years.</p><h3 id="australian-tourism:-holiday-trips-by-state">Australian tourism: holiday trips by state</h3><p>R: <code>tourism |> filter(Purpose == "Holiday") |> group_by(State) |> summarise(Trips = sum(Trips))</code></p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def holidays
+  (-&gt; tourism
+      (tc/select-rows #(= &quot;Holiday&quot; (:Purpose %)))
+      (tc/group-by [:Quarter :State])
+      (tc/aggregate {:Trips #(dfn/sum (% :Trips))})
+      (tct/add-time-columns :Quarter {:year-string :Year :quarter :QuarterNum})
+      (tc/order-by [:State :Quarter])))</code></pre></div></div><div style="margin:15px;"><div><p>R: <code>autoplot(holidays, Trips)</code></p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def holidays-plot
+  (-&gt; holidays
+      (pj/lay-line :Quarter :Trips {:color :State})
+      (pj/options {:title &quot;Australian domestic holidays&quot;
+                   :y-label &quot;Overnight trips (&apos;000)&quot;
+                   :width 800})))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">holidays-plot</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure printed-clojure">[:svg
+ {:xmlns &quot;http://www.w3.org/2000/svg&quot;,
+  :width 800,
+  :height 400,
+  :viewBox &quot;0 0 800 400&quot;,
+  :role &quot;img&quot;,
+  :class &quot;plotje-plot&quot;,
+  :font-family
+  &quot;system-ui, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, sans-serif&quot;,
+  :aria-label &quot;Australian domestic holidays&quot;}
+ [:g
+  [:g
+   {:transform &quot;translate(345.00,14.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 15,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Australian domestic holidays&quot;]]]
+  [:g
+   {:transform &quot;translate(12.00,197.50)&quot;}
+   [:g
+    {:transform &quot;rotate(-90.00)&quot;}
+    [:g
+     [:text
+      {:fill &quot;rgb(51,51,51)&quot;,
+       :fill-opacity 1.0,
+       :font-size 13,
+       :dominant-baseline &quot;hanging&quot;,
+       :text-anchor &quot;middle&quot;}
+      &quot;Overnight trips (&apos;000)&quot;]]]]
+  [:g
+   {:transform &quot;translate(345.00,382.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 13,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Quarter&quot;]]]
+  [:g
+   {:transform &quot;translate(652.00,35.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;State&quot;]]]
+  [:g
+   {:transform &quot;translate(652.00,53.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(228,26,28)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;ACT&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,69.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(55,126,184)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;New South Wales&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,85.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(77,175,74)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;Northern Territory&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,101.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(152,78,163)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;Queensland&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,117.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(255,127,0)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;South Australia&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,133.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(255,255,51)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;Tasmania&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,149.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(166,86,40)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;Victoria&quot;]]]]]
+  [:g
+   {:transform &quot;translate(652.00,165.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(247,129,191)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;Western Australia&quot;]]]]]
+  [:g
+   {:transform &quot;translate(58.00,43.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 574.0,
+       :height 309.0}]]]]
+  [:g
+   {:transform &quot;translate(48.00,33.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;36.09,10.00 36.09,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;88.90,10.00 88.90,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;141.79,10.00 141.79,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;194.60,10.00 194.60,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;247.48,10.00 247.48,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;300.29,10.00 300.29,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;353.18,10.00 353.18,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;405.99,10.00 405.99,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;458.87,10.00 458.87,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;511.68,10.00 511.68,319.00&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,308.93 584.00,308.93&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,273.61 584.00,273.61&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,238.29 584.00,238.29&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,202.97 584.00,202.97&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,167.65 584.00,167.65&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,132.33 584.00,132.33&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,97.01 584.00,97.01&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,61.69 584.00,61.69&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,26.37 584.00,26.37&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-1lqhecx&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;574.00&quot;, :height &quot;309.00&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-1lqhecx)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(228,26,28)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,295.07 42.60,299.97 49.19,301.11 55.84,296.89 62.50,301.31 69.01,300.12 75.59,296.36 82.25,293.55 88.90,297.74 95.49,297.99 102.07,301.10 108.72,297.78 115.38,298.78 121.89,291.27 128.47,299.57 135.13,295.93 141.79,297.33 148.30,295.85 154.88,300.93 161.54,299.02 168.19,301.05 174.70,297.88 181.29,299.00 187.94,298.72 194.60,300.87 201.18,299.25 207.76,299.77 214.42,300.94 221.07,300.32 227.59,299.43 234.17,298.00 240.82,302.39 247.48,298.36 253.99,299.53 260.57,299.56 267.23,301.07 273.89,298.65 280.40,300.77 286.98,300.47 293.64,301.75 300.29,298.16 306.87,299.01 313.46,298.94 320.11,300.46 326.77,295.88 333.28,300.07 339.86,300.70 346.52,301.78 353.18,287.75 359.69,294.51 366.27,299.57 372.93,299.54 379.58,300.37 386.09,301.08 392.68,297.53 399.33,300.02 405.99,298.95 412.57,301.26 419.15,299.73 425.81,303.11 432.46,293.67 438.98,300.47 445.56,296.17 452.21,300.04 458.87,295.55 465.38,298.34 471.96,295.28 478.62,299.37 485.28,291.46 491.79,298.83 498.37,296.57 505.03,300.06 511.68,297.44 518.26,294.83 524.85,297.69 531.50,293.80 538.16,293.17 544.67,295.26 551.25,294.54 557.91,293.78&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(55,126,184)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,24.05 42.60,78.49 49.19,119.57 55.84,91.17 62.50,52.16 69.01,100.01 75.59,113.42 82.25,88.48 88.90,58.26 95.49,108.35 102.07,78.27 108.72,100.85 115.38,64.97 121.89,102.47 128.47,116.03 135.13,104.36 141.79,67.19 148.30,91.68 154.88,112.37 161.54,85.69 168.19,65.78 174.70,106.12 181.29,110.72 187.94,108.55 194.60,66.32 201.18,102.68 207.76,120.28 214.42,123.98 221.07,55.14 227.59,131.36 234.17,138.10 240.82,138.54 247.48,66.05 253.99,114.09 260.57,141.72 267.23,111.47 273.89,69.12 280.40,112.70 286.98,131.56 293.64,125.84 300.29,50.75 306.87,114.73 313.46,128.24 320.11,121.25 326.77,79.97 333.28,134.45 339.86,126.30 346.52,115.63 353.18,67.01 359.69,117.46 366.27,118.22 372.93,121.09 379.58,65.60 386.09,109.65 392.68,128.90 399.33,136.07 405.99,78.36 412.57,124.98 419.15,128.77 425.81,104.77 432.46,72.28 438.98,109.18 445.56,106.76 452.21,115.04 458.87,77.56 465.38,103.34 471.96,114.19 478.62,103.26 485.28,65.41 491.79,98.91 498.37,114.47 505.03,90.01 511.68,33.58 518.26,95.25 524.85,101.62 531.50,90.36 538.16,58.34 544.67,85.29 551.25,70.95 557.91,73.76&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(77,175,74)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,304.70 42.60,297.41 49.19,283.47 55.84,300.85 62.50,304.95 69.01,293.23 75.59,284.83 82.25,299.68 88.90,299.92 95.49,294.54 102.07,285.21 108.72,296.70 115.38,304.70 121.89,293.96 128.47,286.14 135.13,302.06 141.79,304.47 148.30,294.17 154.88,290.61 161.54,298.44 168.19,302.90 174.70,297.87 181.29,287.37 187.94,301.07 194.60,304.81 201.18,297.15 207.76,277.36 214.42,303.29 221.07,303.05 227.59,292.68 234.17,286.02 240.82,300.65 247.48,302.37 253.99,295.58 260.57,288.01 267.23,299.16 273.89,303.60 280.40,291.28 286.98,283.07 293.64,297.37 300.29,301.12 306.87,295.64 313.46,287.55 320.11,299.31 326.77,303.83 333.28,291.37 339.86,288.13 346.52,298.95 353.18,303.64 359.69,290.64 366.27,288.24 372.93,297.31 379.58,304.35 386.09,298.16 392.68,289.40 399.33,299.82 405.99,304.04 412.57,297.33 419.15,288.06 425.81,301.93 432.46,304.87 438.98,296.31 445.56,290.79 452.21,301.70 458.87,304.11 465.38,287.62 471.96,283.40 478.62,301.53 485.28,303.06 491.79,291.96 498.37,282.55 505.03,297.44 511.68,301.35 518.26,291.22 524.85,278.75 531.50,301.46 538.16,300.66 544.67,289.71 551.25,288.51 557.91,299.88&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(152,78,163)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,165.43 42.60,191.57 49.19,156.04 55.84,169.82 62.50,157.76 69.01,153.93 75.59,145.65 82.25,167.17 88.90,158.53 95.49,155.63 102.07,157.62 108.72,166.31 115.38,168.56 121.89,152.43 128.47,151.69 135.13,161.62 141.79,152.21 148.30,170.47 154.88,138.73 161.54,160.27 168.19,158.66 174.70,167.25 181.29,144.71 187.94,160.21 194.60,166.81 201.18,161.98 207.76,136.74 214.42,171.15 221.07,156.38 227.59,177.12 234.17,152.46 240.82,181.21 247.48,152.82 253.99,158.37 260.57,159.80 267.23,151.01 273.89,154.99 280.40,143.58 286.98,144.92 293.64,166.88 300.29,137.80 306.87,166.97 313.46,155.39 320.11,163.98 326.77,164.69 333.28,167.95 339.86,139.74 346.52,171.70 353.18,189.35 359.69,165.68 366.27,137.25 372.93,159.80 379.58,202.49 386.09,165.83 392.68,144.50 399.33,158.24 405.99,180.80 412.57,166.74 419.15,144.30 425.81,148.50 432.46,160.86 438.98,173.09 445.56,151.00 452.21,160.18 458.87,158.01 465.38,150.88 471.96,150.89 478.62,161.54 485.28,166.56 491.79,162.52 498.37,129.60 505.03,155.45 511.68,150.10 518.26,159.78 524.85,128.82 531.50,155.68 538.16,158.07 544.67,153.08 551.25,122.03 557.91,141.56&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(255,127,0)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,246.98 42.60,261.51 49.19,273.11 55.84,256.57 62.50,251.71 69.01,253.77 75.59,269.67 82.25,262.69 88.90,246.34 95.49,268.49 102.07,256.00 108.72,263.79 115.38,254.81 121.89,264.24 128.47,269.78 135.13,258.53 141.79,255.51 148.30,264.23 154.88,271.48 161.54,260.47 168.19,259.39 174.70,266.09 181.29,273.15 187.94,265.18 194.60,250.66 201.18,261.87 207.76,270.35 214.42,264.74 221.07,257.98 227.59,268.77 234.17,269.89 240.82,268.06 247.48,248.32 253.99,258.10 260.57,274.03 267.23,264.49 273.89,251.41 280.40,262.82 286.98,269.15 293.64,264.04 300.29,249.37 306.87,268.56 313.46,272.81 320.11,267.14 326.77,261.49 333.28,264.67 339.86,268.14 346.52,264.39 353.18,257.90 359.69,268.43 366.27,274.59 372.93,263.51 379.58,260.97 386.09,256.18 392.68,272.41 399.33,264.66 405.99,255.85 412.57,268.24 419.15,272.87 425.81,261.11 432.46,254.62 438.98,259.02 445.56,273.14 452.21,267.42 458.87,251.06 465.38,261.74 471.96,273.05 478.62,261.26 485.28,248.25 491.79,264.08 498.37,269.25 505.03,259.20 511.68,251.18 518.26,258.37 524.85,262.62 531.50,264.80 538.16,247.37 544.67,260.00 551.25,267.26 557.91,253.14&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(255,255,51)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,264.24 42.60,279.71 49.19,297.19 55.84,280.39 62.50,269.33 69.01,287.71 75.59,294.24 82.25,285.55 88.90,273.11 95.49,289.03 102.07,290.12 108.72,282.96 115.38,270.37 121.89,279.98 128.47,295.16 135.13,290.59 141.79,266.68 148.30,288.45 154.88,295.50 161.54,281.01 168.19,272.48 174.70,277.31 181.29,296.32 187.94,283.18 194.60,258.91 201.18,281.61 207.76,298.60 214.42,279.02 221.07,262.66 227.59,285.95 234.17,296.32 240.82,287.39 247.48,267.07 253.99,273.05 260.57,294.70 267.23,287.49 273.89,262.36 280.40,281.74 286.98,293.95 293.64,277.39 300.29,261.96 306.87,284.79 313.46,293.56 320.11,290.43 326.77,263.86 333.28,283.60 339.86,291.39 346.52,287.11 353.18,263.38 359.69,280.59 366.27,295.83 372.93,287.22 379.58,271.36 386.09,287.99 392.68,291.92 399.33,287.88 405.99,268.84 412.57,287.43 419.15,295.76 425.81,281.70 432.46,262.92 438.98,285.74 445.56,292.26 452.21,285.71 458.87,267.04 465.38,273.23 471.96,295.58 478.62,281.16 485.28,258.27 491.79,287.55 498.37,294.80 505.03,275.41 511.68,260.17 518.26,283.02 524.85,292.76 531.50,275.97 538.16,257.51 544.67,277.21 551.25,289.13 557.91,277.36&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(166,86,40)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,82.63 42.60,149.44 49.19,174.83 55.84,167.38 62.50,102.70 69.01,154.74 75.59,186.80 82.25,177.06 88.90,110.51 95.49,162.74 102.07,181.30 108.72,170.06 115.38,96.53 121.89,156.87 128.47,175.79 135.13,172.67 141.79,114.71 148.30,160.03 154.88,184.39 161.54,169.79 168.19,120.18 174.70,158.06 181.29,177.75 187.94,175.12 194.60,124.69 201.18,155.69 207.76,183.51 214.42,178.86 221.07,112.68 227.59,182.99 234.17,195.37 240.82,181.81 247.48,95.96 253.99,162.42 260.57,201.94 267.23,173.58 273.89,111.85 280.40,164.22 286.98,180.22 293.64,167.34 300.29,82.66 306.87,178.59 313.46,178.81 320.11,173.48 326.77,129.86 333.28,172.36 339.86,174.48 346.52,180.51 353.18,120.91 359.69,172.52 366.27,183.39 372.93,173.32 379.58,113.57 386.09,152.95 392.68,184.24 399.33,163.23 405.99,105.35 412.57,156.84 419.15,187.54 425.81,157.71 432.46,116.12 438.98,153.22 445.56,180.11 452.21,154.13 458.87,96.44 465.38,142.18 471.96,176.99 478.62,152.78 485.28,90.37 491.79,142.90 498.37,166.49 505.03,143.10 511.68,61.43 518.26,149.46 524.85,154.89 531.50,137.45 538.16,51.12 544.67,132.75 551.25,150.58 557.91,103.58&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(247,129,191)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;36.09,254.36 42.60,258.09 49.19,255.60 55.84,251.44 62.50,242.31 69.01,249.23 75.59,250.78 82.25,259.66 88.90,244.97 95.49,245.03 102.07,261.49 108.72,258.35 115.38,258.83 121.89,256.76 128.47,255.13 135.13,251.53 141.79,247.40 148.30,254.34 154.88,253.23 161.54,263.49 168.19,249.15 174.70,258.49 181.29,257.91 187.94,254.84 194.60,242.41 201.18,260.51 207.76,254.39 214.42,257.58 221.07,251.19 227.59,263.33 234.17,263.04 240.82,264.82 247.48,247.94 253.99,255.17 260.57,260.94 267.23,252.46 273.89,248.76 280.40,253.38 286.98,259.34 293.64,255.09 300.29,245.36 306.87,262.74 313.46,256.94 320.11,262.63 326.77,256.12 333.28,263.55 339.86,268.65 346.52,267.71 353.18,263.99 359.69,264.63 366.27,266.36 372.93,268.87 379.58,257.17 386.09,263.18 392.68,265.66 399.33,261.88 405.99,253.91 412.57,260.90 419.15,264.53 425.81,260.07 432.46,244.10 438.98,256.29 445.56,260.90 452.21,260.14 458.87,219.52 465.38,233.64 471.96,248.53 478.62,245.50 485.28,226.44 491.79,238.97 498.37,243.37 505.03,241.09 511.68,226.58 518.26,234.49 524.85,252.17 531.50,239.51 538.16,228.80 544.67,238.44 551.25,246.77 557.91,236.43&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(36.09,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;1998&quot;]]]
+    [:g
+     {:transform &quot;translate(88.90,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2000&quot;]]]
+    [:g
+     {:transform &quot;translate(141.79,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2002&quot;]]]
+    [:g
+     {:transform &quot;translate(194.60,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2004&quot;]]]
+    [:g
+     {:transform &quot;translate(247.48,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2006&quot;]]]
+    [:g
+     {:transform &quot;translate(300.29,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2008&quot;]]]
+    [:g
+     {:transform &quot;translate(353.18,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2010&quot;]]]
+    [:g
+     {:transform &quot;translate(405.99,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2012&quot;]]]
+    [:g
+     {:transform &quot;translate(458.87,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2014&quot;]]]
+    [:g
+     {:transform &quot;translate(511.68,331.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;2016&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,303.43)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;0&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,268.11)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,232.79)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;1000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,197.47)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;1500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,162.15)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;2000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,126.83)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;2500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,91.51)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;3000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,56.19)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;3500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,20.87)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;4000&quot;]]]]]]]
+</code></pre></div></div><div style="margin:15px;"><div><p>R: <code>gg_season(holidays, Trips)</code> — one panel per state, each with its own y scale, one line per year.</p></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def holidays-seasonal-plot
+  (-&gt; holidays
+      (pj/lay-line :QuarterNum :Trips {:color :Year})
+      (pj/facet :State :row)
+      (pj/scale :x {:breaks (range 1 5) :tick-labels [&quot;Q1&quot; &quot;Q2&quot; &quot;Q3&quot; &quot;Q4&quot;]})
+      (pj/options {:title &quot;Australian domestic tourism: Holiday trips&quot;
+                   :x-label &quot;Quarter&quot;
+                   :y-label &quot;Overnight trips (&apos;000)&quot;
+                   :color-label &quot;Year&quot;
+                   :color-values (year-colors (holidays :Year))
+                   :scales :free-y
+                   :width 600
+                   :height 1100})))</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">holidays-seasonal-plot</code></pre></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure printed-clojure">[:svg
+ {:xmlns &quot;http://www.w3.org/2000/svg&quot;,
+  :width 600,
+  :height 1100,
+  :viewBox &quot;0 0 600 1100&quot;,
+  :role &quot;img&quot;,
+  :class &quot;plotje-plot&quot;,
+  :font-family
+  &quot;system-ui, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, sans-serif&quot;,
+  :aria-label &quot;Australian domestic tourism: Holiday trips&quot;}
+ [:g
+  [:g
+   {:transform &quot;translate(213.00,14.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 15,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Australian domestic tourism: Holiday trips&quot;]]]
+  [:g
+   {:transform &quot;translate(12.00,547.50)&quot;}
+   [:g
+    {:transform &quot;rotate(-90.00)&quot;}
+    [:g
+     [:text
+      {:fill &quot;rgb(51,51,51)&quot;,
+       :fill-opacity 1.0,
+       :font-size 13,
+       :dominant-baseline &quot;hanging&quot;,
+       :text-anchor &quot;middle&quot;}
+      &quot;Overnight trips (&apos;000)&quot;]]]]
+  [:g
+   {:transform &quot;translate(213.00,1082.00)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 13,
+      :dominant-baseline &quot;hanging&quot;,
+      :text-anchor &quot;middle&quot;}
+     &quot;Quarter&quot;]]]
+  [:g
+   {:transform &quot;translate(510.00,35.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Year&quot;]]]
+  [:g
+   {:transform &quot;translate(510.00,53.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(19,43,67)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;1998&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,69.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(22,50,76)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;1999&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,85.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(26,57,85)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,101.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(29,64,95)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2001&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,117.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(33,71,104)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2002&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,133.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(36,78,114)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2003&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,149.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(40,85,123)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2004&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,165.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(43,92,133)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2005&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,181.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(47,99,142)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2006&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,197.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(50,106,152)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2007&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,213.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(54,113,161)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2008&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,229.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(57,120,171)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2009&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,245.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(61,127,180)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2010&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,261.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(64,134,190)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2011&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,277.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(68,141,199)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2012&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,293.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(71,148,209)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2013&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,309.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(75,155,218)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2014&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,325.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(78,162,228)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2015&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,341.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(82,169,237)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2016&quot;]]]]]
+  [:g
+   {:transform &quot;translate(510.00,357.00)&quot;, :data-legend &quot;true&quot;}
+   [:g
+    [:g
+     {:transform &quot;translate(0.00,0.00)&quot;}
+     [:g
+      [:g
+       [:rect
+        {:y 0,
+         :rx 4.0,
+         :stroke &quot;none&quot;,
+         :fill &quot;rgb(86,177,247)&quot;,
+         :width 8,
+         :x 0,
+         :ry 4.0,
+         :fill-opacity 1.0,
+         :height 8}]]]]
+    [:g
+     {:transform &quot;translate(12.00,0.00)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(51,51,51)&quot;,
+        :fill-opacity 1.0,
+        :font-size 10,
+        :dominant-baseline &quot;hanging&quot;}
+       &quot;2017&quot;]]]]]
+  [:g
+   {:transform &quot;translate(58.00,43.00)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,171.63)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,300.25)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,428.88)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,557.50)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,686.13)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,814.75)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(58.00,943.38)&quot;}
+   [:g
+    [:g
+     [:rect
+      {:fill &quot;rgb(232,232,232)&quot;,
+       :fill-opacity 1.0,
+       :stroke &quot;none&quot;,
+       :x 0,
+       :y 0,
+       :width 310.0,
+       :height 108.625}]]]]
+  [:g
+   {:transform &quot;translate(48.00,33.00)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,105.69 320.00,105.69&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,60.28 320.00,60.28&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,14.86 320.00,14.86&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,61.99 118.03,93.53 211.97,100.84 305.91,73.69&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,102.16 118.03,94.50 211.97,70.29 305.91,52.26&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,79.16 118.03,80.80 211.97,100.80 305.91,79.41&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,85.87 118.03,37.61 211.97,90.94 305.91,67.55&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,76.56 118.03,67.02 211.97,99.66 305.91,87.44&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,100.48 118.03,80.10 211.97,87.30 305.91,85.50&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,99.30 118.03,88.90 211.97,92.24 305.91,99.78&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,95.77 118.03,90.02 211.97,80.87 305.91,109.10&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,83.19 118.03,90.68 211.97,90.91 305.91,100.56&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,85.00 118.03,98.63 211.97,96.73 305.91,104.98&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,81.86 118.03,87.37 211.97,86.91 305.91,96.69&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,67.19 118.03,94.18 211.97,98.22 305.91,105.15&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,58.38 211.97,90.95 305.91,90.73&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,96.10 118.03,100.62 211.97,77.83 305.91,93.83&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,86.95 118.03,101.82 211.97,91.95 305.91,113.69&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,53.03 118.03,96.73 211.97,69.11 305.91,93.97&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,65.10 118.03,83.07 211.97,63.37 305.91,89.68&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,38.79 118.03,86.19 211.97,71.65 305.91,94.10&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,77.26 118.03,60.49 211.97,78.84 305.91,53.87&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.77 118.03,63.23 211.97,58.63 305.91,53.71&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,100.19)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;100&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,54.78)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;200&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,9.36)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;300&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,161.63)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,76.17 320.00,76.17&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,16.89 320.00,16.89&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,60.62 211.97,95.10 305.91,71.27&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,38.53 118.03,78.69 211.97,89.94 305.91,69.01&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,43.65 118.03,85.68 211.97,60.44 305.91,79.39&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.28 118.03,80.75 211.97,92.13 305.91,82.34&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,51.15 118.03,71.69 211.97,89.06 305.91,66.67&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.96 118.03,83.81 211.97,87.67 305.91,85.86&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,50.41 118.03,80.93 211.97,95.69 305.91,98.80&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,41.03 118.03,105.00 211.97,110.65 305.91,111.02&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,50.19 118.03,90.50 211.97,113.69 305.91,88.30&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,52.76 118.03,89.33 211.97,105.17 305.91,100.36&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,37.35 118.03,91.03 211.97,102.38 305.91,96.51&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,61.87 118.03,107.59 211.97,100.75 305.91,91.79&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,50.99 118.03,93.33 211.97,93.97 305.91,96.37&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.81 118.03,86.78 211.97,102.93 305.91,108.94&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.52 118.03,99.64 211.97,102.82 305.91,82.68&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.42 118.03,86.38 211.97,84.35 305.91,91.30&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,59.85 118.03,81.48 211.97,90.59 305.91,81.41&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.65 118.03,77.76 211.97,90.82 305.91,70.30&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,22.94 118.03,74.69 211.97,80.03 305.91,70.59&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,43.72 118.03,66.34 211.97,54.30 305.91,56.66&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,70.67)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;3000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,11.39)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;4000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,290.25)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,77.35 320.00,77.35&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,26.80 320.00,26.80&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,112.79 118.03,86.70 211.97,36.81 305.91,98.99&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,113.69 118.03,71.72 211.97,41.68 305.91,94.83&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,95.66 118.03,76.43 211.97,43.03 305.91,84.15&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,112.78 118.03,74.36 211.97,46.37 305.91,103.34&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,111.95 118.03,75.12 211.97,62.35 305.91,90.38&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,106.34 118.03,88.35 211.97,50.78 305.91,99.79&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,113.17 118.03,85.76 211.97,14.94 305.91,107.72&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,106.88 118.03,69.76 211.97,45.94 305.91,98.30&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,104.43 118.03,80.15 211.97,53.06 305.91,92.96&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,108.84 118.03,64.75 211.97,35.38 305.91,86.56&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,99.96 118.03,80.35 211.97,51.40 305.91,93.50&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,109.66 118.03,65.07 211.97,53.49 305.91,92.20&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,108.98 118.03,62.46 211.97,53.88 305.91,86.35&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,111.53 118.03,89.38 211.97,58.04 305.91,95.33&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,110.42 118.03,86.40 211.97,53.23 305.91,102.85&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,113.38 118.03,82.77 211.97,63.02 305.91,102.06&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,110.67 118.03,51.65 211.97,36.57 305.91,101.43&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,106.91 118.03,67.20 211.97,33.52 305.91,86.79&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,100.81 118.03,64.56 211.97,19.91 305.91,101.18&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,98.32 118.03,59.14 211.97,54.83 305.91,95.54&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,71.85)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;200&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,21.30)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;400&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,418.88)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,114.28 320.00,114.28&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,70.93 320.00,70.93&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,27.58 320.00,27.58&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,68.21 118.03,100.29 211.97,56.68 305.91,73.60&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,58.79 118.03,54.09 211.97,43.92 305.91,70.34&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,59.74 118.03,56.17 211.97,58.62 305.91,69.28&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,72.04 118.03,52.25 211.97,51.35 305.91,63.53&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,51.98 118.03,74.39 211.97,35.43 305.91,61.87&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,59.90 118.03,70.43 211.97,42.77 305.91,61.80&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,69.90 118.03,63.97 211.97,32.99 305.91,75.23&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,57.10 118.03,82.56 211.97,52.28 305.91,87.57&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,52.73 118.03,59.54 211.97,61.29 305.91,50.51&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.39 118.03,41.39 211.97,43.03 305.91,69.98&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,34.30 118.03,70.09 211.97,55.89 305.91,66.42&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,67.30 118.03,71.30 211.97,36.67 305.91,75.90&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,97.57 118.03,68.51 211.97,33.62 305.91,61.30&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,113.69 118.03,68.69 211.97,42.51 305.91,59.38&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,87.07 118.03,69.81 211.97,42.27 305.91,47.42&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,62.60 118.03,77.60 211.97,50.50 305.91,61.76&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,59.10 118.03,50.35 211.97,50.36 305.91,63.43&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,69.60 118.03,64.63 211.97,24.23 305.91,55.96&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,49.39 118.03,61.27 211.97,23.27 305.91,56.24&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,59.17 118.03,53.05 211.97,14.94 305.91,38.91&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,108.78)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;1500&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,65.43)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;2000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,22.08)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;2500&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,547.50)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,85.56 320.00,85.56&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,36.17 320.00,36.17&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,17.14 118.03,67.97 211.97,108.53 305.91,50.69&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,33.68 118.03,40.90 211.97,96.49 305.91,72.09&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,92.36 211.97,48.70 305.91,75.94&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,44.54 118.03,77.51 211.97,96.87 305.91,57.53&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,46.97 118.03,77.49 211.97,102.83 305.91,64.31&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.56 118.03,83.96 211.97,108.64 305.91,80.80&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,30.01 118.03,69.21 211.97,98.88 305.91,79.24&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.62 118.03,93.36 211.97,97.27 305.91,90.85&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,21.85 118.03,56.06 211.97,111.73 305.91,78.37&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,32.64 118.03,72.54 211.97,94.68 305.91,76.80&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,25.51 118.03,92.61 211.97,107.48 305.91,87.63&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,67.91 118.03,79.02 211.97,91.14 305.91,78.02&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.33 118.03,92.16 211.97,113.69 305.91,74.94&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,66.07 118.03,49.33 211.97,106.05 305.91,78.96&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,48.18 118.03,91.48 211.97,107.69 305.91,66.56&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,43.88 118.03,59.24 211.97,108.61 305.91,88.61&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,31.44 118.03,68.77 211.97,108.30 305.91,67.09&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,21.61 118.03,76.94 211.97,95.04 305.91,59.88&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,31.84 118.03,56.97 211.97,71.83 305.91,79.46&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,18.51 118.03,62.67 211.97,88.08 305.91,38.69&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,80.06)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;600&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,30.67)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;800&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,676.13)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,53.62 320.00,53.62&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,31.11 118.03,68.28 211.97,110.29 305.91,69.92&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,43.34 118.03,87.51 211.97,103.21 305.91,82.32&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,52.42 118.03,90.69 211.97,93.29 305.91,76.09&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,45.83 118.03,68.93 211.97,105.42 305.91,94.43&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,36.97 118.03,89.28 211.97,106.23 305.91,71.39&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,50.91 118.03,62.51 211.97,108.20 305.91,76.61&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,18.29 118.03,72.86 211.97,113.69 305.91,66.62&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,27.31 118.03,83.27 211.97,108.20 305.91,86.74&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,37.91 118.03,52.27 211.97,104.30 305.91,86.98&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,26.57 118.03,73.17 211.97,102.51 305.91,62.71&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,25.62 118.03,80.49 211.97,101.56 305.91,94.04&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,30.19 118.03,77.62 211.97,96.36 305.91,86.06&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,29.04 118.03,70.40 211.97,107.02 305.91,86.32&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,48.20 118.03,88.18 211.97,97.62 305.91,87.91&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,42.17 118.03,86.84 211.97,106.84 305.91,73.06&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,27.94 118.03,82.78 211.97,98.44 305.91,82.71&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,37.83 118.03,52.70 211.97,106.43 305.91,71.76&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,16.76 118.03,87.12 211.97,104.54 305.91,57.94&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,21.33 118.03,76.25 211.97,99.63 305.91,59.28&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,62.28 211.97,90.91 305.91,62.63&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,48.12)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;500&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,804.75)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,91.24 320.00,91.24&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,44.98 320.00,44.98&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,35.57 118.03,79.31 211.97,95.94 305.91,91.06&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,48.71 118.03,82.79 211.97,103.78 305.91,97.40&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,53.82 118.03,88.02 211.97,100.18 305.91,92.82&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,44.67 118.03,84.18 211.97,96.57 305.91,94.53&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,56.57 118.03,86.25 211.97,102.20 305.91,92.64&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.16 118.03,84.96 211.97,97.85 305.91,96.13&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,63.11 118.03,83.40 211.97,101.62 305.91,98.58&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.24 118.03,101.28 211.97,109.39 305.91,100.51&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,44.30 118.03,87.81 211.97,113.69 305.91,95.12&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,54.70 118.03,88.99 211.97,99.47 305.91,91.04&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,35.59 118.03,98.40 211.97,98.54 305.91,95.05&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,66.49 118.03,94.32 211.97,95.71 305.91,99.66&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.63 118.03,94.43 211.97,101.54 305.91,94.95&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,55.83 118.03,81.61 211.97,102.10 305.91,88.34&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,50.44 118.03,84.16 211.97,104.26 305.91,84.73&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,57.50 118.03,81.79 211.97,99.40 305.91,82.38&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,44.61 118.03,74.56 211.97,97.36 305.91,81.50&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,40.63 118.03,75.03 211.97,90.48 305.91,75.16&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,21.69 118.03,79.32 211.97,82.88 305.91,71.46&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,68.38 211.97,80.06 305.91,49.28&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(7.00,85.74)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;2000&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,39.48)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;3000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(48.00,933.38)&quot;}
+   [:g
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;24.09,10.00 24.09,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;118.03,10.00 118.03,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;211.97,10.00 211.97,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;305.91,10.00 305.91,118.63&quot;}]]]]
+    [:g
+     [:g
+      [:g
+       [:polyline
+        {:fill &quot;none&quot;,
+         :stroke &quot;rgb(245,245,245)&quot;,
+         :stroke-opacity 1.0,
+         :stroke-width 0.6,
+         :points &quot;10.00,52.49 320.00,52.49&quot;}]]]]
+    [:g
+     {}
+     [:clipPath
+      {:id &quot;plotje-clip-t4kfbt&quot;}
+      [:rect
+       {:x &quot;10.00&quot;, :y &quot;10.00&quot;, :width &quot;310.00&quot;, :height &quot;108.63&quot;}]]
+     [:g
+      {:clip-path &quot;url(#plotje-clip-t4kfbt)&quot;}
+      [:g
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(19,43,67)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,84.64 118.03,92.11 211.97,87.13 305.91,78.81&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(22,50,76)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.54 118.03,74.39 211.97,77.49 305.91,95.25&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(26,57,85)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,65.86 118.03,65.98 211.97,98.92 305.91,92.63&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(29,64,95)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,93.59 118.03,89.45 211.97,86.18 305.91,78.98&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(33,71,104)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,70.72 118.03,84.60 211.97,82.38 305.91,102.92&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(36,78,114)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,74.22 118.03,92.91 211.97,91.76 305.91,85.60&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(40,85,123)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,60.74 118.03,96.95 211.97,84.70 305.91,91.09&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(43,92,133)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,78.30 118.03,102.59 211.97,102.02 305.91,105.59&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(47,99,142)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,71.80 118.03,86.26 211.97,97.81 305.91,80.85&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(50,106,152)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,73.45 118.03,82.69 211.97,94.61 305.91,86.11&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(54,113,161)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,66.64 118.03,101.42 211.97,89.81 305.91,101.20&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(57,120,171)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,88.18 118.03,103.03 211.97,113.25 305.91,111.35&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(61,127,180)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,103.93 118.03,105.19 211.97,108.66 305.91,113.69&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(64,134,190)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,90.28 118.03,102.29 211.97,107.25 305.91,99.70&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(68,141,199)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,83.75 118.03,97.73 211.97,104.99 305.91,96.07&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(71,148,209)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,64.12 118.03,88.52 211.97,97.74 305.91,96.21&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(75,155,218)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,14.94 118.03,43.19 211.97,72.99 305.91,66.92&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(78,162,228)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,28.78 118.03,53.86 211.97,62.67 305.91,58.10&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(82,169,237)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,29.07 118.03,44.89 211.97,80.26 305.91,54.93&quot;}]]]]
+       [:g
+        [:g
+         [:g
+          [:polyline
+           {:fill &quot;none&quot;,
+            :stroke &quot;rgb(86,177,247)&quot;,
+            :stroke-opacity 1.0,
+            :stroke-width 2.5,
+            :points
+            &quot;24.09,33.50 118.03,52.80 211.97,69.45 305.91,48.78&quot;}]]]]]]]
+    [:g
+     {:transform &quot;translate(24.09,130.63)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Q1&quot;]]]
+    [:g
+     {:transform &quot;translate(118.03,130.63)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Q2&quot;]]]
+    [:g
+     {:transform &quot;translate(211.97,130.63)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Q3&quot;]]]
+    [:g
+     {:transform &quot;translate(305.91,130.63)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;middle&quot;}
+       &quot;Q4&quot;]]]
+    [:g
+     {:transform &quot;translate(7.00,46.99)&quot;}
+     [:g
+      [:text
+       {:fill &quot;rgb(102,102,102)&quot;,
+        :fill-opacity 1.0,
+        :font-size 11,
+        :dominant-baseline &quot;hanging&quot;,
+        :text-anchor &quot;end&quot;}
+       &quot;1000&quot;]]]]]
+  [:g
+   {:transform &quot;translate(383.00,92.31)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;ACT&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,220.94)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;New South Wales&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,349.56)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Northern Territory&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,478.19)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Queensland&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,606.81)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;South Australia&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,735.44)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Tasmania&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,864.06)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Victoria&quot;]]]
+  [:g
+   {:transform &quot;translate(383.00,992.69)&quot;}
+   [:g
+    [:text
+     {:fill &quot;rgb(51,51,51)&quot;,
+      :fill-opacity 1.0,
+      :font-size 11,
+      :dominant-baseline &quot;hanging&quot;}
+     &quot;Western Australia&quot;]]]]]
+</code></pre></div></div><div style="margin:15px;"><div><p>Southern states (Victoria, Tasmania) peak in summer (Q1); northern ones (Queensland, Northern Territory) in winter and spring (Q3).</p><h2 id="2.6-—-scatterplots">2.6 — Scatterplots</h2><h3 id="electricity-demand-and-temperature-in-victoria,-2014">Electricity demand and temperature in Victoria, 2014</h3></div></div><div style="margin:15px;"><div><pre><code class="sourceCode language-clojure source-clojure bg-light">(def vic-elec-2014
   (-&gt; vic-elec
       (tct/add-time-columns :Time {:year :Year})
       (tc/select-rows #(= 2014 (:Year %)))
@@ -336013,6 +341472,9 @@
    &quot;vic-elec-daily&quot; vic-elec-daily-plot
    &quot;vic-elec-weekly&quot; vic-elec-weekly-plot
    &quot;vic-elec-yearly&quot; vic-elec-yearly-plot
+   &quot;a10-subseries&quot; a10-subseries-plot
+   &quot;holidays&quot; holidays-plot
+   &quot;holidays-seasonal&quot; holidays-seasonal-plot
    &quot;vic-elec-demand-2014&quot; vic-elec-demand-plot
    &quot;vic-elec-temperature-2014&quot; vic-elec-temperature-plot
    &quot;demand-vs-temperature&quot; demand-vs-temperature-plot
