@@ -292,6 +292,7 @@ vic-elec-yearly-plot
   (-> a10-subseries
       pj/overlay
       (pj/lay-line :Year :Cost)
+      (pj/lay-point :Year :Cost)
       (pj/lay-line :Year :MeanCost {:color "#1f77b4"})
       (pj/facet :MonthName)
       (pj/options {:title "Subseries: Australian antidiabetic drug sales"
@@ -337,6 +338,7 @@ holidays-plot
                    :color-label "Year"
                    :color-values (year-colors (holidays :Year))
                    :scales :free-y
+                   :line-width 1
                    :width 600
                    :height 1100})))
 
