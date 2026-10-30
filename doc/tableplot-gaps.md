@@ -1,5 +1,8 @@
 # Tableplot Gaps
 
+> **Superseded.** The Chapter 2 tutorial now uses Plotje, and Tableplot has been
+> removed from the project. Kept as a historical record.
+
 Issues and missing features encountered while translating fpp3 examples.
 
 ## Discovered via fpp3 Chapter 2

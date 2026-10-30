@@ -85,7 +85,7 @@ Extended `add-time-columns` with computed fields:
 
 ### Related Discussions
 - SciCloj Zulip: "caching with Pocket" thread (Feb 2026) — parallel discussion about computation DAGs vs data metadata
-- tableplot gaps doc: `doc/tableplot-gaps.md`
+- tableplot gaps doc (historical, superseded by Plotje): `doc/tableplot-gaps.md`
 
 ## Future Consideration: Time-Aware Lag
 
