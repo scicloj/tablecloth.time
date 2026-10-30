@@ -101,7 +101,7 @@
         dtype (datatypes/get-datatype col)
         _ (when (not= dtype :local-date-time)
             (throw (ex-info "replace-time-zone expects a :local-date-time column. Use convert-time to convert first."
-                           {:expected :local-date-time :actual dtype})))
+                            {:expected :local-date-time :actual dtype})))
         zone-id (temporal/coerce-zone-id zone)]
     (tcc/column
      (dtype/emap #(.atZone ^LocalDateTime % zone-id) :zoned-date-time col))))
@@ -120,7 +120,7 @@
         dtype (datatypes/get-datatype col)
         _ (when (not= dtype :zoned-date-time)
             (throw (ex-info "convert-time-zone expects a :zoned-date-time column. For naive LocalDateTime, use replace-time-zone first."
-                           {:expected :zoned-date-time :actual dtype})))
+                            {:expected :zoned-date-time :actual dtype})))
         zone-id (temporal/coerce-zone-id zone)]
     (tcc/column
      (dtype/emap #(.withZoneSameInstant ^ZonedDateTime % zone-id) :zoned-date-time col))))
