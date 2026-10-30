@@ -1,9 +1,8 @@
-;; # Chapter 2: Time Series Graphics (Plotje version)
+;; # Chapter 2: Time Series Graphics
 ;; Translating fpp3 Chapter 2 examples from R to Clojure
 ;; using tablecloth, tablecloth.time, and plotje.
 ;;
 ;; Reference: https://otexts.com/fpp3/graphics.html
-;; Baseline: chapter_02_time_series_graphics.clj (tableplot version)
 ;;
 ;; Review figures: `clj -M:notebooks -m plotje-review`
 

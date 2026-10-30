@@ -83,7 +83,8 @@ The philosophy: `add-time-columns` extracts temporal components you need, then s
 
 ![Victorian electricity demand (daily average)](doc/images/daily-demand-example.png)
 
-See `notebooks/chapter_02_time_series_graphics.clj` for more examples based on
+See `notebooks/chapter_02_plotje.clj` ([rendered](https://scicloj.github.io/tablecloth.time/chapter_02_plotje.html))
+for more examples based on
 [Forecasting: Principles and Practice](https://otexts.com/fpp3/).
 
 ### Lag and Lead
